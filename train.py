@@ -13,7 +13,7 @@ import dataset_utils
 # preprocessing
 dataset_path = config.left_dataset / "train" / "tensor"
 train_dataset = dataset.SyntheticDataset(dataset_path)
-train_loader = DataLoader(train_dataset, shuffle=True, batch_size=2)
+train_loader = DataLoader(train_dataset, shuffle=True, batch_size=2, collate_fn=dataset_utils.collate_fn)
 device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 
 num_classes = 3
@@ -47,9 +47,28 @@ for epoch in range(num_epochs):
 
         lr_scheduler = dataset_utils.warmup_lr_scheduler(optimizer, warmup_iters, warmup_factor)
 
-    for images, targets in metric_logger.log_every(train_loader, print_freq, header):
+    for i, (images, targets) in enumerate(train_loader):
+    # for images, targets in metric_logger.log_every(train_loader, print_freq, header):
         images = list(image.to(device) for image in images)
         targets = [{k: v.to(device) for k, v in t.items()} for t in targets]
+        # targets_list = []
+        # boxes = targets["boxes"]
+        # labels = targets["labels"]
+        # masks = targets["masks"]
+        # image_ids = targets["image_id"]
+        # areas = targets["area"]
+        # pred_labels = targets["pred_labels"]
+        # for target_idx in range(targets["boxes"].size(0)):
+        #     targets_list.append({
+        #         "boxes":boxes[target_idx].to(device),
+        #         "labels": labels[target_idx].to(device),
+        #         "masks":masks[target_idx].to(device),
+        #         "image_ids": image_ids[target_idx].to(device),
+        #         "area": areas[target_idx].to(device),
+        #         "pred_labels":pred_labels[target_idx].to(device),
+        #
+        #     })
+
 
         loss_dict = model(images, targets)
 
@@ -73,8 +92,8 @@ for epoch in range(num_epochs):
         if lr_scheduler is not None:
             lr_scheduler.step()
 
-        metric_logger.update(loss=losses_reduced, **loss_dict_reduced)
-        metric_logger.update(lr=optimizer.param_groups[0]["lr"])
+        # metric_logger.update(loss=losses_reduced, **loss_dict_reduced)
+        # metric_logger.update(lr=optimizer.param_groups[0]["lr"])
 
     # update the learning rate
     lr_scheduler.step()

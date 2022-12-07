@@ -42,6 +42,9 @@ class SyntheticDataset(Dataset):
         # suppose all instances are not crowd
         pred_labels = torch.zeros((num_objs,), dtype=torch.int64)
 
+        if len(boxes) != len(mask_labels):
+            raise ValueError
+
         target = {}
         target["boxes"] = boxes
         target["labels"] = mask_labels

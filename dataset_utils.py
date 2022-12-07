@@ -75,36 +75,40 @@ def generate_class_mask(label, classMap, h, w):
         class_id = None
         mask_i = np.zeros(shape=(h, w))
         shape_attributes = label[label_index]["shape_attributes"]
+        img = Image.new("L", (w, h), 0)
         if shape_attributes["name"] == "circle":
             x = shape_attributes["cx"]
             y = shape_attributes["cy"]
             r = shape_attributes["r"]
-            for y_index in range(int(y - r), int(y + r)):
-                chord_length_half = np.sqrt(np.ceil(r) ** 2 - np.abs(y - y_index) ** 2)
-                mask_i[y_index, int(np.floor(x - chord_length_half)):int(np.ceil(x + chord_length_half))] = 1
-        elif shape_attributes["name"] == "polygon":
-            img = Image.new("L", (w, h), 0)
+            ImageDraw.Draw(img).ellipse((int(x-r),int(y-r),int(x+r), int(y+r)), fill=1, outline=1)
+
+            # for y_index in range(int(y - r), int(y + r)):
+            #     chord_length_half = np.sqrt(np.ceil(r) ** 2 - np.abs(y - y_index) ** 2)
+            #     mask_i[y_index, int(np.floor(x - chord_length_half)):int(np.ceil(x + chord_length_half))] = 1
+        elif shape_attributes["name"] in ["polygon", "polyline"]:
             polygon = []
             for point_index in range(len(shape_attributes["all_points_x"])):
                 polygon.append(
                     (shape_attributes["all_points_x"][point_index], shape_attributes["all_points_y"][point_index]))
             ImageDraw.Draw(img).polygon(polygon, outline=1, fill=1)
-            mask_i = np.array(img)
+
+        mask_i = np.array(img)
 
         mask_bool = mask_i != 0
         class_label = label[label_index]["region_attributes"]["classes"]
         class_id = classMap[class_label]
 
         if class_id is not None:
-            class_mask[mask_bool] = class_id
+            class_mask[mask_bool] = label_index + 1
             class_labels.append(class_id)
+
+    if int(len(np.unique(class_mask))-1) != int(len(class_labels)):
+        raise ValueError
 
     return class_mask, class_labels
 
 
-
 def warmup_lr_scheduler(optimizer, warmup_iters, warmup_factor):
-
     def f(x):
         if x >= warmup_iters:
             return 1
@@ -112,7 +116,6 @@ def warmup_lr_scheduler(optimizer, warmup_iters, warmup_factor):
         return warmup_factor * (1 - alpha) + alpha
 
     return torch.optim.lr_scheduler.LambdaLR(optimizer, f)
-
 
 
 class SmoothedValue(object):
@@ -175,6 +178,7 @@ class SmoothedValue(object):
             global_avg=self.global_avg,
             max=self.max,
             value=self.value)
+
 
 class MetricLogger(object):
     def __init__(self, delimiter="\t"):
@@ -273,6 +277,7 @@ def is_dist_avail_and_initialized():
         return False
     return True
 
+
 def reduce_dict(input_dict, average=True):
     """
     Args:
@@ -299,7 +304,11 @@ def reduce_dict(input_dict, average=True):
         reduced_dict = {k: v for k, v in zip(names, values)}
     return reduced_dict
 
+
 def get_world_size():
     if not is_dist_avail_and_initialized():
         return 1
     return dist.get_world_size()
+
+def collate_fn(batch):
+    return tuple(zip(*batch))
