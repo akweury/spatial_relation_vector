@@ -5,7 +5,7 @@ import glob
 import numpy as np
 import torch
 
-import utils
+import dataset_utils as utils
 import config
 
 
@@ -46,7 +46,7 @@ def data2tensor(data_path):
 
         # extract labels from each image file
         label = labels[os.path.basename(img_files[item])]
-        class_mask = utils.generate_class_mask(label, labels["classes"], vertex.shape[0], vertex.shape[1])
+        class_mask, mask_labels = utils.generate_class_mask(label, labels["classes"], vertex.shape[0], vertex.shape[1])
         gt = np.c_[
             np.expand_dims(class_mask, axis=2),  # 0
         ]
@@ -57,7 +57,8 @@ def data2tensor(data_path):
 
         # save tensors
         training_case = {"input_tensor": input_tensor,
-                         "gt_tensor": gt_tensor}
+                         "gt_tensor": gt_tensor,
+                         "mask_labels": mask_labels}
 
         torch.save(training_case, output_tensor_file)
         print(f"File {item + 1}/{len(data_files)} saved as a tensor.")

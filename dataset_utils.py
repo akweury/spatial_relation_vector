@@ -1,4 +1,4 @@
-# Created by shaji at 06-Dec-22
+# Created by shaji at 07-Dec-22
 
 import numpy as np
 import cv2 as cv
@@ -63,12 +63,9 @@ def depth2vertex(depth, K, R, t):
     return vertex
 
 
-def vertex_normalization(vertex):
-    return vertex
-
-
 def generate_class_mask(label, classMap, h, w):
     class_mask = np.zeros(shape=(h, w))
+    class_labels = []
     for label_index in range(len(label)):
         # sphere mask
         class_id = None
@@ -91,14 +88,11 @@ def generate_class_mask(label, classMap, h, w):
             mask_i = np.array(img)
 
         mask_bool = mask_i != 0
-        if label[label_index]["region_attributes"]["classes"] == "sphere":
-            class_id = classMap["sphere"]
-        elif label[label_index]["region_attributes"]["classes"] == "cube":
-            class_id = classMap["cube"]
+        class_label = label[label_index]["region_attributes"]["classes"]
+        class_id = classMap[class_label]
 
         if class_id is not None:
             class_mask[mask_bool] = class_id
+            class_labels.append(class_label)
 
-    return class_mask
-
-#
+    return class_mask, class_labels
