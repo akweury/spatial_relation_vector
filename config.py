@@ -8,7 +8,7 @@ output_path = root / "output"
 
 
 # dataset on tp-machine
-synthetic_dataset = Path("D:\\UnityProjects\\hide_dataset_unity\\CapturedData\\data_synthetic\\train")
+left_dataset = dataset / "left"
 
 
 if __name__ == "__main__":
@@ -16,4 +16,4 @@ if __name__ == "__main__":
     print("dataset path: " + str(dataset))
     print("work place path: " + str(work_place_path))
     print("output path: " + str(output_path))
-    print("synthetic_dataset: " + str(synthetic_dataset))
+    print("left_dataset: " + str(left_dataset))

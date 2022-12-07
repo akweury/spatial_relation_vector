@@ -2,5 +2,10 @@
 The implementation about idea spatial relation vector
 
 TODO List:
-1. prepare a small dataset. 
-2. train a model using for sphere and cube detection.
+1. train a model using for sphere and cube detection.
+
+---
+##### Create training tensors
+First, run `create_dataset.py` to calculate masks from dataset images and save them as tensors
+
+
