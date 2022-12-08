@@ -40,7 +40,7 @@ class SyntheticDataset(Dataset):
         image_id = torch.tensor([item])
         area = (boxes[:, 3] - boxes[:, 1]) * (boxes[:, 2] - boxes[:, 0])
         # suppose all instances are not crowd
-        pred_labels = torch.zeros((num_objs,), dtype=torch.int64)
+        iscrowd = torch.zeros((num_objs,), dtype=torch.int64)
 
         if len(boxes) != len(mask_labels):
             raise ValueError
@@ -51,6 +51,6 @@ class SyntheticDataset(Dataset):
         target["masks"] = masks
         target["image_id"] = image_id
         target["area"] = area
-        target["pred_labels"] = pred_labels
+        target["iscrowd"] = iscrowd
 
         return X["input_tensor"][3:]/255, target
