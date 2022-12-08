@@ -3,7 +3,7 @@ The implementation about idea spatial relation vector
 
 #### Docker Command
 
-docker run --rm --gpus all nvcr.io/nvidia/pytorch:22.06-py3 nvidia-smi
+docker run --gpus all -it --rm -v ml-sha/srv_docker:latest python3 spatial_relation_vector/train.py
 
 
 ---
