@@ -40,36 +40,21 @@ for epoch in range(num_epochs):
     metric_logger.add_meter('lr', dataset_utils.SmoothedValue(window_size=1, fmt='{value:.6f}'))
     header = f'Epoch: [{epoch}]'
 
-    lr_scheduler = None
+
     if epoch == 0:
         warmup_factor = 1. / 1000
         warmup_iters = min(1000, len(train_loader) - 1)
 
         lr_scheduler = dataset_utils.warmup_lr_scheduler(optimizer, warmup_iters, warmup_factor)
+    else:
+        lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer,
+                                                       step_size=3,
+                                                       gamma=0.1)
 
     for i, (images, targets) in enumerate(train_loader):
     # for images, targets in metric_logger.log_every(train_loader, print_freq, header):
         images = list(image.to(device) for image in images)
         targets = [{k: v.to(device) for k, v in t.items()} for t in targets]
-        # targets_list = []
-        # boxes = targets["boxes"]
-        # labels = targets["labels"]
-        # masks = targets["masks"]
-        # image_ids = targets["image_id"]
-        # areas = targets["area"]
-        # pred_labels = targets["pred_labels"]
-        # for target_idx in range(targets["boxes"].size(0)):
-        #     targets_list.append({
-        #         "boxes":boxes[target_idx].to(device),
-        #         "labels": labels[target_idx].to(device),
-        #         "masks":masks[target_idx].to(device),
-        #         "image_ids": image_ids[target_idx].to(device),
-        #         "area": areas[target_idx].to(device),
-        #         "pred_labels":pred_labels[target_idx].to(device),
-        #
-        #     })
-
-
         loss_dict = model(images, targets)
 
         losses = sum(loss for loss in loss_dict.values())

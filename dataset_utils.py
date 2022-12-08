@@ -1,17 +1,14 @@
 # Created by shaji at 07-Dec-22
 from collections import defaultdict, deque
 import datetime
-import pickle
 import time
 
 import numpy as np
 import cv2 as cv
 import json
 from PIL import Image, ImageDraw
-
 import torch
 import torch.distributed as dist
-import config
 
 
 def load_labels(label_file):

@@ -53,4 +53,4 @@ class SyntheticDataset(Dataset):
         target["area"] = area
         target["pred_labels"] = pred_labels
 
-        return X["input_tensor"][3:], target
+        return X["input_tensor"][3:]/255, target
