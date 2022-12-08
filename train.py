@@ -1,7 +1,6 @@
 # Created by shaji at 02.12.2022
 
-import math
-import sys
+
 import torch
 from torch.utils.data import DataLoader
 
@@ -10,7 +9,7 @@ import config
 import models
 import dataset_utils
 import pipeline
-from reference import engine
+# from reference import engine
 
 
 # preprocessing
@@ -37,10 +36,11 @@ num_epochs = 10
 print_freq = 10
 for epoch in range(num_epochs):
     # train for one epoch, printing every 10 iterations
-    engine.train_one_epoch(model, optimizer, train_loader, device, epoch, print_freq=10)
+    # engine.train_one_epoch(model, optimizer, train_loader, device, epoch, print_freq=10)
+    pipeline.train_one_epoch(model, optimizer, train_loader, device, epoch, print_freq=10)
     # update the learning rate
     lr_scheduler.step()
     # evaluate on the test dataset
-    engine.evaluate(model, train_loader, device=device)
+    # engine.evaluate(model, train_loader, device=device)
 
 print("That's it!")
