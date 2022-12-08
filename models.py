@@ -7,6 +7,7 @@ from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
 from torchvision.models.detection.mask_rcnn import MaskRCNNPredictor
 
 
+
 def mask_rcnn(test_img, weights=None):
     if weights is None:
         weights = MaskRCNN_ResNet50_FPN_Weights.DEFAULT
@@ -52,3 +53,5 @@ def get_model_instance_segmentation(num_classes, weights=None):
     hidden_layer = 256
     model.roi_heads.mask_predictor = MaskRCNNPredictor(in_features_mask, hidden_layer, num_classes)
     return model
+
+
