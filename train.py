@@ -40,7 +40,5 @@ for epoch in range(num_epochs):
     pipeline.train_one_epoch(model, optimizer, train_loader, device, epoch, print_freq=10)
     # update the learning rate
     lr_scheduler.step()
-    # evaluate on the test dataset
-    # engine.evaluate(model, train_loader, device=device)
 
 print("That's it!")
