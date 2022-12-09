@@ -8,7 +8,6 @@ import torch
 import torch.distributed as dist
 
 
-
 def warmup_lr_scheduler(optimizer, warmup_iters, warmup_factor):
     def f(x):
         if x >= warmup_iters:
@@ -211,17 +210,53 @@ def get_world_size():
         return 1
     return dist.get_world_size()
 
+
 def collate_fn(batch):
     return tuple(zip(*batch))
 
 
+class LogManager():
+    def __init__(self, delimiter="\t", epoch=None, lr=None, date_now=None, time_now=None, best_loss=None):
+        self.delimiter = delimiter
+        self.epoch = epoch
+        self.lr = lr
+        self.date_now = date_now
+        self.time_now = time_now
+        self.best_loss = best_loss
 
-def train_one_epoch(model, optimizer, train_loader, device, epoch, print_freq=10):
-    model.train()
+    def print_new_epoch(self):
+        print(
+            f"-{datetime.datetime.now().strftime('%H:%M:%S')} "
+            f"Epoch [{self.epoch}] lr={self.lr} eval_loss: {float(self.best_loss):.1e} "
+            f"Start from {self.date_now}-{self.time_now}")
+
+    def stop_training(self, loss_value, loss_dict_reduced):
+        print("Loss is {}, stopping training".format(loss_value))
+        print(loss_dict_reduced)
+        sys.exit(1)
+
+    def print_loss(self, loss_value, batch_size):
+        loss_avg = loss_value / int(batch_size)
+        print(f"\t loss: {loss_avg:.2e}")
+
+
+
+def train_one_epoch(model, optimizer, train_loader, device, epoch, eval_best_loss, print_freq=10, ):
+    date_now = datetime.datetime.today().date()
+    time_now = datetime.datetime.now().strftime("%H:%M:%S")
+    mse_criterion = torch.nn.MSELoss(reduction='mean')
+
+    # print log
+    log_manager = LogManager(delimiter="  ", epoch=epoch, lr=optimizer.param_groups[0]['lr'],
+                             date_now=date_now, time_now=time_now, best_loss=eval_best_loss)
+    log_manager.print_new_epoch()
     metric_logger = MetricLogger(delimiter="  ")
     metric_logger.add_meter('lr', SmoothedValue(window_size=1, fmt='{value:.6f}'))
     header = f'Epoch: [{epoch}]'
 
+    # training
+    model.train()
+    # set lr_scheduler
     if epoch == 0:
         warmup_factor = 1. / 1000
         warmup_iters = min(1000, len(train_loader) - 1)
@@ -236,6 +271,7 @@ def train_one_epoch(model, optimizer, train_loader, device, epoch, print_freq=10
         # for images, targets in metric_logger.log_every(train_loader, print_freq, header):
         images = list(image.to(device) for image in images)
         targets = [{k: v.to(device) for k, v in t.items()} for t in targets]
+
         loss_dict = model(images, targets)
 
         losses = sum(loss for loss in loss_dict.values())
@@ -246,10 +282,9 @@ def train_one_epoch(model, optimizer, train_loader, device, epoch, print_freq=10
 
         loss_value = losses_reduced.item()
 
+        # stop training if loss is not finite anymore.
         if not math.isfinite(loss_value):
-            print("Loss is {}, stopping training".format(loss_value))
-            print(loss_dict_reduced)
-            sys.exit(1)
+            log_manager.stop_training(loss_value, loss_dict_reduced)
 
         optimizer.zero_grad()
         losses.backward()
@@ -258,5 +293,7 @@ def train_one_epoch(model, optimizer, train_loader, device, epoch, print_freq=10
         if lr_scheduler is not None:
             lr_scheduler.step()
 
-        # metric_logger.update(loss=losses_reduced, **loss_dict_reduced)
-        # metric_logger.update(lr=optimizer.param_groups[0]["lr"])
+        # print loss
+        log_manager.print_loss(loss_value, 2)
+
+

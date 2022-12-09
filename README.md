@@ -4,7 +4,7 @@ The implementation about idea spatial relation vector
 ---
 #### Docker Command
 
-docker build -t ml-sha/srv .
+docker build -t ml-sha/srv_docker .
 
 docker run --gpus all -it --rm ml-sha/srv_docker \
     python3 /root/spatial_relation_vector/train.py
