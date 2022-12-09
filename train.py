@@ -1,4 +1,4 @@
-# Created by shaji at 02.12.2022
+# Created by shaji on 02.12.2022
 
 
 import torch
@@ -32,5 +32,7 @@ for epoch in range(num_epochs):
     pipeline.train_one_epoch(model, optimizer, train_loader, device, epoch, eval_best_loss, print_freq=10)
     # update the learning rate
     lr_scheduler.step()
+
+    pipeline.evaluation(model, optimizer, train_loader, device, epoch, eval_best_loss, print_freq=10)
 
 print("That's it!")

@@ -1,4 +1,4 @@
-# Created by shaji at 02.12.2022
+# Created by shaji on 02.12.2022
 from pathlib import Path
 
 root = Path(__file__).parents[1]

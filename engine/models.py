@@ -1,4 +1,4 @@
-# Created by shaji at 02.12.2022
+# Created by shaji on 02.12.2022
 from PIL import Image
 from torchvision.models.detection import MaskRCNN_ResNet50_FPN_Weights, maskrcnn_resnet50_fpn
 from torchvision.transforms.functional import pil_to_tensor, to_pil_image

@@ -1,4 +1,4 @@
-# Created by shaji at 09-Dec-22
+# Created by shaji on 09-Dec-22
 from engine import models
 
 # call the function once to download the weights of pre-trained model
