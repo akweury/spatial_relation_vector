@@ -4,8 +4,11 @@ from collections import defaultdict, deque
 import datetime
 import time
 
+import numpy as np
 import torch
 import torch.distributed as dist
+
+from engine.plot_utils import draw_line_chart
 
 
 def warmup_lr_scheduler(optimizer, warmup_iters, warmup_factor):
@@ -216,19 +219,28 @@ def collate_fn(batch):
 
 
 class LogManager():
-    def __init__(self, delimiter="\t", epoch=None, lr=None, date_now=None, time_now=None, best_loss=None):
+    def __init__(self, delimiter="\t", device="cpu", num_epochs=10,
+                 print_freq=10, lr=None, batch_size=2, output_folder=None):
+        self.epoch = None
+        self.device = device
+        self.date_start = datetime.datetime.today().date()
+        self.time_start = datetime.datetime.now().strftime("%H:%M:%S")
+        self.date_now = None
+        self.time_now = None
+        self.best_loss = 1e+10
         self.delimiter = delimiter
-        self.epoch = epoch
+        self.print_freq = print_freq
         self.lr = lr
-        self.date_now = date_now
-        self.time_now = time_now
-        self.best_loss = best_loss
+        self.batch_size = batch_size
+        self.output_folder = output_folder
+        self.eval_losses = np.zeros((1, num_epochs))
+        self.train_losses = np.zeros((1, num_epochs))
 
     def print_new_epoch(self):
         print(
-            f"-{datetime.datetime.now().strftime('%H:%M:%S')} "
+            f"-{self.time_now} "
             f"Epoch [{self.epoch}] lr={self.lr} eval_loss: {float(self.best_loss):.1e} "
-            f"Start from {self.date_now}-{self.time_now}")
+            f"Start from {self.date_start}-{self.time_start}")
 
     def stop_training(self, loss_value, loss_dict_reduced):
         print("Loss is {}, stopping training".format(loss_value))
@@ -239,25 +251,31 @@ class LogManager():
         loss_avg = loss_value / int(batch_size)
         print(f"\t loss: {loss_avg:.2e}")
 
+    def update(self, epoch):
+        self.epoch = epoch
+        self.date_now = datetime.datetime.today().date()
+        self.time_now = datetime.datetime.now().strftime("%H:%M:%S")
+
+    def plot(self):
+        # draw line chart for training
+        draw_line_chart(self.train_losses, self.output_folder, self.date_start, self.time_start,
+                        log_y=True, label="train_loss", epoch=self.epoch, start_epoch=0, title="train"
+                                                                                               "_loss",
+                        cla_leg=True)
+
+        # draw line chart for evaluation
+        draw_line_chart(self.eval_losses, self.output_folder, self.date_start, self.time_start,
+                        log_y=True, label="eval_loss", epoch=self.epoch, start_epoch=0, title="eval_loss",
+                        cla_leg=True)
 
 
-def train_one_epoch(model, optimizer, train_loader, device, epoch, eval_best_loss, print_freq=10, ):
-    date_now = datetime.datetime.today().date()
-    time_now = datetime.datetime.now().strftime("%H:%M:%S")
-    mse_criterion = torch.nn.MSELoss(reduction='mean')
 
-    # print log
-    log_manager = LogManager(delimiter="  ", epoch=epoch, lr=optimizer.param_groups[0]['lr'],
-                             date_now=date_now, time_now=time_now, best_loss=eval_best_loss)
+def train_one_epoch(model, optimizer, train_loader, log_manager):
     log_manager.print_new_epoch()
-    metric_logger = MetricLogger(delimiter="  ")
-    metric_logger.add_meter('lr', SmoothedValue(window_size=1, fmt='{value:.6f}'))
-    header = f'Epoch: [{epoch}]'
-
     # training
     model.train()
     # set lr_scheduler
-    if epoch == 0:
+    if log_manager.epoch == 0:
         warmup_factor = 1. / 1000
         warmup_iters = min(1000, len(train_loader) - 1)
 
@@ -269,8 +287,8 @@ def train_one_epoch(model, optimizer, train_loader, device, epoch, eval_best_los
 
     for i, (images, targets) in enumerate(train_loader):
         # for images, targets in metric_logger.log_every(train_loader, print_freq, header):
-        images = list(image.to(device) for image in images)
-        targets = [{k: v.to(device) for k, v in t.items()} for t in targets]
+        images = list(image.to(log_manager.device) for image in images)
+        targets = [{k: v.to(log_manager.device) for k, v in t.items()} for t in targets]
 
         loss_dict = model(images, targets)
 
@@ -283,6 +301,9 @@ def train_one_epoch(model, optimizer, train_loader, device, epoch, eval_best_los
         loss_value = losses_reduced.item()
 
         # stop training if loss is not finite anymore.
+        if np.sum(loss_value) > 1e+4:
+            print("loss is greater than 1e+4.")
+            break
         if not math.isfinite(loss_value):
             log_manager.stop_training(loss_value, loss_dict_reduced)
 
@@ -297,3 +318,33 @@ def train_one_epoch(model, optimizer, train_loader, device, epoch, eval_best_los
         log_manager.print_loss(loss_value, 2)
 
 
+def evaluation(model, optimizer, test_loader, log_manager):
+    for i, (images, targets) in enumerate(test_loader):
+        with torch.no_grad():
+            images = list(image.to(log_manager.device) for image in images)
+            targets = [{k: v.to(log_manager.device) for k, v in t.items()} for t in targets]
+            # Wait for all kernels to finish
+            torch.cuda.synchronize()
+            # start count the model time
+            start = time.time()
+            # Forward pass
+            loss_dict = model(images, targets)
+            # record data load time
+            gpu_time = time.time() - start
+            losses = sum(loss for loss in loss_dict.values())
+            # reduce losses over all GPUs for logging purposes
+            loss_dict_reduced = reduce_dict(loss_dict)
+            losses_reduced = sum(loss for loss in loss_dict_reduced.values())
+            loss_value = losses_reduced.item()
+            # print loss
+            log_manager.print_loss(loss_value, 2)
+            # update the best loss
+            if loss_value < log_manager.best_loss:
+                log_manager.best_loss = loss_value
+                is_best = True
+
+    return is_best
+
+
+def save_checkpoint(is_best, epoch):
+    return None
