@@ -5,11 +5,7 @@ import torch
 from torch.utils.data import DataLoader
 
 import dataset
-import config
-import models
-import dataset_utils
-import pipeline
-
+from engine import config, pipeline, models
 
 # preprocessing
 batch_size = 2

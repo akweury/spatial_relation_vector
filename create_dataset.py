@@ -5,8 +5,7 @@ import glob
 import numpy as np
 import torch
 
-import dataset_utils as utils
-import config
+from engine import config, dataset_utils as utils
 
 
 def data2tensor(data_path):

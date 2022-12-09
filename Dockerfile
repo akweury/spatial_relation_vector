@@ -14,5 +14,5 @@ RUN cd /root \
 	&& pip uninstall opencv-contrib-python-headless \
 	&& pip install opencv-python==4.5.5.64  
 
-RUN cd /root/spatial_relation_vector \ 
-	&& git pull
+RUN cd /root/spatial_relation_vector \
+  	&& git pull

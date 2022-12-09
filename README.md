@@ -6,8 +6,9 @@ The implementation about idea spatial relation vector
 
 docker build -t ml-sha/srv_docker .
 
-docker run --gpus all -it --rm ml-sha/srv_docker \
-    python3 /root/spatial_relation_vector/train.py
+docker run --gpus all -it --rm ml-sha/srv_docker
+
+python3 train.py
 
 ---
 #### Create training tensors
