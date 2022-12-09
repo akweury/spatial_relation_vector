@@ -1,7 +1,7 @@
 # Created by shaji at 02.12.2022
 from pathlib import Path
 
-root = Path(__file__).parents[0]
+root = Path(__file__).parents[1]
 dataset = root / "dataset"
 work_place_path = root / "workplace"
 output_path = root / "output"
