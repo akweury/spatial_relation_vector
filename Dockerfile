@@ -15,4 +15,5 @@ RUN cd /root \
 	&& pip install opencv-python==4.5.5.64  
 
 RUN cd /root/spatial_relation_vector \
-  	&& git pull
+  	&& git pull \
+    && python3 setup.py
