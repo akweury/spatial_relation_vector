@@ -20,11 +20,11 @@ class Args():
     def io_path(self):
         if self.machine == "local":
             data_path =config.dataset / self.exp
-            output_path =config.output_remote / self.exp
+            output_path =config.output_local / self.exp
 
         elif self.machine == "remote":
             data_path = config.storage_01 / self.exp
-            output_path =  config.output_local / self.exp
+            output_path =  config.output_remote / self.exp
         else:
             raise ValueError("Value of Args.machine is incorrect. Please check the arguments.")
 

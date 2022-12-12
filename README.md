@@ -8,7 +8,13 @@ docker build -t ml-sha/srv_docker .
 
 docker run --gpus all -it --rm -v /storage-01/ml-jsha:/root/spatial_relation_vector/storage-01 ml-sha/srv_docker
 
-python3 train.py
+python3 train.py --exp object_detector --machine remote
+
+###
+copy dataset
+
+scp D:\PycharmProjects\spatial_relation_vector\dataset\object_detector.zip ml-jsha@130.83.185.153:/home/ml-jsha/spatial_relation_vector
+
 
 ---
 #### Create training tensors

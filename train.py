@@ -38,6 +38,7 @@ for epoch in range(args.num_epochs):
     # update the log manager for the new epoch
     log_manager.update(epoch)
     # train for one epoch, printing logs
+
     pipeline.train_one_epoch(model, optimizer, train_loader, log_manager)
     # update the learning rate
     lr_scheduler.step()
