@@ -238,9 +238,14 @@ class LogManager():
 
     def print_new_epoch(self):
         print(
-            f"-{self.time_now} "
-            f"Epoch [{self.epoch}] lr={self.lr} eval_loss: {float(self.best_loss):.1e} "
+            f"{self.time_now} "
+            f"Epoch [{self.epoch}] lr={self.lr} Best eval loss: {float(self.best_loss):.1e} "
             f"Start from {self.date_start}-{self.time_start}")
+    def print_train_epoch(self):
+        print("Training")
+
+    def print_eval_epoch(self):
+        print("Evaluation")
 
     def stop_training(self, loss_value, loss_dict_reduced):
         print("Loss is {}, stopping training".format(loss_value))
@@ -255,6 +260,7 @@ class LogManager():
         self.epoch = epoch
         self.date_now = datetime.datetime.today().date()
         self.time_now = datetime.datetime.now().strftime("%H:%M:%S")
+        self.print_new_epoch()
 
     def plot(self):
         # draw line chart for training
@@ -271,7 +277,8 @@ class LogManager():
 
 
 def train_one_epoch(model, optimizer, train_loader, log_manager):
-    log_manager.print_new_epoch()
+    log_manager.print_train_epoch()
+    loss_sum = 0.0
     # training
     model.train()
     # set lr_scheduler
@@ -299,6 +306,7 @@ def train_one_epoch(model, optimizer, train_loader, log_manager):
         losses_reduced = sum(loss for loss in loss_dict_reduced.values())
 
         loss_value = losses_reduced.item()
+        loss_sum+=loss_value
 
         # stop training if loss is not finite anymore.
         if np.sum(loss_value) > 1e+4:
@@ -314,11 +322,15 @@ def train_one_epoch(model, optimizer, train_loader, log_manager):
         if lr_scheduler is not None:
             lr_scheduler.step()
 
-        # print loss
-        log_manager.print_loss(loss_value, 2)
+    # print loss
+    log_manager.train_losses[0, log_manager.epoch] = loss_sum / len(train_loader)
+    log_manager.print_loss(log_manager.train_losses[0, log_manager.epoch], log_manager.batch_size)
 
 
 def evaluation(model, optimizer, test_loader, log_manager):
+    is_best = False
+    loss_sum = 0.0
+    log_manager.print_eval_epoch()
     for i, (images, targets) in enumerate(test_loader):
         with torch.no_grad():
             images = list(image.to(log_manager.device) for image in images)
@@ -336,12 +348,16 @@ def evaluation(model, optimizer, test_loader, log_manager):
             loss_dict_reduced = reduce_dict(loss_dict)
             losses_reduced = sum(loss for loss in loss_dict_reduced.values())
             loss_value = losses_reduced.item()
-            # print loss
-            log_manager.print_loss(loss_value, 2)
-            # update the best loss
-            if loss_value < log_manager.best_loss:
-                log_manager.best_loss = loss_value
-                is_best = True
+            loss_sum+=loss_value
+
+    # print loss
+    log_manager.eval_losses[0, log_manager.epoch] = loss_sum / len(test_loader)
+    log_manager.print_loss(log_manager.eval_losses[0, log_manager.epoch], log_manager.batch_size)
+
+    # update the best loss
+    if loss_value < log_manager.best_loss:
+        log_manager.best_loss = loss_value
+        is_best = True
 
     return is_best
 
