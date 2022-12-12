@@ -1,4 +1,5 @@
 # Created by shaji on 02.12.2022
+import torch
 from PIL import Image
 from torchvision.models.detection import MaskRCNN_ResNet50_FPN_Weights, maskrcnn_resnet50_fpn
 from torchvision.transforms.functional import pil_to_tensor, to_pil_image
@@ -8,11 +9,12 @@ from torchvision.models.detection.mask_rcnn import MaskRCNNPredictor
 
 
 
-def mask_rcnn(test_img, weights=None):
+def mask_rcnn(img_tensor_int, weights=None):
     if weights is None:
         weights = MaskRCNN_ResNet50_FPN_Weights.DEFAULT
+    if not torch.is_tensor(img_tensor_int):
+        img_tensor_int = pil_to_tensor(Image.open(img_tensor_int)).unsqueeze(dim=0)
 
-    img_tensor_int = pil_to_tensor(Image.open(test_img)).unsqueeze(dim=0)
     img_tensor_float = img_tensor_int / 255.0
     model = maskrcnn_resnet50_fpn(weights=weights)
     model.eval()

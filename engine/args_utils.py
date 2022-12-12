@@ -2,7 +2,9 @@
 import os
 import argparse
 import json
+import torch
 from pprint import pprint
+
 from engine import config
 
 
@@ -15,16 +17,20 @@ class Args():
         self.resume = args.resume
         self.batch_size = args.batch_size
         self.num_epochs = args.num_epochs
-
+        self.conf_threshold = args.conf_threshold
+        if args.device == "gpu":
+            self.device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
+        else:
+            self.device = "cpu"
 
     def io_path(self):
         if self.machine == "local":
-            data_path =config.dataset / self.exp
-            output_path =config.output_local / self.exp
+            data_path = config.dataset / self.exp
+            output_path = config.output_local / self.exp
 
         elif self.machine == "remote":
             data_path = config.storage_01 / self.exp
-            output_path =  config.output_remote / self.exp
+            output_path = config.output_remote / self.exp
         else:
             raise ValueError("Value of Args.machine is incorrect. Please check the arguments.")
 
@@ -63,9 +69,11 @@ def paser():
     parser.add_argument('--machine', type=str, default="local", help='choose the training machin, local or remote')
     parser.add_argument('--batch_size', '-b', default=2, type=int, help='Mini-batch size (default: 2)')
     parser.add_argument('--exp', '--e', help='Experiment name')
+    parser.add_argument('--device', default="cpu", help='Choose device as cpu or gpu')
     parser.add_argument('--num_epochs', default=10, type=int, help='Set number of training epochs')
     parser.add_argument('--num_classes', '-nc', help='Numer of Classes')
     parser.add_argument('--print_freq', '-pf', help='print frequency')
+    parser.add_argument('--conf_threshold', help='The confidence threshold of bounding boxes')
     parser.add_argument('--resume', default=None, type=str, metavar='PATH',
                         help='Path to latest checkpoint (default: none)')
 

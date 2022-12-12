@@ -2,6 +2,7 @@
   "exp": "object_detector",
   "print_freq": 10,
   "num_classes": 3,
-  "resume": null
+  "resume": null,
+  "conf_threshold": 0.3
 }
 

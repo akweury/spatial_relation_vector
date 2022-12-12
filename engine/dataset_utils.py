@@ -26,7 +26,7 @@ def load_labels(label_file):
     label_data["classes"] = {}
     for i in range(len(classes)):
         label_data["classes"][classes[i]] = i + 1
-    return label_data
+    return label_data, classes
 
 
 def load_scaled16bitImage(root, minVal, maxVal):
@@ -42,6 +42,8 @@ def load_scaled16bitImage(root, minVal, maxVal):
 
 def load_32bitImage(root):
     img = cv.imread(root, -1)
+    img = cv.cvtColor(img, cv.COLOR_BGR2RGB)
+
     img[np.isnan(img)] = 0
 
     return img

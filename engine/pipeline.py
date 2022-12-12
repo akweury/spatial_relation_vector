@@ -4,11 +4,14 @@ from collections import defaultdict, deque
 import datetime
 import time
 
+import cv2 as cv
 import numpy as np
 import torch
 import torch.distributed as dist
+from torchvision.utils import draw_bounding_boxes, draw_segmentation_masks
+from torchvision.transforms.functional import pil_to_tensor, to_pil_image
 
-from engine.plot_utils import draw_line_chart
+from engine import plot_utils, config
 
 
 def warmup_lr_scheduler(optimizer, warmup_iters, warmup_factor):
@@ -220,7 +223,7 @@ def collate_fn(batch):
 
 class LogManager():
     def __init__(self, delimiter="\t", device="cpu", num_epochs=10,
-                 print_freq=10, lr=None, batch_size=2, output_folder=None):
+                 print_freq=10, lr=None, batch_size=2, output_folder=None, conf_threshold=0.5):
         self.epoch = None
         self.device = device
         self.date_start = datetime.datetime.today().date()
@@ -235,6 +238,7 @@ class LogManager():
         self.output_folder = output_folder
         self.eval_losses = np.zeros((1, num_epochs))
         self.train_losses = np.zeros((1, num_epochs))
+        self.conf_threshold = conf_threshold
 
     def print_new_epoch(self):
         print(
@@ -259,15 +263,42 @@ class LogManager():
 
     def plot(self):
         # draw line chart for training
-        draw_line_chart(self.train_losses, self.output_folder, self.date_start, self.time_start,
-                        log_y=True, label="train_loss", epoch=self.epoch, start_epoch=0, title="train"
-                                                                                               "_loss",
-                        cla_leg=True)
+        plot_utils.draw_line_chart(self.train_losses, self.output_folder, self.date_start, self.time_start,
+                                   log_y=True, label="train_loss", epoch=self.epoch, start_epoch=0, title="train"
+                                                                                                          "_loss",
+                                   cla_leg=True)
 
         # draw line chart for evaluation
-        draw_line_chart(self.eval_losses, self.output_folder, self.date_start, self.time_start,
-                        log_y=True, label="eval_loss", epoch=self.epoch, start_epoch=0, title="eval_loss",
-                        cla_leg=True)
+        plot_utils.draw_line_chart(self.eval_losses, self.output_folder, self.date_start, self.time_start,
+                                   log_y=True, label="eval_loss", epoch=self.epoch, start_epoch=0, title="eval_loss",
+                                   cla_leg=True)
+
+    def visualization(self, images, img_preds, categories):
+        img_tensor_int = []
+        for image in images:
+            img_tensor_int.append((image*255).to(dtype=torch.uint8))
+
+        img_preds[0]["boxes"] = img_preds[0]["boxes"][img_preds[0]["scores"] > self.conf_threshold]
+        img_preds[0]["labels"] = img_preds[0]["labels"][img_preds[0]["scores"] > self.conf_threshold]
+        img_preds[0]["masks"] = img_preds[0]["masks"][img_preds[0]["scores"] > self.conf_threshold]
+        img_preds[0]["scores"] = img_preds[0]["scores"][img_preds[0]["scores"] > self.conf_threshold]
+
+        img_labels = img_preds[0]["labels"].numpy()
+        img_annot_labels = [f"{categories[label]}: {prob:.2f}" for label, prob in
+                            zip(img_labels, img_preds[0]["scores"].detach().numpy())]
+        colors=config.colors[:len(categories)]
+        img_output_tensor = draw_bounding_boxes(image=img_tensor_int[0],
+                                                boxes=img_preds[0]["boxes"],
+                                                labels=img_annot_labels,
+                                                colors=colors,
+                                                width=2)
+
+        img_masks_float = img_preds[0]["masks"].squeeze(1)
+        img_masks_float[img_masks_float < 0.8] = 0
+        img_masks_bool = img_masks_float.bool()
+        img_output_tensor = draw_segmentation_masks(img_output_tensor, masks=img_masks_bool, alpha=0.8)
+        img_output = to_pil_image(img_output_tensor)
+        img_output.save(str(self.output_folder / f"output_{self.epoch}_0.png"), "PNG")
 
 
 def train_one_epoch(model, optimizer, train_loader, log_manager):
@@ -285,7 +316,7 @@ def train_one_epoch(model, optimizer, train_loader, log_manager):
                                                        step_size=3,
                                                        gamma=0.1)
 
-    for i, (images, targets) in enumerate(train_loader):
+    for i, (images, targets, categories) in enumerate(train_loader):
         # for images, targets in metric_logger.log_every(train_loader, print_freq, header):
         images = list(image.to(log_manager.device) for image in images)
         targets = [{k: v.to(log_manager.device) for k, v in t.items()} for t in targets]
@@ -323,9 +354,9 @@ def train_one_epoch(model, optimizer, train_loader, log_manager):
 def evaluation(model, optimizer, test_loader, log_manager):
     is_best = False
     loss_sum = 0.0
-
-    for i, (images, targets) in enumerate(test_loader):
+    for i, (images, targets, categories) in enumerate(test_loader):
         with torch.no_grad():
+            model.train()
             images = list(image.to(log_manager.device) for image in images)
             targets = [{k: v.to(log_manager.device) for k, v in t.items()} for t in targets]
             # Wait for all kernels to finish
@@ -336,12 +367,16 @@ def evaluation(model, optimizer, test_loader, log_manager):
             loss_dict = model(images, targets)
             # record data load time
             gpu_time = time.time() - start
-            losses = sum(loss for loss in loss_dict.values())
             # reduce losses over all GPUs for logging purposes
             loss_dict_reduced = reduce_dict(loss_dict)
             losses_reduced = sum(loss for loss in loss_dict_reduced.values())
             loss_value = losses_reduced.item()
             loss_sum += loss_value
+
+            # visualize the output
+            model.eval()
+            prediction = model(images)
+            log_manager.visualization(images, prediction, categories)
 
     # print loss
     log_manager.eval_losses[0, log_manager.epoch] = loss_sum / len(test_loader)

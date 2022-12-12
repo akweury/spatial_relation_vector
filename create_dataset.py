@@ -4,12 +4,13 @@ import json
 import glob
 import numpy as np
 import torch
+import argparse
+from pprint import pprint
 
 from engine import config, dataset_utils as utils
 
 
-def data2tensor(data_root):
-
+def data2tensor(data_root, args):
     for sub_name in ["test", "train", "val"]:
         data_path = data_root / sub_name
         if not os.path.exists(str(data_path)):
@@ -20,18 +21,16 @@ def data2tensor(data_root):
         label_json = data_path / "labels.json"
         if not os.path.exists(label_json):
             raise FileNotFoundError("No labels.json has been found!")
-        labels = utils.load_labels(label_json)
+        labels, categories = utils.load_labels(label_json)
 
         depth_files = np.array(sorted(glob.glob(str(data_path / "*depth0.png"), recursive=True)))
         normal_files = np.array(sorted(glob.glob(str(data_path / "*normal0.png"), recursive=True)))
         data_files = np.array(sorted(glob.glob(str(data_path / "*data0.json"), recursive=True)))
         img_files = np.array(sorted(glob.glob(str(data_path / "*image.png"), recursive=True)))
 
-
-
         for item in range(len(data_files)):
             output_tensor_file = str(data_path / "tensor" / f"{str(item).zfill(5)}.pth.tar")
-            if os.path.exists(output_tensor_file) or not os.path.exists(data_files[item]):
+            if args.clear != "true" and (os.path.exists(output_tensor_file) or not os.path.exists(data_files[item])):
                 continue
 
             with open(data_files[item]) as f:
@@ -52,7 +51,8 @@ def data2tensor(data_root):
 
             # extract labels from each image file
             label = labels[os.path.basename(img_files[item])]
-            class_mask, mask_labels = utils.generate_class_mask(label, labels["classes"], vertex.shape[0], vertex.shape[1])
+            class_mask, mask_labels = utils.generate_class_mask(label, labels["classes"], vertex.shape[0],
+                                                                vertex.shape[1])
             gt = np.c_[
                 np.expand_dims(class_mask, axis=2),  # 0
             ]
@@ -64,11 +64,15 @@ def data2tensor(data_root):
             # save tensors
             training_case = {"input_tensor": input_tensor,
                              "gt_tensor": gt_tensor,
-                             "mask_labels": mask_labels}
+                             "mask_labels": mask_labels,
+                             "categories": categories}
 
             torch.save(training_case, output_tensor_file)
             print(f"File {item + 1}/{len(data_files)} saved as a tensor.")
 
 
-dataset_path = config.dataset/ "object_detector"
-data2tensor(dataset_path)
+parser = argparse.ArgumentParser()
+parser.add_argument('--clear', type=str, default="false", help='set to true to clear existed tensors')
+args = parser.parse_args()
+dataset_path = config.dataset / "object_detector"
+data2tensor(dataset_path, args)
