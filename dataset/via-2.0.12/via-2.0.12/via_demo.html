@@ -521,9 +521,9 @@ ul.region_shape .selected { fill:#ffffff; stroke:#ff0000; }
       <input type="file" id="invisible_file_input" name="files[]" style="display:none">
     </div> <!-- endof #top_panel -->
 
-    <!-- Middle Panel contains a left-sidebar and image display areas -->
+    <!-- Middle Panel contains a object_detector-sidebar and image display areas -->
     <div class="middle_panel">
-      <!-- this panel contains a button to shows the left side bar -->
+      <!-- this panel contains a button to shows the object_detector side bar -->
       <div id="leftsidebar_collapse_panel">
         <span class="text_button" onclick="leftsidebar_toggle()" title="Show left sidebar">&rtrif;</span>
       </div>
@@ -1298,7 +1298,7 @@ var _via_is_save_ongoing            = false;
 //
 // Image filename list (img_fn_list) contains a filtered list of images
 // currently accessible by the user. The img_fn_list is visible in the
-// left side toolbar. image_grid, next/prev, etc operations depend on
+// object_detector side toolbar. image_grid, next/prev, etc operations depend on
 // the contents of _via_img_fn_list_img_index_list.
 var _via_image_id_list                 = []; // array of all image id (in order they were added by user)
 var _via_image_filename_list           = []; // array of all image filename
@@ -3284,7 +3284,7 @@ function _via_reg_canvas_mouseup_handler(e) {
     if ( region_dx > VIA_REGION_MIN_DIM && region_dy > VIA_REGION_MIN_DIM ) { // avoid regions with 0 dim
       switch(_via_current_shape) {
       case VIA_REGION_SHAPE.RECT:
-        // ensure that (x0,y0) is top-left and (x1,y1) is bottom-right
+        // ensure that (x0,y0) is top-object_detector and (x1,y1) is bottom-right
         if ( _via_click_x0 < _via_click_x1 ) {
           region_x0 = _via_click_x0;
           region_x1 = _via_click_x1;
@@ -3453,12 +3453,12 @@ function _via_reg_canvas_mousemove_handler(e) {
       if ( _via_region_edge[0] === _via_user_sel_region_id ) {
         switch(_via_region_edge[1]) {
           // rect
-        case 1: // Fall-through // top-left corner of rect
+        case 1: // Fall-through // top-object_detector corner of rect
         case 3: // bottom-right corner of rect
           _via_reg_canvas.style.cursor = "nwse-resize";
           break;
         case 2: // Fall-through // top-right corner of rect
-        case 4: // bottom-left corner of rect
+        case 4: // bottom-object_detector corner of rect
           _via_reg_canvas.style.cursor = "nesw-resize";
           break;
 
@@ -3792,7 +3792,7 @@ function _via_move_selected_regions(move_x, move_y) {
 function _via_validate_move_region(x, y, canvas_attr) {
   switch( canvas_attr['name'] ) {
     case VIA_REGION_SHAPE.RECT:
-      // left and top boundary check
+      // object_detector and top boundary check
       if (x < 0 || y < 0) {
           show_message('Region moved beyond image boundary. Resetting.');
           return false;
@@ -4547,7 +4547,7 @@ function is_inside_point(cx, cy, px, py) {
 }
 
 // returns
-// >0 if (x2,y2) lies on the left side of line joining (x0,y0) and (x1,y1)
+// >0 if (x2,y2) lies on the object_detector side of line joining (x0,y0) and (x1,y1)
 // =0 if (x2,y2) lies on the line joining (x0,y0) and (x1,y1)
 // >0 if (x2,y2) lies on the right side of line joining (x0,y0) and (x1,y1)
 // source: http://geomalgorithms.com/a03-_inclusion.html
@@ -4556,7 +4556,7 @@ function is_left(x0, y0, x1, y1, x2, y2) {
 }
 
 function is_on_region_corner(px, py) {
-  var _via_region_edge = [-1, -1]; // region_id, corner_id [top-left=1,top-right=2,bottom-right=3,bottom-left=4]
+  var _via_region_edge = [-1, -1]; // region_id, corner_id [top-object_detector=1,top-right=2,bottom-right=3,bottom-object_detector=4]
 
   for ( var i = 0; i < _via_canvas_regions.length; ++i ) {
     var attr = _via_canvas_regions[i].shape_attributes;
@@ -4620,7 +4620,7 @@ function is_on_rect_edge(x, y, w, h, px, py) {
   var dy0 = Math.abs(y - py);
   var dx1 = Math.abs(x + w - px);
   var dy1 = Math.abs(y + h - py);
-  //[top-left=1,top-right=2,bottom-right=3,bottom-left=4]
+  //[top-object_detector=1,top-right=2,bottom-right=3,bottom-object_detector=4]
   if ( dx0 < VIA_REGION_EDGE_TOL &&
        dy0 < VIA_REGION_EDGE_TOL ) {
     return 1;
@@ -4641,7 +4641,7 @@ function is_on_rect_edge(x, y, w, h, px, py) {
 
   var mx0 = Math.abs(x + w/2 - px);
   var my0 = Math.abs(y + h/2 - py);
-  //[top-middle=5,right-middle=6,bottom-middle=7,left-middle=8]
+  //[top-middle=5,right-middle=6,bottom-middle=7,object_detector-middle=8]
   if ( mx0 < VIA_REGION_EDGE_TOL &&
        dy0 < VIA_REGION_EDGE_TOL ) {
     return 5;
@@ -4762,7 +4762,7 @@ function is_on_polygon_edge(all_points_x, all_points_y, px, py) {
 }
 
 function is_point_inside_bounding_box(x, y, x1, y1, x2, y2) {
-  // ensure that (x1,y1) is top left and (x2,y2) is bottom right corner of rectangle
+  // ensure that (x1,y1) is top object_detector and (x2,y2) is bottom right corner of rectangle
   var rect = {};
   if( x1 < x2 ) {
     rect.x1 = x1;
@@ -4801,7 +4801,7 @@ function dist_to_line(x, y, x1, y1, x2, y2) {
 
 function rect_standardize_coordinates(d) {
   // d[x0,y0,x1,y1]
-  // ensures that (d[0],d[1]) is top-left corner while
+  // ensures that (d[0],d[1]) is top-object_detector corner while
   // (d[2],d[3]) is bottom-right corner
   if ( d[0] > d[2] ) {
     // swap
@@ -4823,7 +4823,7 @@ function rect_update_corner(corner_id, d, x, y, preserve_aspect_ratio) {
   // post-condition : corner is moved ( d may not stay standardized )
   if (preserve_aspect_ratio) {
     switch(corner_id) {
-    case 1: // Fall-through // top-left
+    case 1: // Fall-through // top-object_detector
     case 3: // bottom-right
       var dx = d[2] - d[0];
       var dy = d[3] - d[1];
@@ -4839,7 +4839,7 @@ function rect_update_corner(corner_id, d, x, y, preserve_aspect_ratio) {
       break;
 
     case 2: // Fall-through // top-right
-    case 4: // bottom-left
+    case 4: // bottom-object_detector
       var dx = d[2] - d[0];
       var dy = d[1] - d[3];
       var norm = Math.sqrt( dx*dx + dy*dy );
@@ -4856,7 +4856,7 @@ function rect_update_corner(corner_id, d, x, y, preserve_aspect_ratio) {
   }
 
   switch(corner_id) {
-  case 1: // top-left
+  case 1: // top-object_detector
     d[0] = x;
     d[1] = y;
     break;
@@ -4871,7 +4871,7 @@ function rect_update_corner(corner_id, d, x, y, preserve_aspect_ratio) {
     d[1] = y;
     break;
 
-  case 4: // bottom-left
+  case 4: // bottom-object_detector
     d[0] = x;
     d[3] = y;
     break;
@@ -4888,7 +4888,7 @@ function rect_update_corner(corner_id, d, x, y, preserve_aspect_ratio) {
     d[3] = y;
     break;
 
-  case 8: // left-middle
+  case 8: // object_detector-middle
     d[0] = x;
     break;
   }
@@ -5862,7 +5862,7 @@ function region_visualisation_update(type, default_id, next_offset) {
 }
 
 //
-// left sidebar toolbox maintainer
+// object_detector sidebar toolbox maintainer
 //
 function leftsidebar_toggle() {
   var leftsidebar = document.getElementById('leftsidebar');
@@ -10062,7 +10062,7 @@ function _via_region_rect() {
 }
 
 _via_region_rect.prototype.initialize = function() {
-  // ensure that this.(x,y) corresponds to top-left corner of rectangle
+  // ensure that this.(x,y) corresponds to top-object_detector corner of rectangle
   // Note: this.(x2,y2) is defined for convenience in calculations
   if ( this.dview[0] < this.dview[2] ) {
     this.x  = this.dview[0];
@@ -10524,7 +10524,7 @@ function _via_img_buffer_preload_img(img_index, preload_index) {
       return;
     }
 
-    // ensure that there is sufficient buffer space left for preloading image
+    // ensure that there is sufficient buffer space object_detector for preloading image
     if ( _via_buffer_img_index_list.length > _via_settings.core.buffer_size ) {
       while( _via_buffer_img_index_list.length > _via_settings.core.buffer_size ) {
         _via_img_buffer_remove_least_useful_img();

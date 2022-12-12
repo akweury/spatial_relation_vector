@@ -8,9 +8,12 @@ from torch.utils.data import Dataset
 
 class SyntheticDataset(Dataset):
 
-    def __init__(self, root):
-        self.root = root
-        self.X = np.array(sorted(glob.glob(str(root / "*pth.tar"), recursive=True)))
+    def __init__(self, root, folder=None):
+
+        if folder is None:
+            raise ValueError("Please set the folder name to train/test ")
+        self.root = root / folder / "tensor"
+        self.X = np.array(sorted(glob.glob(str(self.root / "*pth.tar"), recursive=True)))
 
     def __len__(self):
         return len(self.X)
@@ -23,7 +26,7 @@ class SyntheticDataset(Dataset):
 
         mask = X["gt_tensor"][0]
         obj_ids = np.unique(mask)[1:]
-        masks = mask.numpy() == obj_ids[:,None, None]
+        masks = mask.numpy() == obj_ids[:, None, None]
         num_objs = len(obj_ids)
         boxes = []
         for i in range(num_objs):
@@ -53,4 +56,4 @@ class SyntheticDataset(Dataset):
         target["area"] = area
         target["iscrowd"] = iscrowd
 
-        return X["input_tensor"][3:]/255, target
+        return X["input_tensor"][3:] / 255, target

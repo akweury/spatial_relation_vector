@@ -6,7 +6,7 @@ The implementation about idea spatial relation vector
 
 docker build -t ml-sha/srv_docker .
 
-docker run --gpus all -it --rm ml-sha/srv_docker
+docker run --gpus all -it --rm -v /storage-01/ml-jsha:/root/spatial_relation_vector/storage-01 ml-sha/srv_docker
 
 python3 train.py
 

@@ -2,18 +2,18 @@
 from pathlib import Path
 
 root = Path(__file__).parents[1]
-dataset = root / "dataset"
-work_place_path = root / "workplace"
-output_path = root / "output"
 
+work_place_path = root / "workplace"
+
+# dataset on remote machine
+storage_01 = root / "storage-01" / "dataset"
+output_remote = root / "storage-01" / "output"
 
 # dataset on tp-machine
-left_dataset = dataset / "left"
-
+dataset = root / "dataset"
+output_local = root / "output"
 
 if __name__ == "__main__":
     print("root path: " + str(root))
     print("dataset path: " + str(dataset))
     print("work place path: " + str(work_place_path))
-    print("output path: " + str(output_path))
-    print("left_dataset: " + str(left_dataset))

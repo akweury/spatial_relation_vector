@@ -4,19 +4,20 @@ import datetime
 import torch
 from torch.utils.data import DataLoader
 
-from engine import config, pipeline, models, dataset
+from engine import config, pipeline, models, args_utils
+from engine.SyntheticDataset import SyntheticDataset
 
 # preprocessing
-batch_size = 2
-num_classes = 3
-num_epochs = 10
-print_freq = 10
-dataset_path = config.left_dataset / "train" / "tensor"
-output_folder = config.output_path
+args = args_utils.paser()
+
+dataset_path, output_path = args.io_path()
 device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
-train_dataset = dataset.SyntheticDataset(dataset_path)
-train_loader = DataLoader(train_dataset, shuffle=True, batch_size=batch_size, collate_fn=pipeline.collate_fn)
-model = models.get_model_instance_segmentation(num_classes).to(device)
+train_dataset = SyntheticDataset(dataset_path, "train")
+train_loader = DataLoader(train_dataset, shuffle=True, batch_size=args.batch_size, collate_fn=pipeline.collate_fn)
+# test_dataset = SyntheticDataset(dataset_path, "test")
+# test_loader = DataLoader(test_dataset, shuffle=True, batch_size=args.batch_size, collate_fn=pipeline.collate_fn)
+
+model = models.get_model_instance_segmentation(args.num_classes).to(device)
 
 # construct an optimizer
 params = [p for p in model.parameters() if p.requires_grad]
@@ -27,13 +28,13 @@ lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=3, gamma=0.1
 # init log manager
 log_manager = pipeline.LogManager(delimiter="  ",
                                   device=device,
-                                  num_epochs=num_epochs,
-                                  print_freq=print_freq,
+                                  num_epochs=args.num_epochs,
+                                  print_freq=args.print_freq,
                                   lr=optimizer.param_groups[0]['lr'],
-                                  batch_size=batch_size,
-                                  output_folder=output_folder)
+                                  batch_size=args.batch_size,
+                                  output_folder=output_path)
 # let's train it for some epochs
-for epoch in range(num_epochs):
+for epoch in range(args.num_epochs):
     # update the log manager for the new epoch
     log_manager.update(epoch)
     # train for one epoch, printing logs
