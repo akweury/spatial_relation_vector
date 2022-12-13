@@ -284,6 +284,7 @@ class LogManager():
         img_preds[0]["scores"] = img_preds[0]["scores"][img_preds[0]["scores"] > self.conf_threshold]
 
         img_labels = img_preds[0]["labels"].to("cpu").numpy()
+        print(f"{len(img_labels)} objects has been detected.")
         labels_with_prob = zip(img_labels, img_preds[0]["scores"].detach().to("cpu").numpy())
         img_annot_labels = []
         for label, prob in labels_with_prob:
