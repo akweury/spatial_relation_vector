@@ -276,7 +276,7 @@ class LogManager():
     def visualization(self, images, img_preds, categories):
         img_tensor_int = []
         for image in images:
-            img_tensor_int.append((image*255).to(dtype=torch.uint8))
+            img_tensor_int.append((image * 255).to(dtype=torch.uint8))
 
         img_preds[0]["boxes"] = img_preds[0]["boxes"][img_preds[0]["scores"] > self.conf_threshold]
         img_preds[0]["labels"] = img_preds[0]["labels"][img_preds[0]["scores"] > self.conf_threshold]
@@ -284,8 +284,11 @@ class LogManager():
         img_preds[0]["scores"] = img_preds[0]["scores"][img_preds[0]["scores"] > self.conf_threshold]
 
         img_labels = img_preds[0]["labels"].to("cpu").numpy()
-        img_annot_labels = [f"{categories[0][label]}: {prob:.2f}" for label, prob in
-                            zip(img_labels, img_preds[0]["scores"].detach().to("cpu").numpy())]
+        labels_with_prob = zip(img_labels, img_preds[0]["scores"].detach().to("cpu").numpy())
+        img_annot_labels = []
+        for label, prob in labels_with_prob:
+            img_annot_labels.append(f"{categories[0][label]}: {prob:.2f}")
+
         colors = [config.colors[i] for i in img_labels]
         img_output_tensor = draw_bounding_boxes(image=img_tensor_int[0],
                                                 boxes=img_preds[0]["boxes"],
