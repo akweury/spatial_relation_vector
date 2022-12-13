@@ -296,7 +296,8 @@ class LogManager():
         img_masks_float = img_preds[0]["masks"].squeeze(1)
         img_masks_float[img_masks_float < 0.8] = 0
         img_masks_bool = img_masks_float.bool()
-        img_output_tensor = draw_segmentation_masks(img_output_tensor, masks=img_masks_bool, alpha=0.8)
+        if img_masks_bool.size(0) > 0:
+            img_output_tensor = draw_segmentation_masks(img_output_tensor, masks=img_masks_bool, alpha=0.8)
         img_output = to_pil_image(img_output_tensor)
         img_output.save(str(self.output_folder / f"output_{self.epoch}_0.png"), "PNG")
 
