@@ -26,6 +26,7 @@ def load_labels(label_file):
     label_data["classes"] = {}
     for i in range(len(classes)):
         label_data["classes"][classes[i]] = i + 1
+    classes.insert(0, "background")
     return label_data, classes
 
 

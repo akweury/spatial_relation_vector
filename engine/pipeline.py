@@ -283,13 +283,12 @@ class LogManager():
         img_preds[0]["masks"] = img_preds[0]["masks"][img_preds[0]["scores"] > self.conf_threshold]
         img_preds[0]["scores"] = img_preds[0]["scores"][img_preds[0]["scores"] > self.conf_threshold]
 
-        img_labels = img_preds[0]["labels"].to("cpu").numpy()
+        img_labels = img_preds[0]["labels"].to("cpu").numpy() - 1
         print(f"{len(img_labels)} objects has been detected.")
         labels_with_prob = zip(img_labels, img_preds[0]["scores"].detach().to("cpu").numpy())
         img_annot_labels = []
         for label, prob in labels_with_prob:
-            label = label - 1
-            print(f"categories: {categories}, label: {label}")
+            print(f"categories: {categories[0]}, label: {label}, prob: {prob:.2f}")
             img_annot_labels.append(f"{categories[0][label]}: {prob:.2f}")
 
         colors = [config.colors[i] for i in img_labels]
