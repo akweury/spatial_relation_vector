@@ -285,7 +285,7 @@ class LogManager():
 
         img_labels = img_preds[0]["labels"].to("cpu").numpy()
         img_annot_labels = [f"{categories[label]}: {prob:.2f}" for label, prob in
-                            zip(img_labels, img_preds[0]["scores"].detach().numpy())]
+                            zip(img_labels, img_preds[0]["scores"].detach().to("cpu").numpy())]
         colors=config.colors[:len(categories)]
         img_output_tensor = draw_bounding_boxes(image=img_tensor_int[0],
                                                 boxes=img_preds[0]["boxes"],
