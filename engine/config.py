@@ -5,14 +5,14 @@ import torch
 root = Path(__file__).parents[1]
 
 work_place_path = root / "workplace"
+storage = root / "storage"
+# storage on remote machine
+# machinestorage_01 = root / "storage-01" / "storage"
+# output_remote = root / "storage-01" / "output"
 
-# dataset on remote machine
-storage_01 = root / "storage-01" / "dataset"
-output_remote = root / "storage-01" / "output"
-
-# dataset on tp-machine
-dataset = root / "dataset"
-output_local = root / "output"
+# storage on tp-machine
+dataset = storage / "dataset"
+output_local = storage / "output"
 
 colors = [
     "blue",
@@ -24,5 +24,5 @@ colors = [
 
 if __name__ == "__main__":
     print("root path: " + str(root))
-    print("dataset path: " + str(dataset))
+    print("storage path: " + str(dataset))
     print("work place path: " + str(work_place_path))

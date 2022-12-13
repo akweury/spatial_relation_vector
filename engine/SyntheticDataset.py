@@ -56,6 +56,4 @@ class SyntheticDataset(Dataset):
         target["area"] = area
         target["iscrowd"] = iscrowd
 
-
-
         return X["input_tensor"][3:] / 255, target, X["categories"]

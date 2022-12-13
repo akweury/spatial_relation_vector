@@ -360,7 +360,7 @@ def evaluation(model, optimizer, test_loader, log_manager):
             images = list(image.to(log_manager.device) for image in images)
             targets = [{k: v.to(log_manager.device) for k, v in t.items()} for t in targets]
             # Wait for all kernels to finish
-            torch.cuda.synchronize()
+            # torch.cuda.synchronize()
             # start count the model time
             start = time.time()
             # Forward pass
