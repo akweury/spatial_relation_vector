@@ -65,15 +65,20 @@ def print_args(args):
 def paser():
     parser = argparse.ArgumentParser()
 
-    # Mode selection
-    parser.add_argument('--machine', type=str, default="local", help='choose the training machin, local or remote')
+    # fine tune args
     parser.add_argument('--batch_size', '-b', default=2, type=int, help='Mini-batch size (default: 2)')
+    parser.add_argument('--num_epochs', default=10, type=int, help='Set number of training epochs')
+    parser.add_argument('--conf_threshold', help='The confidence threshold of bounding boxes')
+    parser.add_argument('--lr',default=0.001, type=float, help='Learning rate')
+    parser.add_argument('--momentum', default=0.9, type=float, help='Momentum')
+    parser.add_argument('--weight_decay', default=0.0005, type=float, help='Weight Decay')
+
+    # configuration args
+    parser.add_argument('--num_classes', '-nc', help='Numer of Classes')
+    parser.add_argument('--machine', type=str, default="local", help='choose the training machin, local or remote')
     parser.add_argument('--exp', '--e', help='Experiment name')
     parser.add_argument('--device', default="cpu", help='Choose device as cpu or gpu')
-    parser.add_argument('--num_epochs', default=10, type=int, help='Set number of training epochs')
-    parser.add_argument('--num_classes', '-nc', help='Numer of Classes')
     parser.add_argument('--print_freq', '-pf', help='print frequency')
-    parser.add_argument('--conf_threshold', help='The confidence threshold of bounding boxes')
     parser.add_argument('--resume', default=None, type=str, metavar='PATH',
                         help='Path to latest checkpoint (default: none)')
 
