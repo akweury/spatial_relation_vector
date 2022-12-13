@@ -288,7 +288,7 @@ class LogManager():
         labels_with_prob = zip(img_labels, img_preds[0]["scores"].detach().to("cpu").numpy())
         img_annot_labels = []
         for label, prob in labels_with_prob:
-            print(f"categories: {categories}")
+            print(f"categories: {categories}, label: {label}")
             img_annot_labels.append(f"{categories[0][label]}: {prob:.2f}")
 
         colors = [config.colors[i] for i in img_labels]
