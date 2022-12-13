@@ -9,7 +9,7 @@ docker build -t ml-sha/srv_docker .
 docker run --gpus all -it --rm -v /storage-01/ml-jsha:/root/spatial_relation_vector/storage ml-sha/srv_docker
 
 python3 create_dataset.py --clear true
-python3 train.py --exp object_detector --machine remote --device gpu
+python3 train.py --exp object_detector --machine remote --device gpu --num_epochs 100
 
 ###
 copy dataset

@@ -3,6 +3,6 @@
   "print_freq": 10,
   "num_classes": 3,
   "resume": null,
-  "conf_threshold": 0.3
+  "conf_threshold": 0.8
 }
 
