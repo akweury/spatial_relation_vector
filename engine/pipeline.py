@@ -283,7 +283,7 @@ class LogManager():
         img_preds[0]["masks"] = img_preds[0]["masks"][img_preds[0]["scores"] > self.conf_threshold]
         img_preds[0]["scores"] = img_preds[0]["scores"][img_preds[0]["scores"] > self.conf_threshold]
 
-        img_labels = img_preds[0]["labels"].numpy()
+        img_labels = img_preds[0]["labels"].numpy().cpu()
         img_annot_labels = [f"{categories[label]}: {prob:.2f}" for label, prob in
                             zip(img_labels, img_preds[0]["scores"].detach().numpy())]
         colors=config.colors[:len(categories)]
