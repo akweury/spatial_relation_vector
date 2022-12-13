@@ -18,6 +18,9 @@ class Args():
         self.batch_size = args.batch_size
         self.num_epochs = args.num_epochs
         self.conf_threshold = args.conf_threshold
+        self.lr = args.lr
+        self.momentum = args.momentum
+        self.weight_decay = args.weight_decay
         if args.device == "gpu":
             self.device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
         else:
@@ -69,7 +72,7 @@ def paser():
     parser.add_argument('--batch_size', '-b', default=2, type=int, help='Mini-batch size (default: 2)')
     parser.add_argument('--num_epochs', default=10, type=int, help='Set number of training epochs')
     parser.add_argument('--conf_threshold', help='The confidence threshold of bounding boxes')
-    parser.add_argument('--lr',default=0.001, type=float, help='Learning rate')
+    parser.add_argument('--lr', default=0.001, type=float, help='Learning rate')
     parser.add_argument('--momentum', default=0.9, type=float, help='Momentum')
     parser.add_argument('--weight_decay', default=0.0005, type=float, help='Weight Decay')
 
