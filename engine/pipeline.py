@@ -316,7 +316,7 @@ class LogManager():
         if img_masks_bool.size(0) > 0:
             img_output_tensor = draw_segmentation_masks(img_output_tensor, masks=img_masks_bool, alpha=0.8)
         img_output = to_pil_image(img_output_tensor)
-        img_output.save(str(self.args.output_folder / f"output_{self.epoch}_0.png"), "PNG")
+        img_output.save(str(self.output_folder / f"output_{self.epoch}_0.png"), "PNG")
 
 
 def train_one_epoch(model, optimizer, train_loader, log_manager):
