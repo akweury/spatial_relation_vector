@@ -1,0 +1,10 @@
+{
+  "exp": "object_detector_big",
+  "momentum": 0.9,
+  "weight_decay": 0.0005,
+  "conf_threshold": 0.2,
+  "print_freq": 10,
+  "num_classes": 3,
+  "resume": null
+}
+

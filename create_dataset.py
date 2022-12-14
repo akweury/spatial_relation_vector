@@ -73,6 +73,7 @@ def data2tensor(data_root, args):
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--clear', type=str, default="false", help='set to true to clear existed tensors')
+parser.add_argument('--dataset', type=str, help='Choose which dataset to be created.')
 args = parser.parse_args()
-dataset_path = config.dataset / "object_detector"
+dataset_path = config.dataset / args.dataset
 data2tensor(dataset_path, args)
