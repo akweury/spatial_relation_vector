@@ -403,7 +403,7 @@ def save_checkpoint(is_best, model, optimizer, log_manager):
 
     state = {'args': args,
              'epoch': log_manager.epoch,
-             'model': model,
+             'state_dict': model.state_dict(),
              'optimizer': optimizer,
              'train_losses': log_manager.train_losses[:, :log_manager.epoch],
              'eval_losses': log_manager.eval_losses[:, :log_manager.epoch]
@@ -419,22 +419,19 @@ def save_checkpoint(is_best, model, optimizer, log_manager):
     if log_manager.epoch > 0:
         os.remove(os.path.join(args.model_folder, 'checkpoint-' + str(log_manager.epoch - 1) + '.pth.tar'))
 
-def load_checkpoint(model_path, device):
-    assert os.path.isfile(model_path), f"No checkpoint found at:{model_path}"
-    checkpoint = torch.load(model_path)
-    start_epoch = checkpoint['epoch'] + 1  # resume epoch
-    model = checkpoint['model'].to(device)  # resume model
-    # if torch.cuda.device_count() > 1:
-    #     print("Let's use", torch.cuda.device_count(), "GPUs!")
-    #     model = nn.DataParallel(model)
 
+def load_checkpoint(model_path, args, model):
+    assert os.path.isfile(model_path), f"No checkpoint found at:{model_path}"
+    checkpoint = torch.load(model_path, map_location=torch.device(args.device))
+    start_epoch = checkpoint['epoch'] + 1  # resume epoch
+    model.load_state_dict(checkpoint["state_dict"])  # resume the model
     optimizer = checkpoint['optimizer']  # resume optimizer
     # self.optimizer = SGD(self.parameters, lr=self.args.lr, momentum=self.args.momentum, weight_decay=0)
     # self.args = checkpoint['args']
     parameters = filter(lambda p: p.requires_grad, model.parameters())
 
     print(f"pretrained net state_dict: \n"
-          f"{checkpoint['model'].state_dict().keys()}\n"
+          f"{model.state_dict().keys()}\n"
           f"- checkout {checkpoint['epoch']} was loaded successfully!")
 
     return model, optimizer, parameters

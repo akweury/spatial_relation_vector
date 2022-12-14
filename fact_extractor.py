@@ -16,8 +16,8 @@ train_dataset = SyntheticDataset(args.data_path, "train")
 train_loader = DataLoader(train_dataset, shuffle=True, batch_size=args.batch_size,
                           collate_fn=pipeline.collate_fn)
 
-
-model, optimizer, parameters = pipeline.load_checkpoint(config.model_ball_sphere_detector, args.device)
+model = models.get_model_instance_segmentation(args.num_classes).to(args.device)
+model, optimizer, parameters = pipeline.load_checkpoint(config.model_ball_sphere_detector, args, model)
 model.eval()
 for i, (images, _, categories) in enumerate(train_loader):
     with torch.no_grad():
