@@ -21,29 +21,23 @@ class Args():
         self.lr = args.lr
         self.momentum = args.momentum
         self.weight_decay = args.weight_decay
+        self.data_path = None
+        self.output_folder = None
+        self.io_path()
         if args.device == "gpu":
             self.device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
         else:
             self.device = "cpu"
 
     def io_path(self):
-        # if self.machine == "local":
-        data_path = config.dataset / self.exp
-        output_path = config.output_local / self.exp
+        self.data_path = config.dataset / self.exp
+        self.output_folder = config.output_local / self.exp
 
-        # elif self.machine == "remote":
-        #     data_path = config.storage_01 / self.exp
-        #     output_path = config.output_remote / self.exp
-        # else:
-        #     raise ValueError("Value of Args.machine is incorrect. Please check the arguments.")
-
-        if not os.path.exists(str(data_path)):
+        if not os.path.exists(str(self.data_path)):
             raise ValueError("Dataset Tensors are not generated yet.")
 
-        if not os.path.exists(str(output_path)):
-            os.makedirs(str(output_path))
-
-        return data_path, output_path
+        if not os.path.exists(str(self.output_folder)):
+            os.makedirs(str(self.output_folder))
 
 
 def load_args_from_file(args_file_path, given_args):

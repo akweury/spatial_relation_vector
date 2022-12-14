@@ -3,7 +3,10 @@ import sys
 from collections import defaultdict, deque
 import datetime
 import time
-
+import json
+from pathlib import Path
+import os
+import shutil
 import cv2 as cv
 import numpy as np
 import torch
@@ -222,28 +225,21 @@ def collate_fn(batch):
 
 
 class LogManager():
-    def __init__(self, delimiter="\t", device="cpu", num_epochs=10,
-                 print_freq=10, lr=None, batch_size=2, output_folder=None, conf_threshold=0.5):
+    def __init__(self, args=None):
+        self.args = args
         self.epoch = None
-        self.device = device
         self.date_start = datetime.datetime.today().date()
-        self.time_start = datetime.datetime.now().strftime("%H:%M:%S")
+        self.time_start = datetime.datetime.now().strftime("%H_%M_%S")
         self.date_now = None
         self.time_now = None
         self.best_loss = 1e+10
-        self.delimiter = delimiter
-        self.print_freq = print_freq
-        self.lr = lr
-        self.batch_size = batch_size
-        self.output_folder = output_folder
-        self.eval_losses = np.zeros((1, num_epochs))
-        self.train_losses = np.zeros((1, num_epochs))
-        self.conf_threshold = conf_threshold
+        self.eval_losses = np.zeros((1, args.num_epochs))
+        self.train_losses = np.zeros((1, args.num_epochs))
 
     def print_new_epoch(self):
         print(
             f"{self.time_now} "
-            f"Epoch [{self.epoch}] lr={self.lr} Best eval loss: {float(self.best_loss):.1e} "
+            f"Epoch [{self.epoch}] lr={self.args.lr} Best eval loss: {float(self.best_loss):.1e} "
             f"Start from {self.date_start}-{self.time_start}")
 
     def stop_training(self, loss_value, loss_dict_reduced):
@@ -258,18 +254,17 @@ class LogManager():
     def update(self, epoch):
         self.epoch = epoch
         self.date_now = datetime.datetime.today().date()
-        self.time_now = datetime.datetime.now().strftime("%H:%M:%S")
+        self.time_now = datetime.datetime.now().strftime("%H_%M_%S")
         self.print_new_epoch()
 
     def plot(self):
         # draw line chart for training
-        plot_utils.draw_line_chart(self.train_losses, self.output_folder, self.date_start, self.time_start,
-                                   log_y=True, label="train_loss", epoch=self.epoch, start_epoch=0, title="train"
-                                                                                                          "_loss",
+        plot_utils.draw_line_chart(self.train_losses, self.args.output_folder, self.date_start, self.time_start,
+                                   log_y=True, label="train_loss", epoch=self.epoch, start_epoch=0, title="train_loss",
                                    cla_leg=True)
 
         # draw line chart for evaluation
-        plot_utils.draw_line_chart(self.eval_losses, self.output_folder, self.date_start, self.time_start,
+        plot_utils.draw_line_chart(self.eval_losses, self.args.output_folder, self.date_start, self.time_start,
                                    log_y=True, label="eval_loss", epoch=self.epoch, start_epoch=0, title="eval_loss",
                                    cla_leg=True)
 
@@ -278,17 +273,17 @@ class LogManager():
         for image in images:
             img_tensor_int.append((image * 255).to(dtype=torch.uint8))
 
-        img_preds[0]["boxes"] = img_preds[0]["boxes"][img_preds[0]["scores"] > self.conf_threshold]
-        img_preds[0]["labels"] = img_preds[0]["labels"][img_preds[0]["scores"] > self.conf_threshold]
-        img_preds[0]["masks"] = img_preds[0]["masks"][img_preds[0]["scores"] > self.conf_threshold]
-        img_preds[0]["scores"] = img_preds[0]["scores"][img_preds[0]["scores"] > self.conf_threshold]
+        img_preds[0]["boxes"] = img_preds[0]["boxes"][img_preds[0]["scores"] > self.args.conf_threshold]
+        img_preds[0]["labels"] = img_preds[0]["labels"][img_preds[0]["scores"] > self.args.conf_threshold]
+        img_preds[0]["masks"] = img_preds[0]["masks"][img_preds[0]["scores"] > self.args.conf_threshold]
+        img_preds[0]["scores"] = img_preds[0]["scores"][img_preds[0]["scores"] > self.args.conf_threshold]
 
         img_labels = img_preds[0]["labels"].to("cpu").numpy()
-        print(f"{len(img_labels)} objects has been detected.")
+        # print(f"{len(img_labels)} objects has been detected.")
         labels_with_prob = zip(img_labels, img_preds[0]["scores"].detach().to("cpu").numpy())
         img_annot_labels = []
         for label, prob in labels_with_prob:
-            print(f"categories: {categories[0]}, label: {label}, prob: {prob:.2f}")
+            # print(f"categories: {categories[0]}, label: {label}, prob: {prob:.2f}")
             img_annot_labels.append(f"{categories[0][label]}: {prob:.2f}")
 
         colors = [config.colors[i] for i in img_labels]
@@ -304,11 +299,12 @@ class LogManager():
         if img_masks_bool.size(0) > 0:
             img_output_tensor = draw_segmentation_masks(img_output_tensor, masks=img_masks_bool, alpha=0.8)
         img_output = to_pil_image(img_output_tensor)
-        img_output.save(str(self.output_folder / f"output_{self.epoch}_0.png"), "PNG")
+        img_output.save(str(self.args.output_folder / f"output_{self.epoch}_0.png"), "PNG")
 
 
 def train_one_epoch(model, optimizer, train_loader, log_manager):
     loss_sum = 0.0
+    args = log_manager.args
     # training
     model.train()
     # set lr_scheduler
@@ -323,9 +319,8 @@ def train_one_epoch(model, optimizer, train_loader, log_manager):
                                                        gamma=0.1)
 
     for i, (images, targets, categories) in enumerate(train_loader):
-        # for images, targets in metric_logger.log_every(train_loader, print_freq, header):
-        images = list(image.to(log_manager.device) for image in images)
-        targets = [{k: v.to(log_manager.device) for k, v in t.items()} for t in targets]
+        images = list(image.to(args.device) for image in images)
+        targets = [{k: v.to(args.device) for k, v in t.items()} for t in targets]
 
         loss_dict = model(images, targets)
 
@@ -354,17 +349,21 @@ def train_one_epoch(model, optimizer, train_loader, log_manager):
 
     # print loss
     log_manager.train_losses[0, log_manager.epoch] = loss_sum / len(train_loader)
-    log_manager.print_loss("training", log_manager.train_losses[0, log_manager.epoch], log_manager.batch_size)
+    log_manager.print_loss("training",
+                           log_manager.train_losses[0, log_manager.epoch],
+                           args.batch_size)
 
 
 def evaluation(model, optimizer, test_loader, log_manager):
+    args = log_manager.args
+
     is_best = False
     loss_sum = 0.0
     for i, (images, targets, categories) in enumerate(test_loader):
         with torch.no_grad():
             model.train()
-            images = list(image.to(log_manager.device) for image in images)
-            targets = [{k: v.to(log_manager.device) for k, v in t.items()} for t in targets]
+            images = list(image.to(args.device) for image in images)
+            targets = [{k: v.to(args.device) for k, v in t.items()} for t in targets]
             # Wait for all kernels to finish
             # torch.cuda.synchronize()
             # start count the model time
@@ -386,7 +385,9 @@ def evaluation(model, optimizer, test_loader, log_manager):
 
     # print loss
     log_manager.eval_losses[0, log_manager.epoch] = loss_sum / len(test_loader)
-    log_manager.print_loss("eval", log_manager.eval_losses[0, log_manager.epoch], log_manager.batch_size)
+    log_manager.print_loss("eval",
+                           log_manager.eval_losses[0, log_manager.epoch],
+                           args.batch_size)
 
     # update the best loss
     if loss_value < log_manager.best_loss:
@@ -396,5 +397,44 @@ def evaluation(model, optimizer, test_loader, log_manager):
     return is_best
 
 
-def save_checkpoint(is_best, epoch):
-    return None
+def save_checkpoint(is_best, model, optimizer, log_manager):
+    args = log_manager.args
+    checkpoint_filename = os.path.join(args.output_folder, 'checkpoint-' + str(log_manager.epoch) + '.pth.tar')
+
+    state = {'args': args,
+             'epoch': log_manager.epoch,
+             'model': model,
+             'optimizer': optimizer,
+             'train_losses': log_manager.train_losses[:, :log_manager.epoch],
+             'eval_losses': log_manager.eval_losses[:, :log_manager.epoch]
+             }
+
+    torch.save(state, checkpoint_filename)
+
+    # save the model as the best model
+    if is_best:
+        best_filename = os.path.join(args.output_folder, 'model_best.pth.tar')
+        shutil.copyfile(checkpoint_filename, best_filename)
+
+    if log_manager.epoch > 0:
+        os.remove(os.path.join(args.output_folder, 'checkpoint-' + str(log_manager.epoch - 1) + '.pth.tar'))
+
+def load_checkpoint(model_path, device):
+    assert os.path.isfile(model_path), f"No checkpoint found at:{model_path}"
+    checkpoint = torch.load(model_path)
+    start_epoch = checkpoint['epoch'] + 1  # resume epoch
+    model = checkpoint['model'].to(device)  # resume model
+    # if torch.cuda.device_count() > 1:
+    #     print("Let's use", torch.cuda.device_count(), "GPUs!")
+    #     model = nn.DataParallel(model)
+
+    optimizer = checkpoint['optimizer']  # resume optimizer
+    # self.optimizer = SGD(self.parameters, lr=self.args.lr, momentum=self.args.momentum, weight_decay=0)
+    # self.args = checkpoint['args']
+    parameters = filter(lambda p: p.requires_grad, model.parameters())
+
+    print(f"pretrained net state_dict: \n"
+          f"{checkpoint['model'].state_dict().keys()}\n"
+          f"- checkout {checkpoint['epoch']} was loaded successfully!")
+
+    return model, optimizer, parameters
