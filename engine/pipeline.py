@@ -225,7 +225,7 @@ def collate_fn(batch):
 
 
 class LogManager():
-    def __init__(self, model_exp, args=None, ):
+    def __init__(self, model_exp=None, args=None, ):
         self.args = args
         self.epoch = None
         self.date_start = datetime.datetime.today().date()
@@ -303,8 +303,8 @@ class LogManager():
         labels_with_prob = zip(img_labels, img_preds[0]["scores"].detach().to("cpu").numpy())
         img_annot_labels = []
         for label, prob in labels_with_prob:
-            print(f"categories: {categories[0]}, label: {label}, prob: {prob:.2f}")
-            img_annot_labels.append(f"{categories[0][label]}: {prob:.2f}")
+            print(f"categories: {categories}, label: {label}, prob: {prob:.2f}")
+            img_annot_labels.append(f"{categories[label]}: {prob:.2f}")
 
         colors = [config.colors[i] for i in img_labels]
         img_output_tensor = draw_bounding_boxes(image=img_tensor_int[0],
@@ -401,7 +401,7 @@ def evaluation(model, optimizer, test_loader, log_manager):
             # visualize the output
             model.eval()
             prediction = model(images)
-            log_manager.visualization(images, prediction, categories)
+            log_manager.visualization(images, prediction, config.categories)
 
     # print loss
     log_manager.eval_losses[0, log_manager.epoch] = loss_sum / len(test_loader)

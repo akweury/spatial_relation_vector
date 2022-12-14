@@ -11,6 +11,7 @@ from engine import config
 class Args():
     def __init__(self, args):
         self.machine = args.machine
+        self.clear = args.clear
         self.exp = args.exp
         self.num_classes = args.num_classes
         self.print_freq = args.print_freq
@@ -26,8 +27,6 @@ class Args():
             self.device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
         else:
             self.device = "cpu"
-
-
 
 
 def load_args_from_file(args_file_path, given_args):
@@ -61,9 +60,10 @@ def paser():
     parser.add_argument('--weight_decay', default=0.0005, type=float, help='Weight Decay')
 
     # configuration args
+    parser.add_argument('--clear', type=str, default="false", help='Clear tensors in dataset folders.')
     parser.add_argument('--num_classes', '-nc', help='Numer of Classes')
     parser.add_argument('--machine', type=str, default="local", help='choose the training machin, local or remote')
-    parser.add_argument('--exp', '--e', help='Experiment name')
+    parser.add_argument('--exp', '-e', help='Experiment name')
     parser.add_argument('--device', default="cpu", help='Choose device as cpu or gpu')
     parser.add_argument('--print_freq', '-pf', help='print frequency')
     parser.add_argument('--resume', default=None, type=str, metavar='PATH',

@@ -29,10 +29,11 @@ colors = [
     "cyan"
 ]
 
+categories = ["background", "sphere", "cube"]
+
 # pre-trained model
 # model_ball_sphere_detector = models / "object_detector_big" / "model_best.pth.tar"
 model_ball_sphere_detector = models / "object_detector_big" / "checkpoint-9.pth.tar"
-
 
 if __name__ == "__main__":
     print("root path: " + str(root))
