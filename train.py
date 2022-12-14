@@ -12,7 +12,7 @@ args = args_utils.paser()
 # init log manager
 log_manager = pipeline.LogManager(args=args)
 
-train_dataset = SyntheticDataset(args.data_path, "train")
+train_dataset = SyntheticDataset(log_manager.data_path, "train")
 train_loader = DataLoader(train_dataset, shuffle=True, batch_size=args.batch_size,
                           collate_fn=pipeline.collate_fn)
 test_dataset = SyntheticDataset(args.data_path, "test")

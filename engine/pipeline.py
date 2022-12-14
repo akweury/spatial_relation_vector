@@ -235,6 +235,9 @@ class LogManager():
         self.best_loss = 1e+10
         self.eval_losses = np.zeros((1, args.num_epochs))
         self.train_losses = np.zeros((1, args.num_epochs))
+        self.data_path = None
+        self.output_folder = None
+        self.model_folder = None
         self.io_path()
 
     def io_path(self):
