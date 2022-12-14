@@ -276,12 +276,12 @@ class LogManager():
 
     def plot(self):
         # draw line chart for training
-        plot_utils.draw_line_chart(self.train_losses, self.args.output_folder, self.date_start, self.time_start,
+        plot_utils.draw_line_chart(self.train_losses, self.output_folder, self.date_start, self.time_start,
                                    log_y=True, label="train_loss", epoch=self.epoch, start_epoch=0, title="train_loss",
                                    cla_leg=True)
 
         # draw line chart for evaluation
-        plot_utils.draw_line_chart(self.eval_losses, self.args.output_folder, self.date_start, self.time_start,
+        plot_utils.draw_line_chart(self.eval_losses, self.output_folder, self.date_start, self.time_start,
                                    log_y=True, label="eval_loss", epoch=self.epoch, start_epoch=0, title="eval_loss",
                                    cla_leg=True)
 
