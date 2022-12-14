@@ -1,4 +1,5 @@
 # Created by shaji on 02.12.2022
+import os
 from pathlib import Path
 import torch
 
@@ -6,13 +7,19 @@ root = Path(__file__).parents[1]
 
 work_place_path = root / "workplace"
 storage = root / "storage"
-# storage on remote machine
-# machinestorage_01 = root / "storage-01" / "storage"
-# output_remote = root / "storage-01" / "output"
 
-# storage on tp-machine
 dataset = storage / "dataset"
-output_local = storage / "output"
+output = storage / "output"
+models = storage / "models"
+
+if not os.path.exists(str(dataset)):
+    os.makedirs(str(dataset))
+
+if not os.path.exists(str(output)):
+    os.makedirs(str(output))
+
+if not os.path.exists(str(models)):
+    os.makedirs(str(models))
 
 colors = [
     "blue",

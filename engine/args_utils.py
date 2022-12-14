@@ -23,6 +23,7 @@ class Args():
         self.weight_decay = args.weight_decay
         self.data_path = None
         self.output_folder = None
+        self.model_folder = None
         self.io_path()
         if args.device == "gpu":
             self.device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
@@ -31,13 +32,16 @@ class Args():
 
     def io_path(self):
         self.data_path = config.dataset / self.exp
-        self.output_folder = config.output_local / self.exp
+        self.output_folder = config.output / self.exp
+        self.model_folder = config.models / self.exp
 
         if not os.path.exists(str(self.data_path)):
             raise ValueError("Dataset Tensors are not generated yet.")
 
         if not os.path.exists(str(self.output_folder)):
             os.makedirs(str(self.output_folder))
+        if not os.path.exists(str(self.model_folder)):
+            os.makedirs(str(self.model_folder))
 
 
 def load_args_from_file(args_file_path, given_args):

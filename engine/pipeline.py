@@ -283,7 +283,7 @@ class LogManager():
         labels_with_prob = zip(img_labels, img_preds[0]["scores"].detach().to("cpu").numpy())
         img_annot_labels = []
         for label, prob in labels_with_prob:
-            # print(f"categories: {categories[0]}, label: {label}, prob: {prob:.2f}")
+            print(f"categories: {categories[0]}, label: {label}, prob: {prob:.2f}")
             img_annot_labels.append(f"{categories[0][label]}: {prob:.2f}")
 
         colors = [config.colors[i] for i in img_labels]
@@ -399,7 +399,7 @@ def evaluation(model, optimizer, test_loader, log_manager):
 
 def save_checkpoint(is_best, model, optimizer, log_manager):
     args = log_manager.args
-    checkpoint_filename = os.path.join(args.output_folder, 'checkpoint-' + str(log_manager.epoch) + '.pth.tar')
+    checkpoint_filename = os.path.join(args.model_folder, 'checkpoint-' + str(log_manager.epoch) + '.pth.tar')
 
     state = {'args': args,
              'epoch': log_manager.epoch,
@@ -413,11 +413,11 @@ def save_checkpoint(is_best, model, optimizer, log_manager):
 
     # save the model as the best model
     if is_best:
-        best_filename = os.path.join(args.output_folder, 'model_best.pth.tar')
+        best_filename = os.path.join(args.model_folder, 'model_best.pth.tar')
         shutil.copyfile(checkpoint_filename, best_filename)
 
     if log_manager.epoch > 0:
-        os.remove(os.path.join(args.output_folder, 'checkpoint-' + str(log_manager.epoch - 1) + '.pth.tar'))
+        os.remove(os.path.join(args.model_folder, 'checkpoint-' + str(log_manager.epoch - 1) + '.pth.tar'))
 
 def load_checkpoint(model_path, device):
     assert os.path.isfile(model_path), f"No checkpoint found at:{model_path}"
