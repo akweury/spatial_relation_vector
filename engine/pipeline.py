@@ -235,6 +235,20 @@ class LogManager():
         self.best_loss = 1e+10
         self.eval_losses = np.zeros((1, args.num_epochs))
         self.train_losses = np.zeros((1, args.num_epochs))
+        self.io_path()
+
+    def io_path(self):
+        self.data_path = config.dataset / self.args.exp
+        self.output_folder = config.output / self.args.exp
+        self.model_folder = config.models / self.args.exp
+
+        if not os.path.exists(str(self.data_path)):
+            raise ValueError("Dataset Tensors are not generated yet.")
+
+        if not os.path.exists(str(self.output_folder)):
+            os.makedirs(str(self.output_folder))
+        if not os.path.exists(str(self.model_folder)):
+            os.makedirs(str(self.model_folder))
 
     def print_new_epoch(self):
         print(
@@ -399,7 +413,7 @@ def evaluation(model, optimizer, test_loader, log_manager):
 
 def save_checkpoint(is_best, model, optimizer, log_manager):
     args = log_manager.args
-    checkpoint_filename = os.path.join(args.model_folder, 'checkpoint-' + str(log_manager.epoch) + '.pth.tar')
+    checkpoint_filename = os.path.join(log_manager.model_folder, 'checkpoint-' + str(log_manager.epoch) + '.pth.tar')
 
     state = {'args': args,
              'epoch': log_manager.epoch,
@@ -413,11 +427,11 @@ def save_checkpoint(is_best, model, optimizer, log_manager):
 
     # save the model as the best model
     if is_best:
-        best_filename = os.path.join(args.model_folder, 'model_best.pth.tar')
+        best_filename = os.path.join(log_manager.model_folder, 'model_best.pth.tar')
         shutil.copyfile(checkpoint_filename, best_filename)
 
     if log_manager.epoch > 0:
-        os.remove(os.path.join(args.model_folder, 'checkpoint-' + str(log_manager.epoch - 1) + '.pth.tar'))
+        os.remove(os.path.join(log_manager.model_folder, 'checkpoint-' + str(log_manager.epoch - 1) + '.pth.tar'))
 
 
 def load_checkpoint(model_path, args, model):
