@@ -15,7 +15,7 @@ log_manager = pipeline.LogManager(args=args)
 train_dataset = SyntheticDataset(log_manager.data_path, "train")
 train_loader = DataLoader(train_dataset, shuffle=True, batch_size=args.batch_size,
                           collate_fn=pipeline.collate_fn)
-test_dataset = SyntheticDataset(args.data_path, "test")
+test_dataset = SyntheticDataset(log_manager.data_path, "test")
 test_loader = DataLoader(test_dataset, shuffle=True, batch_size=args.batch_size,
                          collate_fn=pipeline.collate_fn)
 
