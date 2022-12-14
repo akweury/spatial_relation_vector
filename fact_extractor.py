@@ -10,9 +10,9 @@ from engine import config, pipeline, models, args_utils
 # preprocessing
 args = args_utils.paser()
 # init log manager
-log_manager = pipeline.LogManager(args=args)
+log_manager = pipeline.LogManager(model_exp="object_detector_big", args=args)
 
-train_dataset = SyntheticDataset(args.data_path, "train")
+train_dataset = SyntheticDataset(log_manager.data_path, "train")
 train_loader = DataLoader(train_dataset, shuffle=True, batch_size=args.batch_size,
                           collate_fn=pipeline.collate_fn)
 
@@ -24,6 +24,4 @@ for i, (images, _, categories) in enumerate(train_loader):
         images = list(image.to(args.device) for image in images)
         # visualize the output
         prediction = model(images)
-        log_manager.visualization(images, prediction, categories)
-
-
+        log_manager.visualization(images, prediction, categories, idx=i)

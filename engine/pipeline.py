@@ -225,7 +225,7 @@ def collate_fn(batch):
 
 
 class LogManager():
-    def __init__(self, args=None):
+    def __init__(self, model_exp, args=None, ):
         self.args = args
         self.epoch = None
         self.date_start = datetime.datetime.today().date()
@@ -238,12 +238,15 @@ class LogManager():
         self.data_path = None
         self.output_folder = None
         self.model_folder = None
-        self.io_path()
+        self.io_path(model_exp)
 
-    def io_path(self):
+    def io_path(self, model_exp=None):
         self.data_path = config.dataset / self.args.exp
         self.output_folder = config.output / self.args.exp
-        self.model_folder = config.models / self.args.exp
+        if model_exp is None:
+            self.model_folder = config.models / self.args.exp
+        else:
+            self.model_folder = config.models / model_exp
 
         if not os.path.exists(str(self.data_path)):
             raise ValueError("Dataset Tensors are not generated yet.")
@@ -285,7 +288,7 @@ class LogManager():
                                    log_y=True, label="eval_loss", epoch=self.epoch, start_epoch=0, title="eval_loss",
                                    cla_leg=True)
 
-    def visualization(self, images, img_preds, categories):
+    def visualization(self, images, img_preds, categories, idx=0):
         img_tensor_int = []
         for image in images:
             img_tensor_int.append((image * 255).to(dtype=torch.uint8))
@@ -316,7 +319,7 @@ class LogManager():
         if img_masks_bool.size(0) > 0:
             img_output_tensor = draw_segmentation_masks(img_output_tensor, masks=img_masks_bool, alpha=0.8)
         img_output = to_pil_image(img_output_tensor)
-        img_output.save(str(self.output_folder / f"output_{self.epoch}_0.png"), "PNG")
+        img_output.save(str(self.output_folder / f"output_{self.epoch}_{idx}.png"), "PNG")
 
 
 def train_one_epoch(model, optimizer, train_loader, log_manager):
