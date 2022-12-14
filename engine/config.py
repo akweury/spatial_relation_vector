@@ -29,6 +29,10 @@ colors = [
     "cyan"
 ]
 
+# pre-trained model
+model_ball_sphere_detector = models / "object_detector_big" / "model_best.pth.tar"
+
+
 if __name__ == "__main__":
     print("root path: " + str(root))
     print("storage path: " + str(dataset))

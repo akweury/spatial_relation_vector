@@ -4,7 +4,7 @@ import datetime
 import torch
 from torch.utils.data import DataLoader
 
-from engine import config, pipeline, models, args_utils
+from engine import pipeline, models, args_utils
 from engine.SyntheticDataset import SyntheticDataset
 
 # preprocessing
