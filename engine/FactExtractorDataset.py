@@ -25,4 +25,4 @@ class FactExtractorDataset(Dataset):
 
         X = torch.load(self.X[item])
 
-        return X["input_tensor"][3:]/255.0, item
+        return X["input_tensor"], X["objects"]

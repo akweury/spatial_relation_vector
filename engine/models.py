@@ -1,4 +1,6 @@
 # Created by shaji on 02.12.2022
+
+import numpy as np
 import torch
 from PIL import Image
 from torchvision.models.detection import MaskRCNN_ResNet50_FPN_Weights, maskrcnn_resnet50_fpn
@@ -7,6 +9,8 @@ from torchvision.utils import draw_bounding_boxes, draw_segmentation_masks
 from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
 from torchvision.models.detection.mask_rcnn import MaskRCNNPredictor
 
+from engine import config
+from engine.SpatialObject import generate_spatial_obj, calc_srv, spatial_obj, attrDiff
 
 
 def mask_rcnn(img_tensor_int, weights=None):
@@ -57,3 +61,92 @@ def get_model_instance_segmentation(num_classes, weights=None):
     return model
 
 
+def model_fe(predictions, images, vertices, objects, log_manager):
+    facts = []
+    for i in range(len(images)):
+        image = images[i]
+        vertex = vertices[i]
+        prediction = predictions[i]
+
+        prediction["boxes"] = prediction["boxes"][prediction["scores"] > log_manager.args.conf_threshold]
+        prediction["labels"] = prediction["labels"][prediction["scores"] > log_manager.args.conf_threshold]
+        prediction["masks"] = prediction["masks"][prediction["scores"] > log_manager.args.conf_threshold]
+        prediction["scores"] = prediction["scores"][prediction["scores"] > log_manager.args.conf_threshold]
+
+        img_labels = prediction["labels"].to("cpu").numpy()
+        categories = config.categories
+        # print(f"{len(img_labels)} objects has been detected.")
+        labels_with_prob = zip(img_labels, prediction["scores"].detach().to("cpu").numpy())
+        img_annot_labels = []
+        for label, prob in labels_with_prob:
+            print(f"categories: {categories}, label: {label}, prob: {prob:.2f}")
+            img_annot_labels.append(f"{categories[label]}: {prob:.2f}")
+
+        # create SpatialObjects to save object vectors
+        spatialObjs = []
+        for j in range(len(prediction["labels"])):
+            spatialObj = generate_spatial_obj(vertex=vertex,
+                                              boxes=prediction["boxes"][j],
+                                              labels=prediction["labels"][j],
+                                              masks=prediction["masks"][j],
+                                              scores=prediction["scores"][j],
+                                              categories=categories,
+                                              objects=objects[i][j])
+            spatialObjs.append(spatialObj)
+
+        obj_num = len(spatialObjs)
+        srvs = np.zeros(shape=(obj_num, obj_num, 6))
+        for i in range(obj_num):
+            for j in range(obj_num):
+                srv = calc_srv(spatialObjs[i], spatialObjs[j])
+                srvs[i, j, :] = srv
+
+        facts.append(srvs)
+    return facts
+
+
+def load_rules(data):
+    # create SpatialObjects to save object vectors
+    target_obj = {}
+    target_obj["position"] = np.array([data["target"]["x"], data["target"]["y"], data["target"]["z"]])
+    target_obj["size"] = 0.2
+    target_obj["shape"] = data["target"]["shape"]
+    targetSpatialObj = spatial_obj(shape=target_obj["shape"], pos=target_obj["position"], size=target_obj["size"])
+
+    ruleSpatialObjs = []
+    ruleSpatialObjs.append(spatial_obj(shape=data["Objs"][0]["shape"],
+                                       pos=np.array([data["Objs"][0]["x"],
+                                                     data["Objs"][0]["y"],
+                                                     data["Objs"][0]["z"]]),
+                                       size=0.4949747))
+    ruleSpatialObjs.append(spatial_obj(shape=data["Objs"][1]["shape"],
+                                       pos=np.array([data["Objs"][1]["x"],
+                                                     data["Objs"][1]["y"],
+                                                     data["Objs"][1]["z"]]),
+                                       size=0.35))
+
+    obj_num = len(ruleSpatialObjs)
+    srvs = np.zeros(shape=(obj_num, 6))
+    for i in range(obj_num):
+        srv = calc_srv(targetSpatialObj, ruleSpatialObjs[i])
+        srvs[i, :] = srv
+    return srvs
+
+
+def calc_rrv(facts, target_relation_vectors):
+    relative_relation_vectors = []
+    np.set_printoptions(precision=2)
+    facts = [facts[0]]
+    for relation_vectors in facts:
+        for i in range(relation_vectors.shape[0]):
+            for j in range(relation_vectors.shape[1]):
+                relation_vector = relation_vectors[i,j]
+                for target_relation_vector in target_relation_vectors:
+                    relative_relation_vector = relation_vector - target_relation_vector
+                    print(relation_vector)
+                    print(target_relation_vector)
+                    print(relative_relation_vector)
+                    print("\n")
+                    
+
+    return None

@@ -99,6 +99,7 @@ def data2tensor_fact_extractor(data_root, args):
                                         torch.tensor(data["K"]),
                                         torch.tensor(data["R"]).float(),
                                         torch.tensor(data["t"]).float())
+
             img = utils.load_32bitImage(img_files[item])
             input_data = np.c_[
                 vertex,  # 0,1,2
@@ -108,7 +109,8 @@ def data2tensor_fact_extractor(data_root, args):
             input_tensor = torch.from_numpy(input_data.astype(np.float32)).permute(2, 0, 1)
 
             # save tensors
-            training_case = {"input_tensor": input_tensor}
+            training_case = {"input_tensor": input_tensor,
+                             "objects": data["objects"]}
             torch.save(training_case, output_tensor_file)
             print(f"File {item + 1}/{len(data_files)} saved as a tensor.")
 
