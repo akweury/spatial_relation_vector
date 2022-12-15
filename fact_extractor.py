@@ -10,7 +10,9 @@ from engine import config, pipeline, models, args_utils
 import create_dataset
 from engine.models import model_fe, load_rules, calc_rrv
 
-rules_json = "D:\\UnityProjects\\hide_dataset_unity\\Assets\\Scripts\\Rules\\front.json"
+# rules_json = "D:\\UnityProjects\\hide_dataset_unity\\Assets\\Scripts\\Rules\\front.json"
+rules_json = "/Users/jing/PycharmProjects/hide_dataset_unity/Assets/Scripts/Rules/front.json"
+
 with open(rules_json) as f:
     rules_data = json.load(f)
 
