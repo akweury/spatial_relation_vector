@@ -1,6 +1,7 @@
 # Created by shaji on 02.12.2022
 
 import numpy as np
+import pandas as pd
 import torch
 from PIL import Image
 from torchvision.models.detection import MaskRCNN_ResNet50_FPN_Weights, maskrcnn_resnet50_fpn
@@ -61,7 +62,7 @@ def get_model_instance_segmentation(num_classes, weights=None):
     return model
 
 
-def model_fe(predictions, images, vertices, objects, log_manager):
+def model_fe(predictions, images, vertices, objects, log_manager, entity_num):
     facts = []
     for i in range(len(images)):
         image = images[i]
@@ -86,26 +87,29 @@ def model_fe(predictions, images, vertices, objects, log_manager):
         spatialObjs = []
         for j in range(len(prediction["labels"])):
             spatialObj = generate_spatial_obj(vertex=vertex,
-                                              boxes=prediction["boxes"][j],
-                                              labels=prediction["labels"][j],
-                                              masks=prediction["masks"][j],
-                                              scores=prediction["scores"][j],
-                                              categories=categories,
-                                              objects=objects[i][j])
+                                              img=image,
+                                              label=prediction["labels"][j],
+                                              mask=prediction["masks"][j],
+                                              categories=categories)
             spatialObjs.append(spatialObj)
 
         obj_num = len(spatialObjs)
-        srvs = np.zeros(shape=(obj_num, obj_num, 6))
-        for i in range(obj_num):
-            for j in range(obj_num):
-                srv = calc_srv(spatialObjs[i], spatialObjs[j])
-                srvs[i, j, :] = srv
 
-        facts.append(srvs)
+        image_srv = []
+        for obj_i in range(obj_num):
+            for obj_j in range(obj_num):
+                srv = calc_srv(spatialObjs[obj_j], spatialObjs[obj_j], entity_num)
+                image_srv.append(srv)
+        facts.append(image_srv)
+
+    facts = np.array(facts)
+
+    # DF = pd.DataFrame(facts)
+    # DF.to_csv("data1.csv")
     return facts
 
 
-def load_rules(data):
+def load_rules(data, entity_num):
     # create SpatialObjects to save object vectors
     target_obj = {}
     target_obj["position"] = np.array([data["target"]["x"], data["target"]["y"], data["target"]["z"]])
@@ -128,25 +132,37 @@ def load_rules(data):
     obj_num = len(ruleSpatialObjs)
     srvs = np.zeros(shape=(obj_num, 6))
     for i in range(obj_num):
-        srv = calc_srv(targetSpatialObj, ruleSpatialObjs[i])
+        srv = calc_srv(targetSpatialObj, ruleSpatialObjs[i], entity_num)
         srvs[i, :] = srv
     return srvs
 
 
-def calc_rrv(facts, target_relation_vectors):
+def calc_rrv(facts):
     relative_relation_vectors = []
     np.set_printoptions(precision=2)
     facts = [facts[0]]
     for relation_vectors in facts:
         for i in range(relation_vectors.shape[0]):
             for j in range(relation_vectors.shape[1]):
-                relation_vector = relation_vectors[i,j]
-                for target_relation_vector in target_relation_vectors:
-                    relative_relation_vector = relation_vector - target_relation_vector
-                    print(relation_vector)
-                    print(target_relation_vector)
-                    print(relative_relation_vector)
-                    print("\n")
-                    
+                relation_vector = relation_vectors[i, j]
+                print(f"relation vector: {relation_vector}")
+
+    return None
+
+# def similarity(vectorA, vectorB):
+
+
+
+def learn_common_rv(data):
+    batch, = data.shape(0)
+    rv_learned = []
+    rv_candidate = []
+    for image_idx in range(data.shape(0)):
+        for rv_idx in range(data.shape(1)):
+            if len(rv_candidate) == 0:
+                rv_candidate.append(data[image_idx, rv_idx])
+                continue
+            rv = data[image_idx, rv_idx]
+
 
     return None

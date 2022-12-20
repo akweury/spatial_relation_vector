@@ -8,10 +8,11 @@ from engine.FactExtractorDataset import FactExtractorDataset
 from engine.SpatialObject import SpatialObject
 from engine import config, pipeline, models, args_utils
 import create_dataset
-from engine.models import model_fe, load_rules, calc_rrv
+from engine.models import model_fe, load_rules, calc_rrv, learn_common_rv
 
 # rules_json = "D:\\UnityProjects\\hide_dataset_unity\\Assets\\Scripts\\Rules\\front.json"
 rules_json = "/Users/jing/PycharmProjects/hide_dataset_unity/Assets/Scripts/Rules/front.json"
+entity_num = 11
 
 with open(rules_json) as f:
     rules_data = json.load(f)
@@ -42,11 +43,7 @@ for i, (data, objects) in enumerate(train_loader):
         prediction = model_od(images)
 
         # fact extractor
-        facts = model_fe(prediction, images, vertex, objects, log_manager)
-        target_relation_vectors = load_rules(rules_data)
-
-        relative_relation_vectors = calc_rrv(facts, target_relation_vectors)
-
-
+        facts = model_fe(prediction, images, vertex, objects, log_manager, entity_num)
+        common_rv = learn_common_rv(facts)
 
         log_manager.visualization(images, prediction, categories, idx=i)
