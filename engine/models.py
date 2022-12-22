@@ -1,5 +1,5 @@
 # Created by shaji on 02.12.2022
-
+import json
 import numpy as np
 import pandas as pd
 import torch
@@ -309,14 +309,17 @@ def rule_check(property_matrices, learned_rules):
         if not is_repeat_rule:
             no_repeat_rules.append(rule)
 
-    checked_rules = []
+    satisfied_rules = []
+    unsatisfied_rules = []
     for rule in no_repeat_rules:
         premise = rule["premise"]
         conclusion = rule["conclusion"]
         if common_pair(premise, conclusion, property_matrices):
-            checked_rules.append(rule)
+            satisfied_rules.append(rule)
+        else:
+            unsatisfied_rules.append(rule)
 
-    return checked_rules
+    return satisfied_rules, unsatisfied_rules
 
 
 def rule_search(property_matrices, learned_rules):
@@ -346,3 +349,29 @@ def rule_search(property_matrices, learned_rules):
                                            "conclusion": conclusion})
 
     return common_exist_rules
+
+
+def save_rules(rules, file_name):
+    rules_json = []
+    for rule in rules:
+        rule_json = {}
+        premise_list = []
+        for property in rule["premise"]:
+            premise_list.append({
+                "name": property.name,
+                "value": property.value,
+                "commonExist": property.commonExist,
+                "parentId": property.parent
+            })
+
+        rule_json["conclusion"] = {"name": rule["conclusion"].name,
+                                   "value": rule["conclusion"].value,
+                                   "commonExist": rule["conclusion"].commonExist,
+                                   "parentId": rule["conclusion"].parent}
+        rule_json["premise"] = premise_list
+        rules_json.append(rule_json)
+
+    with open(file_name, "w") as f:
+        json.dump(rules_json, f)
+
+
