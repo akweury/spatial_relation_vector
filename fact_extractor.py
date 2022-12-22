@@ -8,11 +8,11 @@ from engine.FactExtractorDataset import FactExtractorDataset
 from engine.SpatialObject import SpatialObject
 from engine import config, pipeline, models, args_utils
 import create_dataset
-from engine.models import model_fe, load_rules, calc_rrv, learn_common_rv
+from engine.models import model_fe, rule_search, rule_check
 
-# rules_json = "D:\\UnityProjects\\hide_dataset_unity\\Assets\\Scripts\\Rules\\front.json"
-rules_json = "/Users/jing/PycharmProjects/hide_dataset_unity/Assets/Scripts/Rules/front.json"
-entity_num = 11
+rules_json = "D:\\UnityProjects\\hide_dataset_unity\\Assets\\Scripts\\Rules\\front.json"
+# rules_json = "/Users/jing/PycharmProjects/hide_dataset_unity/Assets/Scripts/Rules/front.json"
+# entity_num = 11
 
 with open(rules_json) as f:
     rules_data = json.load(f)
@@ -33,6 +33,7 @@ categories = config.categories
 model_od = models.get_model_instance_segmentation(args.num_classes).to(args.device)
 model_od, optimizer, parameters = pipeline.load_checkpoint(config.model_ball_sphere_detector, args, model_od)
 model_od.eval()
+learned_rules = []
 for i, (data, objects) in enumerate(train_loader):
     with torch.no_grad():
         # input data
@@ -43,7 +44,13 @@ for i, (data, objects) in enumerate(train_loader):
         prediction = model_od(images)
 
         # fact extractor
-        facts = model_fe(prediction, images, vertex, objects, log_manager, entity_num)
-        common_rv = learn_common_rv(facts)
+        facts = model_fe(prediction, images, vertex, objects, log_manager)
+        # common_rv = learn_common_rv(facts)
+        learned_rules = rule_check(facts, learned_rules)
+        learned_rules = rule_search(facts, learned_rules)
 
         log_manager.visualization(images, prediction, categories, idx=i)
+
+
+print(learned_rules)
+

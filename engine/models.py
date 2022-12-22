@@ -11,7 +11,7 @@ from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
 from torchvision.models.detection.mask_rcnn import MaskRCNNPredictor
 
 from engine import config
-from engine.SpatialObject import generate_spatial_obj, calc_srv, spatial_obj, attrDiff
+from engine.SpatialObject import generate_spatial_obj, calc_srv, spatial_obj, attrDiff, calc_property_matrix
 
 
 def mask_rcnn(img_tensor_int, weights=None):
@@ -62,7 +62,7 @@ def get_model_instance_segmentation(num_classes, weights=None):
     return model
 
 
-def model_fe(predictions, images, vertices, objects, log_manager, entity_num):
+def model_fe(predictions, images, vertices, objects, log_manager):
     facts = []
     for i in range(len(images)):
         image = images[i]
@@ -86,7 +86,8 @@ def model_fe(predictions, images, vertices, objects, log_manager, entity_num):
         # create SpatialObjects to save object vectors
         spatialObjs = []
         for j in range(len(prediction["labels"])):
-            spatialObj = generate_spatial_obj(vertex=vertex,
+            spatialObj = generate_spatial_obj(id=j,
+                                              vertex=vertex,
                                               img=image,
                                               label=prediction["labels"][j],
                                               mask=prediction["masks"][j],
@@ -94,13 +95,13 @@ def model_fe(predictions, images, vertices, objects, log_manager, entity_num):
             spatialObjs.append(spatialObj)
 
         obj_num = len(spatialObjs)
-
-        image_srv = []
-        for obj_i in range(obj_num):
-            for obj_j in range(obj_num):
-                srv = calc_srv(spatialObjs[obj_j], spatialObjs[obj_j], entity_num)
-                image_srv.append(srv)
-        facts.append(image_srv)
+        property_matrix = calc_property_matrix(spatialObjs, config.propertyNames)
+        # image_srv = []
+        # for obj_i in range(obj_num):
+        #     for obj_j in range(obj_num):
+        #         srv = calc_srv(spatialObjs[obj_j], spatialObjs[obj_j], entity_num)
+        #         image_srv.append(srv)
+        facts.append(property_matrix)
 
     facts = np.array(facts)
 
@@ -115,15 +116,16 @@ def load_rules(data, entity_num):
     target_obj["position"] = np.array([data["target"]["x"], data["target"]["y"], data["target"]["z"]])
     target_obj["size"] = 0.2
     target_obj["shape"] = data["target"]["shape"]
-    targetSpatialObj = spatial_obj(shape=target_obj["shape"], pos=target_obj["position"], size=target_obj["size"])
+    targetSpatialObj = spatial_obj(id=target_obj["id"], shape=target_obj["shape"], pos=target_obj["position"],
+                                   size=target_obj["size"])
 
     ruleSpatialObjs = []
-    ruleSpatialObjs.append(spatial_obj(shape=data["Objs"][0]["shape"],
+    ruleSpatialObjs.append(spatial_obj(id=target_obj["id"], shape=data["Objs"][0]["shape"],
                                        pos=np.array([data["Objs"][0]["x"],
                                                      data["Objs"][0]["y"],
                                                      data["Objs"][0]["z"]]),
                                        size=0.4949747))
-    ruleSpatialObjs.append(spatial_obj(shape=data["Objs"][1]["shape"],
+    ruleSpatialObjs.append(spatial_obj(id=target_obj["id"], shape=data["Objs"][1]["shape"],
                                        pos=np.array([data["Objs"][1]["x"],
                                                      data["Objs"][1]["y"],
                                                      data["Objs"][1]["z"]]),
@@ -149,9 +151,6 @@ def calc_rrv(facts):
 
     return None
 
-# def similarity(vectorA, vectorB):
-
-
 
 def learn_common_rv(data):
     batch, = data.shape(0)
@@ -164,5 +163,186 @@ def learn_common_rv(data):
                 continue
             rv = data[image_idx, rv_idx]
 
-
     return None
+
+
+def common_exist(property, property_matrices):
+    for property_matrix in property_matrices:
+        exist = False
+        for obj in property_matrix:
+            for obj_property in obj:
+                if obj_property["value"] == property["value"]:
+                    exist = True
+        if not exist:
+            return False
+    return True
+
+
+# def isSubList(sub_list, full_list):
+#     list_a = []
+#     list_b = []
+#     for element in sub_list:
+#         new_element = {"value": element["value"],
+#                        "propertyType": element["propertyType"],
+#                        }
+#         list_a.append(new_element)
+#     for element in full_list:
+#         new_element = {"value": element["value"],
+#                        "propertyType": element["propertyType"],
+#                        }
+#         list_b.append(new_element)
+#
+#     res = False
+#     for idx in range(len(list_b) - len(list_a) + 1):
+#         if list_b[idx: idx + len(list_a)] == list_a:
+#             res = True
+#             break
+#     return res
+
+
+def isSubList(sub_list, full_list):
+    list_a = sub_list
+    list_b = list(full_list)
+
+    res = False
+    for idx in range(len(list_b) - len(list_a) + 1):
+        if list_b[idx: idx + len(list_a)] == list_a:
+            res = True
+            break
+    return res
+
+
+def common_exist_check(subset, property_matrices):
+    if len(subset) == 0:
+        return False
+    property_matrix = property_matrices[0]
+    common_matrix = []
+    for obj in property_matrix:
+        candidate_obj = []
+        for property in obj:
+            if property in subset:
+                candidate_obj.append(property)
+        if len(candidate_obj) > 0:
+            common_matrix.append(candidate_obj)
+
+    obj_available = np.ones(shape=property_matrices.shape[:2])
+    for i in range(1, len(property_matrices)):
+        property_matrix = property_matrices[i]
+        for candidate_obj in common_matrix:
+            exist = False
+            for j in range(property_matrix.shape[0]):
+                if obj_available[i, j] == 1:
+                    if isSubList(candidate_obj, property_matrix[j]):
+                        exist = True
+                        obj_available[i, j] = 0
+                        break
+                        # property_matrix.remove(property_matrix[j])  # each object can only be matched once
+            if not exist:
+                return False
+    return True
+
+
+def calc_subset(full_set):
+    full_set = list(full_set)
+    # lists = [[]]  # empty set has been included
+    lists = []  # no empty set has been included
+    for i in range(len(full_set) + 1):
+        for j in range(i):
+            subset = full_set[j:i]
+            if subset not in lists:
+                lists.append(subset)
+    return lists
+
+
+def rule_exist_search(property_matrices, learned_rules):
+    common_exist_set = []
+    common_for_all_set = []
+    common_exist_rules = learned_rules
+    common_for_all_rules = []
+    image_num = len(property_matrices)
+    property_num = len(property_matrices[0][0])
+    for property_matrix in property_matrices:
+        obj_num = len(property_matrix)
+        for obj in property_matrix:
+            for property in obj:
+                if common_exist(property, property_matrices):
+                    property["commonExist"] = True
+                    common_exist_set.append(property)
+        sub_common_sets = calc_subset(common_exist_set)
+
+        for subset in sub_common_sets:
+            if common_exist_check(subset, property_matrices):
+                if subset not in common_exist_rules:
+                    common_exist_rules.append(subset)
+
+    return common_exist_rules
+
+
+def common_pair(premise, conclusion, property_matrices):
+    for property_matrix in property_matrices:
+        rule_exist = False
+        is_common_obj = False
+        for obj in property_matrix:
+            if isSubList(premise, obj[:-1]):
+                if conclusion == obj[-1]:
+                    rule_exist = True
+                    is_common_obj = True
+                    break
+                else:
+                    return False
+    return True
+
+
+def rule_check(property_matrices, learned_rules):
+    # delete repeated rules
+    no_repeat_rules = []
+    for rule in learned_rules:
+        premise = rule["premise"]
+        conclusion = rule["conclusion"]
+        is_repeat_rule = False
+        for no_repeat_rule in no_repeat_rules:
+            premise_no_repeat = no_repeat_rule["premise"]
+            conclusion_no_repeat = no_repeat_rule["conclusion"]
+            if premise == premise_no_repeat and conclusion == conclusion_no_repeat:
+                is_repeat_rule = True
+                break
+        if not is_repeat_rule:
+            no_repeat_rules.append(rule)
+
+    checked_rules = []
+    for rule in no_repeat_rules:
+        premise = rule["premise"]
+        conclusion = rule["conclusion"]
+        if common_pair(premise, conclusion, property_matrices):
+            checked_rules.append(rule)
+
+    return checked_rules
+
+
+def rule_search(property_matrices, learned_rules):
+    common_exist_set = []
+    common_for_all_set = []
+    common_exist_rules = learned_rules
+    common_for_all_rules = []
+    image_num = len(property_matrices)
+    property_num = len(property_matrices[0][0])
+
+    premise_conclusion_pairs = []
+    for property_matrix in property_matrices:
+        obj_num = len(property_matrix)
+        for obj in property_matrix:
+            premise = calc_subset(obj[:-1])
+            conclusion = obj[-1]
+            premise_conclusion_pairs.append({"premise": premise,
+                                             "conclusion": conclusion})
+
+    for premise_conclusion_pair in premise_conclusion_pairs:
+        premises = premise_conclusion_pair["premise"]
+        conclusion = premise_conclusion_pair["conclusion"]
+
+        for premise in premises:
+            if common_pair(premise, conclusion, property_matrices):
+                common_exist_rules.append({"premise": premise,
+                                           "conclusion": conclusion})
+
+    return common_exist_rules
