@@ -10,8 +10,8 @@ from engine import config, pipeline, models, args_utils
 import create_dataset
 from engine.models import model_fe, rule_search, rule_check, save_rules
 
-rules_json = "D:\\UnityProjects\\hide_dataset_unity\\Assets\\Scripts\\Rules\\front.json"
-# rules_json = "/Users/jing/PycharmProjects/hide_dataset_unity/Assets/Scripts/Rules/front.json"
+# rules_json = "D:\\UnityProjects\\hide_dataset_unity\\Assets\\Scripts\\Rules\\front.json"
+rules_json = "/Users/jing/PycharmProjects/hide_dataset_unity/Assets/Scripts/Rules/front.json"
 # entity_num = 11
 
 with open(rules_json) as f:

@@ -1,7 +1,6 @@
 # Created by shaji on 02.12.2022
 import json
 import numpy as np
-import pandas as pd
 import torch
 from PIL import Image
 from torchvision.models.detection import MaskRCNN_ResNet50_FPN_Weights, maskrcnn_resnet50_fpn
