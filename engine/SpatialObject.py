@@ -103,8 +103,8 @@ def property_mapping(propertyValues, propertyType):
         # normalize
         x_range = position_matrix[:, 0].max() - position_matrix[:, 0].min()
         z_range = position_matrix[:, 2].max() - position_matrix[:, 2].min()
-        pos_x = position_matrix[:, 0] / x_range
-        pos_z = position_matrix[:, 2] / z_range
+        pos_x = position_matrix[:, 0] / (x_range + 1e-10)
+        pos_z = position_matrix[:, 2] / (z_range + 1e-10)
         for i in range(position_matrix.shape[0]):
             z_diff = (pos_z[i] - 0.5)
             x_diff = (pos_x[i] - 0.5)

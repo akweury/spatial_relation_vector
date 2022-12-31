@@ -52,7 +52,7 @@ for i, (data, objects) in enumerate(train_loader):
         # common_rv = learn_common_rv(facts)
         # learned_rules, _ = rule_check(facts, learned_rules)
         learned_rules = rule_search(facts, learned_rules)
-
+        save_rules(learned_rules, log_manager.output_folder / f"learned_rules_{i}.json")
         log_manager.visualization(images, prediction, categories, idx=i)
 
 print(learned_rules)
