@@ -344,7 +344,7 @@ def rule_search(property_matrices, learned_rules):
 
         for premise in premises:
             if common_pair(premise, conclusion, property_matrices):
-                new_rule = {"premise": premise, "conclusion": conclusion, "freq": 0}
+                new_rule = {"premise": premise, "conclusion": conclusion, "freq": 1}
                 is_new_rule = True
                 for each_rule in common_exist_rules:
                     if each_rule["premise"] == new_rule["premise"] and each_rule["conclusion"] == new_rule[
@@ -376,6 +376,7 @@ def save_rules(rules, file_name):
                                    "commonExist": rule["conclusion"].commonExist,
                                    "parentId": rule["conclusion"].parent}
         rule_json["premise"] = premise_list
+        rule_json["freq"] = rule['freq']
         rules_json.append(rule_json)
 
     with open(file_name, "w") as f:

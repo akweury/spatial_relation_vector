@@ -35,7 +35,7 @@ categories = ["background", "sphere", "cube"]
 # model_ball_sphere_detector = models / "object_detector_big" / "model_best.pth.tar"
 model_ball_sphere_detector = models / "object_detector_big" / "checkpoint-9.pth.tar"
 
-propertyNames = ["shape", "size", "color", "position"]
+propertyNames = ["shape", "size", "color", "pos_x", "pos_y", "pos_z"]
 
 if __name__ == "__main__":
     print("root path: " + str(root))

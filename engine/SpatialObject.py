@@ -20,7 +20,9 @@ class SpatialObject():
         self.id = id
         self.color = color
         self.shape = shape
-        self.position = pos
+        self.pos_x = pos
+        self.pos_y = pos
+        self.pos_z = pos
         self.size = size
         self.material = material
 
@@ -96,7 +98,7 @@ def property_mapping(propertyValues, propertyType):
             approx_color = rgb[np.argmax(propertyValue)]
             mapped_properties.append(approx_color)
         return mapped_properties
-    if propertyType == "position":
+    if propertyType == "pos_x":
 
         position_matrix = np.array(propertyValues)
         position_matrix[:, -1] = np.abs(position_matrix[:, -1])
@@ -106,19 +108,39 @@ def property_mapping(propertyValues, propertyType):
         pos_x = position_matrix[:, 0] / (x_range + 1e-10)
         pos_z = position_matrix[:, 2] / (z_range + 1e-10)
         for i in range(position_matrix.shape[0]):
-            z_diff = (pos_z[i] - 0.5)
             x_diff = (pos_x[i] - 0.5)
-            if z_diff > x_diff:
-                if z_diff > np.abs(x_diff):
-                    mapped_properties.append("behind")
-                else:
-                    mapped_properties.append("left")
+            if x_diff < 0:
+                mapped_properties.append("left")
             else:
-                if np.abs(z_diff) > x_diff:
-                    mapped_properties.append("front")
-                else:
-                    mapped_properties.append("right")
+                mapped_properties.append("right")
         return mapped_properties
+    if propertyType == "pos_y":
+        position_matrix = np.array(propertyValues)
+        position_matrix[:, -1] = np.abs(position_matrix[:, -1])
+        # normalize
+        y_range = position_matrix[:, 1].max() - position_matrix[:, 1].min()
+        pos_y = position_matrix[:, 1] / (y_range + 1e-10)
+        for i in range(position_matrix.shape[0]):
+            y_diff = (pos_y[i] - 0.5)
+            if y_diff < 0:
+                mapped_properties.append("low")
+            else:
+                mapped_properties.append("high")
+        return mapped_properties
+    if propertyType == "pos_z":
+        position_matrix = np.array(propertyValues)
+        position_matrix[:, -1] = np.abs(position_matrix[:, -1])
+        # normalize
+        z_range = position_matrix[:, 2].max() - position_matrix[:, 2].min()
+        pos_z = position_matrix[:, 2] / (z_range + 1e-10)
+        for i in range(position_matrix.shape[0]):
+            z_diff = (pos_z[i] - 0.5)
+            if z_diff < 0:
+                mapped_properties.append("front")
+            else:
+                mapped_properties.append("behind")
+        return mapped_properties
+
     if propertyType == "size":
         size_matrix = np.array(propertyValues)
         volumns = size_matrix.prod(axis=1)
@@ -132,12 +154,15 @@ def property_mapping(propertyValues, propertyType):
 
 
 def calc_property_matrix(objs, propertyNames):
+    # discrete property values
     property_mapped_values_matrix = []
     for propertyType in propertyNames:
         property_values = []
         for obj in objs:
             property_values.append(obj.__dict__[propertyType])
         property_mapped_values_matrix.append(property_mapping(property_values, propertyType))
+
+    # calculate property matrix
     property_matrix = []
     for i in range(len(objs)):
         obj_vector = []
