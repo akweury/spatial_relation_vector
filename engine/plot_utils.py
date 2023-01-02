@@ -13,7 +13,9 @@ import torch
 from torch import nn
 from torch.optim import SGD, Adam, lr_scheduler
 from torch.utils.data import DataLoader
-
+from PIL import Image
+from PIL import ImageFont
+from PIL import ImageDraw
 
 def draw_line_chart(data_1, path, date_now, time_now,
                     title=None, x_label=None, y_label=None, show=False, log_y=False,
@@ -119,5 +121,7 @@ def visual_img(img, name, upper_right=None, font_scale=0.8):
     return img
 
 
-def addTextPIL(img, text):
+def addTextPIL(img, text, pos):
+    draw = ImageDraw.Draw(img)
+    draw.text(pos , text, (255, 255, 255))
     return img

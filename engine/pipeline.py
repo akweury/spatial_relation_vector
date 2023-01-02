@@ -323,8 +323,12 @@ class LogManager():
             img_output_tensor = draw_segmentation_masks(img_output_tensor, masks=img_masks_bool, alpha=0.2)
         img_output = to_pil_image(img_output_tensor)
 
-        draw = ImageDraw.Draw(img_output)
-        draw.text((50, 90), "hello world", (255, 255, 255))
+
+        # print rules on the image
+        if satisfied_rules is not None:
+            plot_utils.addTextPIL(img_output,satisfied_rules, (50, 90))
+
+
         img_output.save(str(self.output_folder / f"output_{self.epoch}_{idx}.png"), "PNG")
         if show:
             img_output.show()
