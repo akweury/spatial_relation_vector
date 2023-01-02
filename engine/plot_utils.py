@@ -17,6 +17,7 @@ from PIL import Image
 from PIL import ImageFont
 from PIL import ImageDraw
 
+
 def draw_line_chart(data_1, path, date_now, time_now,
                     title=None, x_label=None, y_label=None, show=False, log_y=False,
                     label=None, epoch=None, cla_leg=False, start_epoch=0, loss_type="mse"):
@@ -121,7 +122,25 @@ def visual_img(img, name, upper_right=None, font_scale=0.8):
     return img
 
 
-def addTextPIL(img, text, pos):
+def addTextPIL(img, text, pos, color=(255, 255, 255)):
     draw = ImageDraw.Draw(img)
-    draw.text(pos , text, (255, 255, 255))
-    return img
+    x_pos, y_pos = pos
+    draw.text(pos, text, color)
+    y_pos += 10
+    return img, y_pos
+
+
+def addRulePIL(img, rule, pos):
+    draw = ImageDraw.Draw(img)
+    ref_text = ""
+    for property in rule["premise"]["ref"]:
+        ref_text += property.value + " "
+    obj_text = ""
+    for property in rule["premise"]["obj"]:
+        obj_text += property.value + " "
+    ruleText = f'obj1: {ref_text}, obj2: {obj_text}, conclusion:{rule["conclusion"]}, freq:{rule["freq"]}'
+
+    draw.text(pos, ruleText, (255, 255, 255))
+    x_pos, y_pos = pos
+    y_pos += 10
+    return img, y_pos

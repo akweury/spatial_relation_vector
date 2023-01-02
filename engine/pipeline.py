@@ -323,13 +323,20 @@ class LogManager():
             img_output_tensor = draw_segmentation_masks(img_output_tensor, masks=img_masks_bool, alpha=0.2)
         img_output = to_pil_image(img_output_tensor)
 
-
         # print rules on the image
+        text_y_pos = 10
+        img_output, text_y_pos = plot_utils.addTextPIL(img_output, "satisfied_rules", (10, text_y_pos), color=(255, 0, 0))
         if satisfied_rules is not None:
-            plot_utils.addTextPIL(img_output,satisfied_rules, (50, 90))
+            for ruleIdx in range(len(satisfied_rules)):
+                img_output = plot_utils.addRulePIL(img_output, satisfied_rules[ruleIdx], (10, text_y_pos))
+        img_output, text_y_pos = plot_utils.addTextPIL(img_output, "unsatisfied_rules", (10, text_y_pos), color=(255, 0, 0))
+        if unsatisfied_rules is not None:
+            for ruleIdx in range(len(unsatisfied_rules)):
+                img_output, text_y_pos = plot_utils.addRulePIL(img_output, unsatisfied_rules[ruleIdx], (10, text_y_pos))
 
 
         img_output.save(str(self.output_folder / f"output_{self.epoch}_{idx}.png"), "PNG")
+
         if show:
             img_output.show()
 
