@@ -15,7 +15,7 @@ from torch.optim import SGD, Adam, lr_scheduler
 from torch.utils.data import DataLoader
 
 
-def draw_line_chart(data_1, path,date_now, time_now,
+def draw_line_chart(data_1, path, date_now, time_now,
                     title=None, x_label=None, y_label=None, show=False, log_y=False,
                     label=None, epoch=None, cla_leg=False, start_epoch=0, loss_type="mse"):
     if data_1.shape[1] <= 1:
@@ -88,6 +88,7 @@ def image_resize(image, width=None, height=None, inter=cv.INTER_AREA):
     # return the resized image
     return resized
 
+
 def addText(img, text, pos='upper_left', font_size=1.6, color=(255, 255, 255), thickness=1):
     h, w = img.shape[:2]
     if pos == 'upper_left':
@@ -105,6 +106,7 @@ def addText(img, text, pos='upper_left', font_size=1.6, color=(255, 255, 255), t
                fontFace=cv.FONT_HERSHEY_SIMPLEX, fontScale=font_size, color=color,
                thickness=thickness, lineType=cv.LINE_AA)
 
+
 def visual_img(img, name, upper_right=None, font_scale=0.8):
     img = image_resize(img, width=512, height=512)
     img = cv.normalize(img, None, 0, 255, cv.NORM_MINMAX, dtype=cv.CV_8U)
@@ -114,4 +116,8 @@ def visual_img(img, name, upper_right=None, font_scale=0.8):
     addText(img, f"{name}", font_size=font_scale)
     if upper_right is not None:
         addText(img, f"{upper_right}", pos="upper_right", font_size=0.65)
+    return img
+
+
+def addTextPIL(img, text):
     return img

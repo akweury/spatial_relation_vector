@@ -73,4 +73,6 @@ for i, (data, objects) in enumerate(test_loader):
         satisfied_rules, unsatisfied_rules = rule_check(facts, learned_rules)
         save_rules(satisfied_rules, log_manager.output_folder / "satisfied_rules.json")
         save_rules(unsatisfied_rules, log_manager.output_folder / "unsatisfied_rules.json")
-        log_manager.visualization(images, prediction, categories, idx=i, show=True)
+        log_manager.visualization(images, prediction, categories,satisfied_rules=satisfied_rules, unsatisfied_rules=unsatisfied_rules, idx=i, show=True)
+        if len(unsatisfied_rules) > 0:
+            print("break")

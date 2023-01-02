@@ -20,6 +20,7 @@ class SpatialObject():
         self.id = id
         self.color = color
         self.shape = shape
+        self.pos = pos
         self.pos_x = pos
         self.pos_y = pos
         self.pos_z = pos
@@ -30,7 +31,6 @@ class SpatialObject():
         print(f"color:{self.color}\n"
               f"color :{self.color}\n"
               f"shape :{self.shape}\n"
-              f"pos :{self.position}\n"
               f"size :{self.size}\n"
               f"material :{self.material}\n")
 
@@ -87,92 +87,76 @@ def calc_srv(objA, objB, entity_num):
 
     return srv
 
+def size_mapping(ref_size_vec, size_vec):
+    volumn_ref = ref_size_vec.prod(axis=0)
+    volumn = size_vec.prod(axis=0)
+
+    if volumn_ref>volumn:
+        return "big"
+    else:
+        return "small"
+
+def dir_mapping(ref_pos_vec, pos_vec):
+    dir_vec = ref_pos_vec-pos_vec
+    # if np.argmax(dir_vec) == 0:
+    if dir_vec[0] < 0:
+        return "left"
+    else:
+        return "right"
+    # if np.argmax(dir_vec) == 1:
+    #     if dir_vec[1] < 0:
+    #         return "below"
+    #     else:
+    #         return "above"
+    # if np.argmax(dir_vec) == 2:
+    #     if dir_vec[2] < 0:
+    #         return "front"
+    #     else:
+    #         return "behind"
+
 
 def property_mapping(propertyValues, propertyType):
     mapped_properties = []
     if propertyType == "shape":
         return propertyValues
-    if propertyType == "color":
-        for propertyValue in propertyValues:
-            rgb = ["red", "green", "blue"]
-            approx_color = rgb[np.argmax(propertyValue)]
-            mapped_properties.append(approx_color)
-        return mapped_properties
-    if propertyType == "pos_x":
-
-        position_matrix = np.array(propertyValues)
-        position_matrix[:, -1] = np.abs(position_matrix[:, -1])
-        # normalize
-        x_range = position_matrix[:, 0].max() - position_matrix[:, 0].min()
-        z_range = position_matrix[:, 2].max() - position_matrix[:, 2].min()
-        pos_x = position_matrix[:, 0] / (x_range + 1e-10)
-        pos_z = position_matrix[:, 2] / (z_range + 1e-10)
-        for i in range(position_matrix.shape[0]):
-            x_diff = (pos_x[i] - 0.5)
-            if x_diff < 0:
-                mapped_properties.append("left")
-            else:
-                mapped_properties.append("right")
-        return mapped_properties
-    if propertyType == "pos_y":
-        position_matrix = np.array(propertyValues)
-        position_matrix[:, -1] = np.abs(position_matrix[:, -1])
-        # normalize
-        y_range = position_matrix[:, 1].max() - position_matrix[:, 1].min()
-        pos_y = position_matrix[:, 1] / (y_range + 1e-10)
-        for i in range(position_matrix.shape[0]):
-            y_diff = (pos_y[i] - 0.5)
-            if y_diff < 0:
-                mapped_properties.append("low")
-            else:
-                mapped_properties.append("high")
-        return mapped_properties
-    if propertyType == "pos_z":
-        position_matrix = np.array(propertyValues)
-        position_matrix[:, -1] = np.abs(position_matrix[:, -1])
-        # normalize
-        z_range = position_matrix[:, 2].max() - position_matrix[:, 2].min()
-        pos_z = position_matrix[:, 2] / (z_range + 1e-10)
-        for i in range(position_matrix.shape[0]):
-            z_diff = (pos_z[i] - 0.5)
-            if z_diff < 0:
-                mapped_properties.append("front")
-            else:
-                mapped_properties.append("behind")
-        return mapped_properties
-
-    if propertyType == "size":
-        size_matrix = np.array(propertyValues)
-        volumns = size_matrix.prod(axis=1)
-        median_volumn = np.median(volumns)
-        for volumn in volumns:
-            if volumn > median_volumn:
-                mapped_properties.append("big")
-            else:
-                mapped_properties.append("small")
-        return mapped_properties
+    # if propertyType == "color":
+    #     rgb = ["red", "green", "blue"]
+    #     approx_color = rgb[np.argmax(propertyValues)]
+    #     return approx_color
 
 
 def calc_property_matrix(objs, propertyNames):
+    obj_relation_matrix = []
     # discrete property values
-    property_mapped_values_matrix = []
-    for propertyType in propertyNames:
-        property_values = []
-        for obj in objs:
-            property_values.append(obj.__dict__[propertyType])
-        property_mapped_values_matrix.append(property_mapping(property_values, propertyType))
-
-    # calculate property matrix
-    property_matrix = []
-    for i in range(len(objs)):
-        obj_vector = []
+    for obj_ref in objs:
+        # ref obj
+        ref_obj_mapping = []
+        for propertyType in propertyNames:
+            mapped_property = property_mapping(obj_ref.__dict__[propertyType], propertyType)
+            ref_obj_mapping.append(mapped_property)
+        ref_obj_vector = []
         for j in range(len(propertyNames)):
-            propertyObj = Property(property_mapped_values_matrix[j][i], propertyNames[j], objs[i].id)
-            # propertyObj = {"value": property_mapped_values_matrix[j][i],
-            #                "propertyType": propertyNames[j],
-            #                # "parentId": objs[i].id,
-            #                "commonExist": False}
+            propertyObj = Property(ref_obj_mapping[j], propertyNames[j], obj_ref.id)
+            ref_obj_vector.append(propertyObj)
 
-            obj_vector.append(propertyObj)
-        property_matrix.append(obj_vector)
-    return property_matrix
+        for obj in objs:
+            if obj != obj_ref:
+                # relationship
+                ref_dir = dir_mapping(obj_ref.pos, obj.pos)
+                ref_size = size_mapping(obj_ref.size,obj.size)
+                # obj vector
+                obj_mapping = []
+                for propertyType in propertyNames:
+                    mapped_property = property_mapping(obj.__dict__[propertyType], propertyType)
+                    obj_mapping.append(mapped_property)
+                obj_vector = []
+                for j in range(len(propertyNames)):
+                    propertyObj = Property(obj_mapping[j], propertyNames[j], obj.id)
+                    obj_vector.append(propertyObj)
+                obj_relation_matrix.append({
+                    "ref_obj": ref_obj_vector,
+                    "ref_dir": ref_dir,
+                    "ref_size": ref_size,
+                    "obj": obj_vector,
+                })
+    return obj_relation_matrix

@@ -13,7 +13,9 @@ import torch
 import torch.distributed as dist
 from torchvision.utils import draw_bounding_boxes, draw_segmentation_masks
 from torchvision.transforms.functional import pil_to_tensor, to_pil_image
-
+from PIL import Image
+from PIL import ImageFont
+from PIL import ImageDraw
 from engine import plot_utils, config
 
 
@@ -288,7 +290,8 @@ class LogManager():
                                    log_y=True, label="eval_loss", epoch=self.epoch, start_epoch=0, title="eval_loss",
                                    cla_leg=True)
 
-    def visualization(self, images, img_preds, categories, idx=0, show=False):
+    def visualization(self, images, img_preds, categories, satisfied_rules=None, unsatisfied_rules=None, idx=0,
+                      show=False):
         img_tensor_int = []
         for image in images:
             img_tensor_int.append((image * 255).to(dtype=torch.uint8))
@@ -317,12 +320,14 @@ class LogManager():
         img_masks_float[img_masks_float < 0.8] = 0
         img_masks_bool = img_masks_float.bool()
         if img_masks_bool.size(0) > 0:
-            img_output_tensor = draw_segmentation_masks(img_output_tensor, masks=img_masks_bool, alpha=0.8)
+            img_output_tensor = draw_segmentation_masks(img_output_tensor, masks=img_masks_bool, alpha=0.2)
         img_output = to_pil_image(img_output_tensor)
+
+        draw = ImageDraw.Draw(img_output)
+        draw.text((50, 90), "hello world", (255, 255, 255))
         img_output.save(str(self.output_folder / f"output_{self.epoch}_{idx}.png"), "PNG")
         if show:
             img_output.show()
-
 
 
 def train_one_epoch(model, optimizer, train_loader, log_manager):

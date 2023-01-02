@@ -103,9 +103,6 @@ def model_fe(predictions, images, vertices, objects, log_manager):
         facts.append(property_matrix)
 
     facts = np.array(facts)
-
-    # DF = pd.DataFrame(facts)
-    # DF.to_csv("data1.csv")
     return facts
 
 
@@ -241,6 +238,17 @@ def common_exist_check(subset, property_matrices):
     return True
 
 
+def calc_subset_2objs(ref_obj, obj):
+    lists = []
+    ref_obj_subset = calc_subset(ref_obj)
+    obj_subset = calc_subset(obj)
+    for ref_obj_property in ref_obj_subset:
+        for obj_property in obj_subset:
+            lists.append({"ref": ref_obj_property, "obj": obj_property})
+
+    return lists
+
+
 def calc_subset(full_set):
     full_set = list(full_set)
     # lists = [[]]  # empty set has been included
@@ -277,18 +285,29 @@ def rule_exist_search(property_matrices, learned_rules):
     return common_exist_rules
 
 
+def isSubObj(subObj, obj):
+    for property_sub in subObj:
+        exist = False
+        for property_main in obj:
+            if property_main == property_sub:
+                exist = True
+        if not exist:
+            return False
+
+    return True
 def common_pair(premise, conclusion, property_matrices):
     for property_matrix in property_matrices:
-        rule_exist = False
-        is_common_obj = False
         for obj in property_matrix:
-            if isSubList(premise, obj[:-1]):
-                if conclusion == obj[-1]:
-                    rule_exist = True
-                    is_common_obj = True
+            if isSubObj(premise["ref"], obj["ref_obj"] ) and isSubObj(premise["obj"], obj["obj"]):
+                if len(conclusion) == 2:
+                    if conclusion["dir"] == obj["ref_dir"] and conclusion["size"] == obj["ref_size"]:
+                        break
+                elif conclusion == obj["ref_dir"] or conclusion == obj["ref_size"]:
                     break
                 else:
                     return False
+            else:
+                return False
     return True
 
 
@@ -327,55 +346,58 @@ def rule_search(property_matrices, learned_rules):
     common_exist_rules = learned_rules
     common_for_all_rules = []
     image_num = len(property_matrices)
-    property_num = len(property_matrices[0][0])
+    property_num = len(property_matrices[0])
 
     premise_conclusion_pairs = []
     for property_matrix in property_matrices:
         obj_num = len(property_matrix)
-        for obj in property_matrix:
-            premise = calc_subset(obj[:-1])
-            conclusion = obj[-1]
-            premise_conclusion_pairs.append({"premise": premise,
-                                             "conclusion": conclusion})
+        for relation in property_matrix:
+            premise = calc_subset_2objs(relation["ref_obj"], relation["obj"])
+            conclusion = [relation["ref_dir"], relation["ref_size"],
+                          {"dir": relation["ref_dir"], "size": relation["ref_size"]}]
+            premise_conclusion_pairs.append({"premise": premise, "conclusion": conclusion})
 
     for premise_conclusion_pair in premise_conclusion_pairs:
         premises = premise_conclusion_pair["premise"]
-        conclusion = premise_conclusion_pair["conclusion"]
-
+        conclusions = premise_conclusion_pair["conclusion"]
         for premise in premises:
-            if common_pair(premise, conclusion, property_matrices):
-                new_rule = {"premise": premise, "conclusion": conclusion, "freq": 1}
-                is_new_rule = True
-                for each_rule in common_exist_rules:
-                    if each_rule["premise"] == new_rule["premise"] and each_rule["conclusion"] == new_rule[
-                        "conclusion"]:
-                        each_rule["freq"] += 1
-                        is_new_rule = False
-                        break
-                if is_new_rule:
-                    common_exist_rules.append(new_rule)
-
+            for conclusion in conclusions:
+                if common_pair(premise, conclusion, property_matrices):
+                    new_rule = {"premise": premise, "conclusion": conclusion, "freq": 1}
+                    is_new_rule = True
+                    for each_rule in common_exist_rules:
+                        if each_rule["premise"] == new_rule["premise"] and \
+                                each_rule["conclusion"] == new_rule["conclusion"]:
+                            each_rule["freq"] += 1
+                            is_new_rule = False
+                            break
+                    if is_new_rule:
+                        common_exist_rules.append(new_rule)
     return common_exist_rules
+
+
+def obj2propertyList(obj):
+    lists = []
+    for property in obj:
+        lists.append({
+            "name": property.name,
+            "value": property.value,
+            "commonExist": property.commonExist,
+            "parentId": property.parent
+        })
+    return lists
 
 
 def save_rules(rules, file_name):
     rules_json = []
     for rule in rules:
         rule_json = {}
-        premise_list = []
-        for property in rule["premise"]:
-            premise_list.append({
-                "name": property.name,
-                "value": property.value,
-                "commonExist": property.commonExist,
-                "parentId": property.parent
-            })
+        premise_dict = {}
 
-        rule_json["conclusion"] = {"name": rule["conclusion"].name,
-                                   "value": rule["conclusion"].value,
-                                   "commonExist": rule["conclusion"].commonExist,
-                                   "parentId": rule["conclusion"].parent}
-        rule_json["premise"] = premise_list
+        premise_dict["ref"] = obj2propertyList(rule["premise"]["ref"])
+        premise_dict["obj"] = obj2propertyList(rule["premise"]["obj"])
+        rule_json["premise"] = premise_dict
+        rule_json["conclusion"] = rule["conclusion"]
         rule_json["freq"] = rule['freq']
         rules_json.append(rule_json)
 
