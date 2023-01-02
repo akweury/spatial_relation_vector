@@ -47,7 +47,7 @@ def generate_spatial_obj(id, vertex, img, label, mask, categories):
     obj_points = vertex[mask == 1]
     obj_pixels = img[mask == 1]
     center_pos = obj_points.mean(axis=0)
-    dim = obj_points.max(axis=0) - obj_points.min(axis=0)
+    dim = obj_points.shape[0]
     shape = categories[label]
     color = obj_pixels.mean(axis=0)
     return SpatialObject(id, shape=shape, pos=center_pos, size=dim, color=color)
@@ -87,32 +87,19 @@ def calc_srv(objA, objB, entity_num):
 
     return srv
 
-def size_mapping(ref_size_vec, size_vec):
-    volumn_ref = ref_size_vec.prod(axis=0)
-    volumn = size_vec.prod(axis=0)
-
-    if volumn_ref>volumn:
-        return "big"
+def size_mapping(ref_size, obj_size):
+    if ref_size > obj_size:
+        return "bigger than"
     else:
-        return "small"
+        return "smaller than"
 
 def dir_mapping(ref_pos_vec, pos_vec):
     dir_vec = ref_pos_vec-pos_vec
     # if np.argmax(dir_vec) == 0:
     if dir_vec[0] < 0:
-        return "left"
+        return "left of"
     else:
-        return "right"
-    # if np.argmax(dir_vec) == 1:
-    #     if dir_vec[1] < 0:
-    #         return "below"
-    #     else:
-    #         return "above"
-    # if np.argmax(dir_vec) == 2:
-    #     if dir_vec[2] < 0:
-    #         return "front"
-    #     else:
-    #         return "behind"
+        return "right of"
 
 
 def property_mapping(propertyValues, propertyType):

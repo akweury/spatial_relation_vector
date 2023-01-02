@@ -290,55 +290,27 @@ class LogManager():
                                    log_y=True, label="eval_loss", epoch=self.epoch, start_epoch=0, title="eval_loss",
                                    cla_leg=True)
 
-    def visualization(self, images, img_preds, categories, satisfied_rules=None, unsatisfied_rules=None, idx=0,
+    def visualization(self, images, img_preds, categories,
+                      satisfied_rules=None, unsatisfied_rules=None, learned_rules=None,
+                      idx=0,
                       show=False):
         img_tensor_int = []
         for image in images:
             img_tensor_int.append((image * 255).to(dtype=torch.uint8))
 
-        img_preds[0]["boxes"] = img_preds[0]["boxes"][img_preds[0]["scores"] > self.args.conf_threshold]
-        img_preds[0]["labels"] = img_preds[0]["labels"][img_preds[0]["scores"] > self.args.conf_threshold]
-        img_preds[0]["masks"] = img_preds[0]["masks"][img_preds[0]["scores"] > self.args.conf_threshold]
-        img_preds[0]["scores"] = img_preds[0]["scores"][img_preds[0]["scores"] > self.args.conf_threshold]
-
-        img_labels = img_preds[0]["labels"].to("cpu").numpy()
-        # print(f"{len(img_labels)} objects has been detected.")
-        labels_with_prob = zip(img_labels, img_preds[0]["scores"].detach().to("cpu").numpy())
-        img_annot_labels = []
-        for label, prob in labels_with_prob:
-            print(f"categories: {categories}, label: {label}, prob: {prob:.2f}")
-            img_annot_labels.append(f"{categories[label]}: {prob:.2f}")
-
-        colors = [config.colors[i] for i in img_labels]
-        img_output_tensor = draw_bounding_boxes(image=img_tensor_int[0],
-                                                boxes=img_preds[0]["boxes"],
-                                                labels=img_annot_labels,
-                                                colors=colors,
-                                                width=2)
-
-        img_masks_float = img_preds[0]["masks"].squeeze(1)
-        img_masks_float[img_masks_float < 0.8] = 0
-        img_masks_bool = img_masks_float.bool()
-        if img_masks_bool.size(0) > 0:
-            img_output_tensor = draw_segmentation_masks(img_output_tensor, masks=img_masks_bool, alpha=0.2)
-        img_output = to_pil_image(img_output_tensor)
+        img_outputs = []
+        for i in range(len(img_preds)):
+            img_output = plot_utils.maskRCNNVisualization(img_tensor_int[i], img_preds[i], self.args.conf_threshold, categories)
+            img_output, text_y_pos = plot_utils.printRules(img_output, satisfied_rules, unsatisfied_rules, learned_rules)
+            img_outputs.append(img_output)
 
         # print rules on the image
-        text_y_pos = 10
-        img_output, text_y_pos = plot_utils.addTextPIL(img_output, "satisfied_rules", (10, text_y_pos), color=(255, 0, 0))
-        if satisfied_rules is not None:
-            for ruleIdx in range(len(satisfied_rules)):
-                img_output = plot_utils.addRulePIL(img_output, satisfied_rules[ruleIdx], (10, text_y_pos))
-        img_output, text_y_pos = plot_utils.addTextPIL(img_output, "unsatisfied_rules", (10, text_y_pos), color=(255, 0, 0))
-        if unsatisfied_rules is not None:
-            for ruleIdx in range(len(unsatisfied_rules)):
-                img_output, text_y_pos = plot_utils.addRulePIL(img_output, unsatisfied_rules[ruleIdx], (10, text_y_pos))
+        img_outputs_img = plot_utils.get_concat_h_multi_resize(img_outputs)
 
-
-        img_output.save(str(self.output_folder / f"output_{self.epoch}_{idx}.png"), "PNG")
+        img_outputs_img.save(str(self.output_folder / f"output_{self.epoch}_{idx}.png"), "PNG")
 
         if show:
-            img_output.show()
+            img_outputs_img.show()
 
 
 def train_one_epoch(model, optimizer, train_loader, log_manager):

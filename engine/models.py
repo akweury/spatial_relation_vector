@@ -295,15 +295,27 @@ def isSubObj(subObj, obj):
             return False
 
     return True
+
+
 def common_pair(premise, conclusion, property_matrices):
     for property_matrix in property_matrices:
         for obj in property_matrix:
-            if isSubObj(premise["ref"], obj["ref_obj"] ) and isSubObj(premise["obj"], obj["obj"]):
+            if isSubObj(premise["ref"], obj["ref_obj"]) and isSubObj(premise["obj"], obj["obj"]):
                 if len(conclusion) == 2:
                     if conclusion["dir"] == obj["ref_dir"] and conclusion["size"] == obj["ref_size"]:
                         break
-                elif conclusion == obj["ref_dir"] or conclusion == obj["ref_size"]:
-                    break
+                    else:
+                        return False
+                elif "dir" in conclusion:
+                    if conclusion["dir"] == obj["ref_dir"]:
+                        break
+                    else:
+                        return False
+                elif "size" in conclusion:
+                    if conclusion["size"] == obj["ref_size"]:
+                        break
+                    else:
+                        return False
                 else:
                     return False
             else:
@@ -341,19 +353,16 @@ def rule_check(property_matrices, learned_rules):
 
 
 def rule_search(property_matrices, learned_rules):
-    common_exist_set = []
-    common_for_all_set = []
+
     common_exist_rules = learned_rules
-    common_for_all_rules = []
-    image_num = len(property_matrices)
-    property_num = len(property_matrices[0])
+    learned_rules_batch = []
 
     premise_conclusion_pairs = []
     for property_matrix in property_matrices:
         obj_num = len(property_matrix)
         for relation in property_matrix:
             premise = calc_subset_2objs(relation["ref_obj"], relation["obj"])
-            conclusion = [relation["ref_dir"], relation["ref_size"],
+            conclusion = [{"dir": relation["ref_dir"]}, {"size": relation["ref_size"]},
                           {"dir": relation["ref_dir"], "size": relation["ref_size"]}]
             premise_conclusion_pairs.append({"premise": premise, "conclusion": conclusion})
 
@@ -373,7 +382,19 @@ def rule_search(property_matrices, learned_rules):
                             break
                     if is_new_rule:
                         common_exist_rules.append(new_rule)
-    return common_exist_rules
+
+                    is_new_batch_rule = True
+                    new_batch_rule = {"premise": premise, "conclusion": conclusion, "freq": 1}
+                    for each_rule in learned_rules_batch:
+                        if each_rule["premise"] == new_batch_rule["premise"] and \
+                                each_rule["conclusion"] == new_batch_rule["conclusion"]:
+                            each_rule["freq"] += 1
+                            is_new_batch_rule = False
+                            break
+                    if is_new_batch_rule:
+                        learned_rules_batch.append(new_batch_rule)
+
+    return common_exist_rules, learned_rules_batch
 
 
 def obj2propertyList(obj):
