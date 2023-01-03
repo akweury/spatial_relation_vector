@@ -105,6 +105,6 @@ def get_discrete_spatial_objs(continual_spatial_objs):
 def get_random_continual_spatial_objs(continual_spatial_objs):
     for img in continual_spatial_objs:
         for obj in img:
-            obj["pos"] = np.random.rand(3)
+            obj.pos = np.random.rand(3)
 
     return continual_spatial_objs

@@ -64,6 +64,9 @@ def depth2vertex(depth, K, R, t):
     vertex = camOrig.unsqueeze(1).repeat(1, h, w) + vertex.reshape(3, h, w)
     vertex = vertex.permute(1, 2, 0)
     vertex = np.array(vertex)
+
+    mask = (torch.sum(depth, dim=0) == 0)
+    vertex[mask] = 0
     return vertex
 
 
@@ -80,7 +83,7 @@ def generate_class_mask(label, classMap, h, w):
             x = shape_attributes["cx"]
             y = shape_attributes["cy"]
             r = shape_attributes["r"]
-            ImageDraw.Draw(img).ellipse((int(x-r),int(y-r),int(x+r), int(y+r)), fill=1, outline=1)
+            ImageDraw.Draw(img).ellipse((int(x - r), int(y - r), int(x + r), int(y + r)), fill=1, outline=1)
 
             # for y_index in range(int(y - r), int(y + r)):
             #     chord_length_half = np.sqrt(np.ceil(r) ** 2 - np.abs(y - y_index) ** 2)
@@ -102,12 +105,24 @@ def generate_class_mask(label, classMap, h, w):
             class_mask[mask_bool] = label_index + 1
             class_labels.append(class_id)
 
-    if int(len(np.unique(class_mask))-1) != int(len(class_labels)):
+    if int(len(np.unique(class_mask)) - 1) != int(len(class_labels)):
         raise ValueError
 
     return class_mask, class_labels
 
 
 def normalize(vertex):
+    # all_points = vertex.reshape(-1, 3)
+    mask = np.sum(vertex, axis=-1) != 0
 
-    return vertex
+    vertex_normalized = np.zeros(shape=vertex.shape)
+    valid_min, valid_max = vertex[mask].min(), vertex[mask].max()
+    vertex_normalized[mask] = ( vertex[mask] - valid_min) / (valid_max - valid_min)
+
+    # check if normalization is correct
+    valid_points_recall = np.zeros(shape=vertex_normalized.shape)
+    valid_points_recall[mask] = vertex_normalized[mask] * (valid_max - valid_min) + valid_min
+    print("recall difference: " + str(np.sum(vertex[mask] - valid_points_recall[mask])))
+    assert np.abs(np.sum(vertex[mask] - valid_points_recall[mask])) < 1e-2
+
+    return vertex_normalized, valid_min, valid_max

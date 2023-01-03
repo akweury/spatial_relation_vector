@@ -23,7 +23,7 @@ model_od.eval()
 learned_rules = rule_utils.load_rules(os.path.join(str(config.rules_ball_sphere)))
 
 # apply rules
-for i, (data, objects) in enumerate(test_loader):
+for i, (data, objects, vertex_max, vertex_min) in enumerate(test_loader):
     with torch.no_grad():
         # input data
         images = list((_data[3:] / 255).to(args.device) for _data in data)

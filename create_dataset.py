@@ -100,11 +100,11 @@ def data2tensor_fact_extractor(data_root, args):
                                         torch.tensor(data["R"]).float(),
                                         torch.tensor(data["t"]).float())
 
-            vertex_normalized, vertex_scales = utils.normalize(vertex)
+            vertex_normalized, vertex_min, vertex_max = utils.normalize(vertex)
 
             img = utils.load_32bitImage(img_files[item])
             input_data = np.c_[
-                vertex,  # 0,1,2
+                vertex_normalized,  # 0,1,2
                 img,  # 3,4,5
             ]
             # convert to tensor
@@ -112,7 +112,10 @@ def data2tensor_fact_extractor(data_root, args):
 
             # save tensors
             training_case = {"input_tensor": input_tensor,
-                             "objects": data["objects"]}
+                             "objects": data["objects"],
+                             "vertex_max": vertex_max,
+                             "vertex_min": vertex_min
+                             }
             torch.save(training_case, output_tensor_file)
             print(f"File {item + 1}/{len(data_files)} saved as a tensor.")
 
