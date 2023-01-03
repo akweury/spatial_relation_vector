@@ -1,5 +1,6 @@
 # Created by shaji on 14-Dec-22
 
+import os
 import json
 import torch
 from torch.utils.data import DataLoader
@@ -35,8 +36,7 @@ test_loader = DataLoader(test_dataset, shuffle=True, batch_size=1,
 
 categories = config.categories
 
-model_od = models.get_model_instance_segmentation(args.num_classes).to(args.device)
-model_od, optimizer, parameters = pipeline.load_checkpoint(config.model_ball_sphere_detector, args, model_od)
+model_od, optimizer, parameters = pipeline.load_checkpoint(config.model_ball_sphere_detector, args)
 model_od.eval()
 learned_rules = []
 for i, (data, objects) in enumerate(train_loader):
@@ -55,32 +55,33 @@ for i, (data, objects) in enumerate(train_loader):
         learned_rules, learned_rules_batch = rule_search(facts, learned_rules)
         save_rules(learned_rules, log_manager.output_folder / f"learned_rules_{i}.json")
         log_manager.visualization(images, prediction, categories,
-                                  learned_rules=learned_rules_batch,facts=facts,  idx=i, show=False)
-        print("batch")
-print(learned_rules)
+                                  learned_rules=learned_rules_batch,facts=facts,  idx=i, show=True)
+        print("break")
+# save learned rules
+rule_utils.save_rules(learned_rules, os.path.join(str(config.models / args.exp), 'learned_rules.json'))
 
 # apply rules
-for i, (data, objects) in enumerate(test_loader):
-    with torch.no_grad():
-        # input data
-        images = list((_data[3:] / 255).to(args.device) for _data in data)
-        vertex = list((_data[:3]).to(args.device) for _data in data)
-
-        # object detection
-        prediction = model_od(images)
-
-        # fact extractor
-        continual_spatial_objs = rule_utils.get_continual_spatial_objs(prediction, images, vertex, objects, log_manager)
-        facts = rule_utils.get_discrete_spatial_objs(continual_spatial_objs)
-
-        satisfied_rules, unsatisfied_rules = rule_check(facts, learned_rules)
-        log_manager.visualization(images, prediction, categories,
-                                  satisfied_rules=satisfied_rules, unsatisfied_rules=unsatisfied_rules, facts=facts,
-                                  idx=i, show=True)
-
-        while len(unsatisfied_rules) > 0:
-            random_continual_spatial_objs = rule_utils.get_random_continual_spatial_objs(continual_spatial_objs)
-            facts = rule_utils.get_discrete_spatial_objs(random_continual_spatial_objs)
-            satisfied_rules, unsatisfied_rules = rule_check(facts, learned_rules)
-
-        print("break")
+# for i, (data, objects) in enumerate(test_loader):
+#     with torch.no_grad():
+#         # input data
+#         images = list((_data[3:] / 255).to(args.device) for _data in data)
+#         vertex = list((_data[:3]).to(args.device) for _data in data)
+#
+#         # object detection
+#         prediction = model_od(images)
+#
+#         # fact extractor
+#         continual_spatial_objs = rule_utils.get_continual_spatial_objs(prediction, images, vertex, objects, log_manager)
+#         facts = rule_utils.get_discrete_spatial_objs(continual_spatial_objs)
+#
+#         satisfied_rules, unsatisfied_rules = rule_check(facts, learned_rules)
+#         log_manager.visualization(images, prediction, categories,
+#                                   satisfied_rules=satisfied_rules, unsatisfied_rules=unsatisfied_rules, facts=facts,
+#                                   idx=i, show=True)
+#
+#         while len(unsatisfied_rules) > 0:
+#             random_continual_spatial_objs = rule_utils.get_random_continual_spatial_objs(continual_spatial_objs)
+#             facts = rule_utils.get_discrete_spatial_objs(random_continual_spatial_objs)
+#             satisfied_rules, unsatisfied_rules = rule_check(facts, learned_rules)
+#
+#         print("break")

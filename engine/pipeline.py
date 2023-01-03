@@ -16,7 +16,7 @@ from torchvision.transforms.functional import pil_to_tensor, to_pil_image
 from PIL import Image
 from PIL import ImageFont
 from PIL import ImageDraw
-from engine import plot_utils, config
+from engine import plot_utils, config, models
 
 
 def warmup_lr_scheduler(optimizer, warmup_iters, warmup_factor):
@@ -431,7 +431,9 @@ def save_checkpoint(is_best, model, optimizer, log_manager):
         os.remove(os.path.join(log_manager.model_folder, 'checkpoint-' + str(log_manager.epoch - 1) + '.pth.tar'))
 
 
-def load_checkpoint(model_path, args, model):
+def load_checkpoint(model_path, args):
+    model = models.get_model_instance_segmentation(args.num_classes).to(args.device)
+
     assert os.path.isfile(model_path), f"No checkpoint found at:{model_path}"
     checkpoint = torch.load(model_path, map_location=torch.device(args.device))
     start_epoch = checkpoint['epoch'] + 1  # resume epoch

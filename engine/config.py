@@ -34,6 +34,7 @@ categories = ["background", "sphere", "cube"]
 # pre-trained model
 # model_ball_sphere_detector = models / "object_detector_big" / "model_best.pth.tar"
 model_ball_sphere_detector = models / "object_detector_big" / "checkpoint-9.pth.tar"
+rules_ball_sphere = models / "fact_extractor" / "learned_rules.json"
 
 propertyNames = ["shape"]
 
