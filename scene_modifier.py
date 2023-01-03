@@ -9,7 +9,6 @@ from engine import config, pipeline, args_utils
 from engine.models import rule_check
 from engine import rule_utils
 
-
 # preprocessing
 args = args_utils.paser()
 log_manager = pipeline.LogManager(model_exp="object_detector_big", args=args)
@@ -40,9 +39,12 @@ for i, (data, objects, vertex_max, vertex_min) in enumerate(test_loader):
         log_manager.visualization(images, prediction, config.categories,
                                   satisfied_rules=satisfied_rules, unsatisfied_rules=unsatisfied_rules, facts=facts,
                                   idx=i, show=True)
+        try_counter = 0
         while len(unsatisfied_rules) > 0:
+            try_counter += 1
+
             random_continual_spatial_objs = rule_utils.get_random_continual_spatial_objs(continual_spatial_objs)
             facts = rule_utils.get_discrete_spatial_objs(random_continual_spatial_objs)
             satisfied_rules, unsatisfied_rules = rule_check(facts, learned_rules)
 
-        print("break")
+        print(f"tried {try_counter} times")
