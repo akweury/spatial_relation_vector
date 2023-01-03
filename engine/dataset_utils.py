@@ -108,3 +108,6 @@ def generate_class_mask(label, classMap, h, w):
     return class_mask, class_labels
 
 
+def normalize(vertex):
+
+    return vertex

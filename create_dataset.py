@@ -100,6 +100,8 @@ def data2tensor_fact_extractor(data_root, args):
                                         torch.tensor(data["R"]).float(),
                                         torch.tensor(data["t"]).float())
 
+            vertex_normalized, vertex_scales = utils.normalize(vertex)
+
             img = utils.load_32bitImage(img_files[item])
             input_data = np.c_[
                 vertex,  # 0,1,2
