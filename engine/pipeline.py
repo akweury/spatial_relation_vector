@@ -291,7 +291,7 @@ class LogManager():
                                    cla_leg=True)
 
     def visualization(self, images, img_preds, categories,
-                      satisfied_rules=None, unsatisfied_rules=None, learned_rules=None,
+                      satisfied_rules=None, unsatisfied_rules=None, learned_rules=None,facts=None,
                       idx=0,
                       show=False):
         img_tensor_int = []
@@ -301,7 +301,7 @@ class LogManager():
         img_outputs = []
         for i in range(len(img_preds)):
             img_output = plot_utils.maskRCNNVisualization(img_tensor_int[i], img_preds[i], self.args.conf_threshold, categories)
-            img_output, text_y_pos = plot_utils.printRules(img_output, satisfied_rules, unsatisfied_rules, learned_rules)
+            img_output, text_y_pos = plot_utils.printRules(img_output, satisfied_rules, unsatisfied_rules, learned_rules, facts[i])
             img_outputs.append(img_output)
 
         # print rules on the image

@@ -153,6 +153,23 @@ def addRulePIL(img, rule, pos):
     y_pos += 10
     return img, y_pos
 
+def addFactPIL(img, fact, pos):
+    draw = ImageDraw.Draw(img)
+    ref_text = ""
+    for property in fact["ref_obj"]:
+        ref_text += property.value + " "
+    obj_text = ""
+    for property in fact["obj"]:
+        obj_text += property.value + " "
+
+    conclusion_text = fact['ref_dir'] + " " + fact["ref_size"]
+
+    ruleText = f'{ref_text} {conclusion_text} {obj_text}'
+
+    draw.text(pos, ruleText, (255, 255, 255))
+    x_pos, y_pos = pos
+    y_pos += 10
+    return img, y_pos
 
 def maskRCNNVisualization(img, img_pred, threshold, categories):
     img_pred["boxes"] = img_pred["boxes"][img_pred["scores"] > threshold]
@@ -185,14 +202,22 @@ def maskRCNNVisualization(img, img_pred, threshold, categories):
     return img_output
 
 
-def printRules(img_output, satisfied_rules, unsatisfied_rules, learned_rules):
+def printRules(img_output, satisfied_rules, unsatisfied_rules, learned_rules, facts):
     text_y_pos = 10
-    img_output, text_y_pos = addTextPIL(img_output, "satisfied_rules", (10, text_y_pos),
-                                                   color=(255, 0, 0))
+
+    # facts
+    img_output, text_y_pos = addTextPIL(img_output, "facts", (10, text_y_pos), color=(255, 0, 0))
+    if facts is not None:
+        for ruleIdx in range(len(facts)):
+            img_output, text_y_pos = addFactPIL(img_output, facts[ruleIdx], (10, text_y_pos))
+
+    # satisfied rules
+    img_output, text_y_pos = addTextPIL(img_output, "satisfied_rules", (10, text_y_pos), color=(255, 0, 0))
     if satisfied_rules is not None:
         for ruleIdx in range(len(satisfied_rules)):
             img_output, text_y_pos = addRulePIL(img_output, satisfied_rules[ruleIdx],
                                                            (10, text_y_pos))
+    # unsatisfied rules
     img_output, text_y_pos = addTextPIL(img_output, "unsatisfied_rules", (10, text_y_pos),
                                                    color=(255, 0, 0))
     if unsatisfied_rules is not None:
@@ -200,6 +225,7 @@ def printRules(img_output, satisfied_rules, unsatisfied_rules, learned_rules):
             img_output, text_y_pos = addRulePIL(img_output, unsatisfied_rules[ruleIdx],
                                                            (10, text_y_pos))
 
+    # learned rules
     img_output, text_y_pos = addTextPIL(img_output, "learned_rules", (10, text_y_pos),
                                                    color=(255, 0, 0))
     if learned_rules is not None:

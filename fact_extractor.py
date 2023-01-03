@@ -9,6 +9,7 @@ from engine.SpatialObject import SpatialObject
 from engine import config, pipeline, models, args_utils
 import create_dataset
 from engine.models import model_fe, rule_search, rule_check, save_rules
+from engine import rule_utils
 
 # rules_json = "D:\\UnityProjects\\hide_dataset_unity\\Assets\\Scripts\\Rules\\front.json"
 # rules_json = "/Users/jing/PycharmProjects/hide_dataset_unity/Assets/Scripts/Rules/front.json"
@@ -53,7 +54,8 @@ for i, (data, objects) in enumerate(train_loader):
         # learned_rules, _ = rule_check(facts, learned_rules)
         learned_rules, learned_rules_batch = rule_search(facts, learned_rules)
         save_rules(learned_rules, log_manager.output_folder / f"learned_rules_{i}.json")
-        log_manager.visualization(images, prediction, categories,learned_rules=learned_rules_batch,  idx=i, show=True)
+        log_manager.visualization(images, prediction, categories,
+                                  learned_rules=learned_rules_batch,facts=facts,  idx=i, show=False)
         print("batch")
 print(learned_rules)
 
@@ -68,11 +70,17 @@ for i, (data, objects) in enumerate(test_loader):
         prediction = model_od(images)
 
         # fact extractor
-        facts = model_fe(prediction, images, vertex, objects, log_manager)
-        # common_rv = learn_common_rv(facts)
+        continual_spatial_objs = rule_utils.get_continual_spatial_objs(prediction, images, vertex, objects, log_manager)
+        facts = rule_utils.get_discrete_spatial_objs(continual_spatial_objs)
+
         satisfied_rules, unsatisfied_rules = rule_check(facts, learned_rules)
-        save_rules(satisfied_rules, log_manager.output_folder / "satisfied_rules.json")
-        save_rules(unsatisfied_rules, log_manager.output_folder / "unsatisfied_rules.json")
-        log_manager.visualization(images, prediction, categories,satisfied_rules=satisfied_rules, unsatisfied_rules=unsatisfied_rules, idx=i, show=True)
-        if len(unsatisfied_rules) > 0:
-            print("break")
+        log_manager.visualization(images, prediction, categories,
+                                  satisfied_rules=satisfied_rules, unsatisfied_rules=unsatisfied_rules, facts=facts,
+                                  idx=i, show=True)
+
+        while len(unsatisfied_rules) > 0:
+            random_continual_spatial_objs = rule_utils.get_random_continual_spatial_objs(continual_spatial_objs)
+            facts = rule_utils.get_discrete_spatial_objs(random_continual_spatial_objs)
+            satisfied_rules, unsatisfied_rules = rule_check(facts, learned_rules)
+
+        print("break")

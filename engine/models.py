@@ -326,6 +326,7 @@ def common_pair(premise, conclusion, property_matrices):
 def rule_check(property_matrices, learned_rules):
     # delete repeated rules
     no_repeat_rules = []
+
     for rule in learned_rules:
         premise = rule["premise"]
         conclusion = rule["conclusion"]
