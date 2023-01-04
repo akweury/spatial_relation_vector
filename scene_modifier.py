@@ -5,9 +5,8 @@ import torch
 from torch.utils.data import DataLoader
 
 from engine.FactExtractorDataset import FactExtractorDataset
-from engine import config, pipeline, args_utils
+from engine import config, pipeline, args_utils, rule_utils, file_utils
 from engine.models import rule_check
-from engine import rule_utils
 
 # preprocessing
 args = args_utils.paser()
@@ -22,7 +21,7 @@ model_od.eval()
 learned_rules = rule_utils.load_rules(os.path.join(str(config.rules_ball_sphere)))
 learned_rules = rule_utils.rule_combination(learned_rules)
 # apply rules
-for i, (data, objects, vertex_max, vertex_min) in enumerate(test_loader):
+for i, (data, objects, vertex_max, vertex_min, file_json) in enumerate(test_loader):
     with torch.no_grad():
         # input data
         images = list((_data[3:] / 255).to(args.device) for _data in data)
@@ -42,9 +41,12 @@ for i, (data, objects, vertex_max, vertex_min) in enumerate(test_loader):
         try_counter = 0
         while len(unsatisfied_rules) > 0:
             try_counter += 1
-
-            random_continual_spatial_objs = rule_utils.get_random_continual_spatial_objs(continual_spatial_objs)
-            facts = rule_utils.get_discrete_spatial_objs(random_continual_spatial_objs)
+            continual_spatial_objs = rule_utils.get_random_continual_spatial_objs(continual_spatial_objs,vertex_max[0], vertex_min[0])
+            facts = rule_utils.get_discrete_spatial_objs(continual_spatial_objs)
             satisfied_rules, unsatisfied_rules = rule_check(facts, learned_rules)
 
         print(f"tried {try_counter} times")
+        scene = rule_utils.objs2scene(continual_spatial_objs)
+
+        scene_dict = {'scene':scene, 'file_name':file_json[0]}
+        file_utils.save_json(scene_dict, str(config.output/ args.exp / f"output_scene_{i}.json"))

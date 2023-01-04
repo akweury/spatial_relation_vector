@@ -126,3 +126,5 @@ def normalize(vertex):
     assert np.abs(np.sum(vertex[mask] - valid_points_recall[mask])) < 1e-2
 
     return vertex_normalized, valid_min, valid_max
+
+

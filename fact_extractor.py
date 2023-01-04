@@ -32,7 +32,7 @@ categories = config.categories
 model_od, optimizer, parameters = pipeline.load_checkpoint(config.model_ball_sphere_detector, args)
 model_od.eval()
 learned_rules = []
-for i, (data, objects, _, _) in enumerate(train_loader):
+for i, (data, objects, _, _, _ ) in enumerate(train_loader):
     with torch.no_grad():
         # input data
         images = list((_data[3:] / 255).to(args.device) for _data in data)
@@ -48,7 +48,7 @@ for i, (data, objects, _, _) in enumerate(train_loader):
         learned_rules, learned_rules_batch = rule_search(facts, learned_rules)
         save_rules(learned_rules, log_manager.output_folder / f"learned_rules_{i}.json")
         log_manager.visualization(images, prediction, categories,
-                                  learned_rules=learned_rules_batch, facts=facts, idx=i, show=True)
+                                  learned_rules=learned_rules_batch, facts=facts, idx=i, show=False)
         print("break")
 
 # save learned rules

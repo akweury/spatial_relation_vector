@@ -102,11 +102,10 @@ def get_discrete_spatial_objs(continual_spatial_objs):
     return facts
 
 
-def get_random_continual_spatial_objs(continual_spatial_objs):
+def get_random_continual_spatial_objs(continual_spatial_objs, vertex_max, vertex_min):
     for img in continual_spatial_objs:
         for obj in img:
-            obj.pos = np.random.rand(3)
-
+            obj.pos = np.random.rand(3) * (vertex_max - vertex_min) + vertex_min
     return continual_spatial_objs
 
 
@@ -135,6 +134,16 @@ def rule_combination(learned_rules):
 def equivalent_conclusions(conclusion, fact, key):
     if conclusion[key] == fact[key]:
         return True
-    if conclusion[key] == config.relation_dict[key]:
-        return True
     return False
+
+
+def objs2scene(random_continual_spatial_objs):
+    scene = []
+    for pair in random_continual_spatial_objs:
+        for obj in pair:
+            scene.append(obj.__dict__)
+    for obj in scene:
+        for key in obj.keys():
+            if isinstance(obj[key], np.ndarray):
+                obj[key] = obj[key].tolist()
+    return scene

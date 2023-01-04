@@ -114,7 +114,8 @@ def data2tensor_fact_extractor(data_root, args):
             training_case = {"input_tensor": input_tensor,
                              "objects": data["objects"],
                              "vertex_max": vertex_max,
-                             "vertex_min": vertex_min
+                             "vertex_min": vertex_min,
+                             'file_name': data_files[item]
                              }
             torch.save(training_case, output_tensor_file)
             print(f"File {item + 1}/{len(data_files)} saved as a tensor.")

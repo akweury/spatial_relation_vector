@@ -6,6 +6,8 @@ import numpy as np
 import torch
 from torch.utils.data import Dataset
 
+from engine import file_utils
+
 
 class FactExtractorDataset(Dataset):
 
@@ -24,5 +26,5 @@ class FactExtractorDataset(Dataset):
             return None
 
         X = torch.load(self.X[item])
-
-        return X["input_tensor"], X["objects"], X["vertex_max"], X["vertex_min"]
+        file_json = file_utils.load_json(X['file_name'])
+        return X["input_tensor"], X["objects"], X["vertex_max"], X["vertex_min"], file_json
