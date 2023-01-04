@@ -20,7 +20,7 @@ model_od.eval()
 
 # load learned rules
 learned_rules = rule_utils.load_rules(os.path.join(str(config.rules_ball_sphere)))
-
+learned_rules = rule_utils.rule_combination(learned_rules)
 # apply rules
 for i, (data, objects, vertex_max, vertex_min) in enumerate(test_loader):
     with torch.no_grad():

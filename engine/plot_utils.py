@@ -156,13 +156,13 @@ def addRulePIL(img, rule, pos):
 def addFactPIL(img, fact, pos):
     draw = ImageDraw.Draw(img)
     ref_text = ""
-    for property in fact["ref_obj"]:
+    for property in fact["ref"]:
         ref_text += property.value + " "
     obj_text = ""
     for property in fact["obj"]:
         obj_text += property.value + " "
 
-    conclusion_text = fact['ref_dir'] + " " + fact["ref_size"]
+    conclusion_text = fact['dir'] + " " + fact["size"]
 
     ruleText = f'{ref_text} {conclusion_text} {obj_text}'
 

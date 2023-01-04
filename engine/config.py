@@ -38,7 +38,16 @@ rules_ball_sphere = models / "fact_extractor" / "learned_rules.json"
 
 propertyNames = ["shape"]
 
+relation_dict = {'dir': 'left/right of',
+                 'dir_left': 'left of',
+                 'dir_right': 'right of',
+                 'size': 'bigger/smaller than',
+                 "size_small": 'smaller than',
+                 'size_big': 'bigger than'
+                 }
+
 if __name__ == "__main__":
     print("root path: " + str(root))
     print("storage path: " + str(dataset))
     print("work place path: " + str(work_place_path))
+

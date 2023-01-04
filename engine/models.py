@@ -11,7 +11,7 @@ from torchvision.models.detection.mask_rcnn import MaskRCNNPredictor
 
 from engine import config
 from engine.SpatialObject import generate_spatial_obj, calc_srv, spatial_obj, attrDiff, calc_property_matrix
-
+from engine import rule_utils
 
 def mask_rcnn(img_tensor_int, weights=None):
     if weights is None:
@@ -299,20 +299,20 @@ def isSubObj(subObj, obj):
 
 def common_pair(premise, conclusion, property_matrices):
     for property_matrix in property_matrices:
-        for obj in property_matrix:
-            if isSubObj(premise["ref"], obj["ref_obj"]) and isSubObj(premise["obj"], obj["obj"]):
+        for fact in property_matrix:
+            if isSubObj(premise["ref"], fact["ref"]) and isSubObj(premise["obj"], fact["obj"]):
                 if len(conclusion) == 2:
-                    if conclusion["dir"] == obj["ref_dir"] and conclusion["size"] == obj["ref_size"]:
+                    if rule_utils.equivalent_conclusions(conclusion, fact, 'size') and rule_utils.equivalent_conclusions(conclusion, fact, 'dir'):
                         break
                     else:
                         return False
                 elif "dir" in conclusion:
-                    if conclusion["dir"] == obj["ref_dir"]:
+                    if rule_utils.equivalent_conclusions(conclusion, fact, 'dir'):
                         break
                     else:
                         return False
                 elif "size" in conclusion:
-                    if conclusion["size"] == obj["ref_size"]:
+                    if rule_utils.equivalent_conclusions(conclusion, fact, 'size'):
                         break
                     else:
                         return False
@@ -326,7 +326,6 @@ def common_pair(premise, conclusion, property_matrices):
 def rule_check(property_matrices, learned_rules):
     # delete repeated rules
     no_repeat_rules = []
-
     for rule in learned_rules:
         premise = rule["premise"]
         conclusion = rule["conclusion"]
@@ -354,7 +353,6 @@ def rule_check(property_matrices, learned_rules):
 
 
 def rule_search(property_matrices, learned_rules):
-
     common_exist_rules = learned_rules
     learned_rules_batch = []
 

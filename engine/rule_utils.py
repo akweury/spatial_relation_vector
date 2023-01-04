@@ -108,3 +108,33 @@ def get_random_continual_spatial_objs(continual_spatial_objs):
             obj.pos = np.random.rand(3)
 
     return continual_spatial_objs
+
+
+def rule_combination(learned_rules):
+    combined_rules = []
+    for learned_rule in learned_rules:
+        hasConflict = False
+        for combined_rule in combined_rules:
+            if combined_rule['premise'] == learned_rule['premise']:
+                if combined_rule['conclusion'].keys() == learned_rule['conclusion'].keys():
+                    hasConflict = True
+                    if 'size' in combined_rule['conclusion'].keys():
+                        if combined_rule['conclusion']['size'] != learned_rule['conclusion']['size']:
+                            combined_rule['conclusion']['size'] = config.relation_dict['size']
+                            combined_rule['freq'] = combined_rule['freq'] + learned_rule['freq']
+                    if 'dir' in combined_rule['conclusion'].keys():
+                        if combined_rule['conclusion']['dir'] != learned_rule['conclusion']['dir']:
+                            combined_rule['conclusion']['dir'] = config.relation_dict['dir']
+                            combined_rule['freq'] = combined_rule['freq'] + learned_rule['freq']
+        if not hasConflict:
+            combined_rules.append(learned_rule)
+        print('break')
+    return combined_rules
+
+
+def equivalent_conclusions(conclusion, fact, key):
+    if conclusion[key] == fact[key]:
+        return True
+    if conclusion[key] == config.relation_dict[key]:
+        return True
+    return False

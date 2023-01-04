@@ -141,9 +141,9 @@ def calc_property_matrix(objs, propertyNames):
                     propertyObj = Property(obj_mapping[j], propertyNames[j], obj.id)
                     obj_vector.append(propertyObj)
                 obj_relation_matrix.append({
-                    "ref_obj": ref_obj_vector,
-                    "ref_dir": ref_dir,
-                    "ref_size": ref_size,
+                    "ref": ref_obj_vector,
+                    "dir": ref_dir,
+                    "size": ref_size,
                     "obj": obj_vector,
                 })
     return obj_relation_matrix
