@@ -9,7 +9,7 @@ from engine.FactExtractorDataset import FactExtractorDataset
 from engine.SpatialObject import SpatialObject
 from engine import config, pipeline, models, args_utils
 import create_dataset
-from engine.models import model_fe, rule_search, rule_check, save_rules
+from engine.models import rule_search, rule_check, save_rules
 from engine import rule_utils
 
 # preprocessing
@@ -42,12 +42,13 @@ for i, (data, objects, _, _) in enumerate(train_loader):
         prediction = model_od(images)
 
         # fact extractor
-        facts = model_fe(prediction, images, vertex, objects, log_manager)
+        continual_spatial_objs = rule_utils.get_continual_spatial_objs(prediction, images, vertex, objects, log_manager)
+        facts = rule_utils.get_discrete_spatial_objs(continual_spatial_objs)
 
         learned_rules, learned_rules_batch = rule_search(facts, learned_rules)
         save_rules(learned_rules, log_manager.output_folder / f"learned_rules_{i}.json")
         log_manager.visualization(images, prediction, categories,
-                                  learned_rules=learned_rules_batch, facts=facts, idx=i, show=False)
+                                  learned_rules=learned_rules_batch, facts=facts, idx=i, show=True)
         print("break")
 
 # save learned rules

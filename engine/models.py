@@ -61,49 +61,49 @@ def get_model_instance_segmentation(num_classes, weights=None):
     return model
 
 
-def model_fe(predictions, images, vertices, objects, log_manager):
-    facts = []
-    for i in range(len(images)):
-        image = images[i]
-        vertex = vertices[i]
-        prediction = predictions[i]
-
-        prediction["boxes"] = prediction["boxes"][prediction["scores"] > log_manager.args.conf_threshold]
-        prediction["labels"] = prediction["labels"][prediction["scores"] > log_manager.args.conf_threshold]
-        prediction["masks"] = prediction["masks"][prediction["scores"] > log_manager.args.conf_threshold]
-        prediction["scores"] = prediction["scores"][prediction["scores"] > log_manager.args.conf_threshold]
-
-        img_labels = prediction["labels"].to("cpu").numpy()
-        categories = config.categories
-        # print(f"{len(img_labels)} objects has been detected.")
-        labels_with_prob = zip(img_labels, prediction["scores"].detach().to("cpu").numpy())
-        img_annot_labels = []
-        for label, prob in labels_with_prob:
-            print(f"categories: {categories}, label: {label}, prob: {prob:.2f}")
-            img_annot_labels.append(f"{categories[label]}: {prob:.2f}")
-
-        # create SpatialObjects to save object vectors
-        spatialObjs = []
-        for j in range(len(prediction["labels"])):
-            spatialObj = generate_spatial_obj(id=j,
-                                              vertex=vertex,
-                                              img=image,
-                                              label=prediction["labels"][j],
-                                              mask=prediction["masks"][j],
-                                              categories=categories)
-            spatialObjs.append(spatialObj)
-
-        obj_num = len(spatialObjs)
-        property_matrix = calc_property_matrix(spatialObjs, config.propertyNames)
-        # image_srv = []
-        # for obj_i in range(obj_num):
-        #     for obj_j in range(obj_num):
-        #         srv = calc_srv(spatialObjs[obj_j], spatialObjs[obj_j], entity_num)
-        #         image_srv.append(srv)
-        facts.append(property_matrix)
-
-    facts = np.array(facts)
-    return facts
+# def model_fe(predictions, images, vertices, objects, log_manager):
+#     facts = []
+#     for i in range(len(images)):
+#         image = images[i]
+#         vertex = vertices[i]
+#         prediction = predictions[i]
+#
+#         prediction["boxes"] = prediction["boxes"][prediction["scores"] > log_manager.args.conf_threshold]
+#         prediction["labels"] = prediction["labels"][prediction["scores"] > log_manager.args.conf_threshold]
+#         prediction["masks"] = prediction["masks"][prediction["scores"] > log_manager.args.conf_threshold]
+#         prediction["scores"] = prediction["scores"][prediction["scores"] > log_manager.args.conf_threshold]
+#
+#         img_labels = prediction["labels"].to("cpu").numpy()
+#         categories = config.categories
+#         # print(f"{len(img_labels)} objects has been detected.")
+#         labels_with_prob = zip(img_labels, prediction["scores"].detach().to("cpu").numpy())
+#         img_annot_labels = []
+#         for label, prob in labels_with_prob:
+#             print(f"categories: {categories}, label: {label}, prob: {prob:.2f}")
+#             img_annot_labels.append(f"{categories[label]}: {prob:.2f}")
+#
+#         # create SpatialObjects to save object vectors
+#         spatialObjs = []
+#         for j in range(len(prediction["labels"])):
+#             spatialObj = generate_spatial_obj(id=j,
+#                                               vertex=vertex,
+#                                               img=image,
+#                                               label=prediction["labels"][j],
+#                                               mask=prediction["masks"][j],
+#                                               categories=categories)
+#             spatialObjs.append(spatialObj)
+#
+#         obj_num = len(spatialObjs)
+#         property_matrix = calc_property_matrix(spatialObjs, config.propertyNames)
+#         # image_srv = []
+#         # for obj_i in range(obj_num):
+#         #     for obj_j in range(obj_num):
+#         #         srv = calc_srv(spatialObjs[obj_j], spatialObjs[obj_j], entity_num)
+#         #         image_srv.append(srv)
+#         facts.append(property_matrix)
+#
+#     facts = np.array(facts)
+#     return facts
 
 
 def load_rules(data, entity_num):
@@ -360,9 +360,9 @@ def rule_search(property_matrices, learned_rules):
     for property_matrix in property_matrices:
         obj_num = len(property_matrix)
         for relation in property_matrix:
-            premise = calc_subset_2objs(relation["ref_obj"], relation["obj"])
-            conclusion = [{"dir": relation["ref_dir"]}, {"size": relation["ref_size"]},
-                          {"dir": relation["ref_dir"], "size": relation["ref_size"]}]
+            premise = calc_subset_2objs(relation["ref"], relation["obj"])
+            conclusion = [{"dir": relation["dir"]}, {"size": relation["size"]},
+                          {"dir": relation["dir"], "size": relation["size"]}]
             premise_conclusion_pairs.append({"premise": premise, "conclusion": conclusion})
 
     for premise_conclusion_pair in premise_conclusion_pairs:

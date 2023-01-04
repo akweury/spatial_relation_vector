@@ -1,6 +1,7 @@
 # Created by shaji on 14-Dec-22
 import numpy as np
-import torch
+
+from engine.mechanics import size_mapping, dir_mapping, property_mapping
 
 
 class Property():
@@ -87,30 +88,6 @@ def calc_srv(objA, objB, entity_num):
 
     return srv
 
-def size_mapping(ref_size, obj_size):
-    if ref_size > obj_size:
-        return "bigger than"
-    else:
-        return "smaller than"
-
-def dir_mapping(ref_pos_vec, pos_vec):
-    dir_vec = ref_pos_vec-pos_vec
-    # if np.argmax(dir_vec) == 0:
-    if dir_vec[0] < 0:
-        return "left of"
-    else:
-        return "right of"
-
-
-def property_mapping(propertyValues, propertyType):
-    mapped_properties = []
-    if propertyType == "shape":
-        return propertyValues
-    # if propertyType == "color":
-    #     rgb = ["red", "green", "blue"]
-    #     approx_color = rgb[np.argmax(propertyValues)]
-    #     return approx_color
-
 
 def calc_property_matrix(objs, propertyNames):
     obj_relation_matrix = []
@@ -130,7 +107,7 @@ def calc_property_matrix(objs, propertyNames):
             if obj != obj_ref:
                 # relationship
                 ref_dir = dir_mapping(obj_ref.pos, obj.pos)
-                ref_size = size_mapping(obj_ref.size,obj.size)
+                ref_size = size_mapping(obj_ref.size, obj.size)
                 # obj vector
                 obj_mapping = []
                 for propertyType in propertyNames:
