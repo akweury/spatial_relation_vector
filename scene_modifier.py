@@ -35,18 +35,25 @@ for i, (data, objects, vertex_max, vertex_min, file_json) in enumerate(test_load
         facts = rule_utils.get_discrete_spatial_objs(continual_spatial_objs)
 
         satisfied_rules, unsatisfied_rules = rule_check(facts, learned_rules)
-        log_manager.visualization(images, prediction, config.categories,
-                                  satisfied_rules=satisfied_rules, unsatisfied_rules=unsatisfied_rules, facts=facts,
-                                  idx=i, show=True)
+
         try_counter = 0
-        while len(unsatisfied_rules) > 0:
+        new_unsatisfied_rules = unsatisfied_rules.copy()
+
+        while len(new_unsatisfied_rules) > 0:
             try_counter += 1
             continual_spatial_objs = rule_utils.get_random_continual_spatial_objs(continual_spatial_objs,vertex_max[0], vertex_min[0])
-            facts = rule_utils.get_discrete_spatial_objs(continual_spatial_objs)
-            satisfied_rules, unsatisfied_rules = rule_check(facts, learned_rules)
+            new_facts = rule_utils.get_discrete_spatial_objs(continual_spatial_objs)
+            new_satisfied_rules, new_unsatisfied_rules = rule_check(new_facts, learned_rules)
 
         print(f"tried {try_counter} times")
-        scene = rule_utils.objs2scene(continual_spatial_objs)
 
-        scene_dict = {'scene':scene, 'file_name':file_json[0]}
-        file_utils.save_json(scene_dict, str(config.output/ args.exp / f"output_scene_{i}.json"))
+        log_manager.visualization(images, prediction, config.categories,
+                                  satisfied_rules=satisfied_rules,
+                                  unsatisfied_rules=unsatisfied_rules,
+                                  facts=facts,
+                                  suggested_objs=continual_spatial_objs,
+                                  idx=i, prefix="Test", show=False)
+
+
+        scene_dict = {'scene':rule_utils.objs2scene(continual_spatial_objs), 'file_name':file_json[0]}
+        file_utils.save_json(scene_dict, str(config.output/ args.exp / f"Test_output_{i}.json"))

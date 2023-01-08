@@ -21,16 +21,12 @@ class SpatialObject():
         self.id = id
         self.color = color
         self.shape = shape
-        self.pos = pos
-        self.pos_x = pos
-        self.pos_y = pos
-        self.pos_z = pos
+        self.position = pos
         self.size = size
         self.material = material
 
     def print_info(self):
         print(f"color:{self.color}\n"
-              f"color :{self.color}\n"
               f"shape :{self.shape}\n"
               f"size :{self.size}\n"
               f"material :{self.material}\n")
@@ -80,7 +76,7 @@ cube = 10
 
 def calc_srv(objA, objB, entity_num):
     srv = np.zeros(shape=(entity_num))
-    srv[pos_start:pos_end] = objB.pos - objA.pos  # pos difference
+    srv[pos_start:pos_end] = objB.position - objA.position# pos difference
     srv[size_start:size_end] = objB.size - objA.size  # size difference
     srv[color_start:color_end] = objB.color - objA.color  # size difference
     srv[sphere] = attrDiff(objA.shape, objB.shape, "sphere")  # sphere coding
@@ -106,7 +102,7 @@ def calc_property_matrix(objs, propertyNames):
         for obj in objs:
             if obj != obj_ref:
                 # relationship
-                ref_dir = dir_mapping(obj_ref.pos, obj.pos)
+                ref_dir = dir_mapping(obj_ref.position, obj.position)
                 ref_size = size_mapping(obj_ref.size, obj.size)
                 # obj vector
                 obj_mapping = []

@@ -292,7 +292,9 @@ class LogManager():
 
     def visualization(self, images, img_preds, categories,
                       satisfied_rules=None, unsatisfied_rules=None, learned_rules=None,facts=None,
+                      suggested_objs=None,
                       idx=0,
+                      prefix=None,
                       show=False):
         img_tensor_int = []
         for image in images:
@@ -301,13 +303,14 @@ class LogManager():
         img_outputs = []
         for i in range(len(img_preds)):
             img_output = plot_utils.maskRCNNVisualization(img_tensor_int[i], img_preds[i], self.args.conf_threshold, categories)
-            img_output, text_y_pos = plot_utils.printRules(img_output, satisfied_rules, unsatisfied_rules, learned_rules, facts[i])
+            img_output, text_y_pos = plot_utils.printRules(img_output, satisfied_rules, unsatisfied_rules,
+                                                           learned_rules, facts[i], suggested_objs)
             img_outputs.append(img_output)
 
         # print rules on the image
         img_outputs_img = plot_utils.get_concat_h_multi_resize(img_outputs)
 
-        img_outputs_img.save(str(self.output_folder / f"output_{self.epoch}_{idx}.png"), "PNG")
+        img_outputs_img.save(str(self.output_folder / f"{prefix}_output_{idx}.png"), "PNG")
 
         if show:
             img_outputs_img.show()
