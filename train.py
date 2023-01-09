@@ -6,11 +6,14 @@ from torch.utils.data import DataLoader
 
 from engine import pipeline, models, args_utils
 from engine.SyntheticDataset import SyntheticDataset
-
+import create_dataset
 # preprocessing
 args = args_utils.paser()
 # init log manager
 log_manager = pipeline.LogManager(args=args)
+
+# create_dataset.data2tensorManualMask(log_manager.data_path, args)
+create_dataset.data2tensorAutoMask(log_manager.data_path, args)
 
 train_dataset = SyntheticDataset(log_manager.data_path, "train")
 train_loader = DataLoader(train_dataset, shuffle=True, batch_size=args.batch_size,

@@ -41,6 +41,17 @@ def load_scaled16bitImage(root, minVal, maxVal):
     return img
 
 
+def load_16bitImage(root):
+    img = cv.imread(root, -1)
+    img = np.array(img, dtype=np.float32)
+    mask = (img == 0)
+    img = img / 65535
+    img[np.isnan(img)] = 0
+    img = torch.tensor((~mask) * img).unsqueeze(2)
+    img = np.array(img).astype(np.float32)
+    return img
+
+
 def load_32bitImage(root):
     img = cv.imread(root, -1)
     img = cv.cvtColor(img, cv.COLOR_BGR2RGB)
@@ -111,13 +122,28 @@ def generate_class_mask(label, classMap, h, w):
     return class_mask, class_labels
 
 
+def get_masks(labelMap, objData, masks, h, w):
+    class_mask = np.zeros(shape=(h, w))
+    masks = masks[:, :, 0]
+    mask_values = np.unique(masks)
+    for i in range(len(mask_values)):
+        mask_i = masks == mask_values[i]
+        class_mask[mask_i] = i
+
+    class_labels = []
+    for obj in objData:
+        class_labels.append(labelMap[obj["shape"]])
+
+    return class_mask, class_labels
+
+
 def normalize(vertex):
     # all_points = vertex.reshape(-1, 3)
     mask = np.sum(vertex, axis=-1) != 0
 
     vertex_normalized = np.zeros(shape=vertex.shape)
     valid_min, valid_max = vertex[mask].min(), vertex[mask].max()
-    vertex_normalized[mask] = ( vertex[mask] - valid_min) / (valid_max - valid_min)
+    vertex_normalized[mask] = (vertex[mask] - valid_min) / (valid_max - valid_min)
 
     # check if normalization is correct
     valid_points_recall = np.zeros(shape=vertex_normalized.shape)
@@ -126,5 +152,3 @@ def normalize(vertex):
     assert np.abs(np.sum(vertex[mask] - valid_points_recall[mask])) < 1e-2
 
     return vertex_normalized, valid_min, valid_max
-
-
