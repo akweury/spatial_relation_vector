@@ -17,13 +17,16 @@ class Property():
 
 
 class SpatialObject():
-    def __init__(self, id, color=None, shape=None, pos=None, size=None, material=None):
+    def __init__(self, id, color=None, shape=None, pos=None, size=None, material=None, boxCenter=None):
         self.id = id
         self.color = color
         self.shape = shape
         self.position = pos
+        self.positionNew = None
         self.size = size
         self.material = material
+        self.screenPosition = boxCenter
+
 
     def print_info(self):
         print(f"color:{self.color}\n"
@@ -36,7 +39,7 @@ def spatial_obj(id, shape, pos, size):
     return SpatialObject(id, shape=shape, pos=pos, size=size)
 
 
-def generate_spatial_obj(id, vertex, img, label, mask, categories):
+def generate_spatial_obj(id, vertex, img, label, mask, categories, box):
     vertex = vertex.permute(1, 2, 0).numpy()
     img = img.permute(1, 2, 0).numpy()
     mask = mask.squeeze(0).numpy()
@@ -47,7 +50,9 @@ def generate_spatial_obj(id, vertex, img, label, mask, categories):
     dim = obj_points.shape[0]
     shape = categories[label]
     color = obj_pixels.mean(axis=0)
-    return SpatialObject(id, shape=shape, pos=center_pos, size=dim, color=color)
+    box = box.tolist()
+    boxCenter = [(box[0]+box[2])/2,(box[1]+box[3])/2]
+    return SpatialObject(id, shape=shape, pos=center_pos, size=dim, color=color, boxCenter=boxCenter)
 
 
 def attrDiff(objA, objB, attr):

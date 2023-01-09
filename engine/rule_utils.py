@@ -86,7 +86,7 @@ def get_continual_spatial_objs(predictions, images, vertices, objects, log_manag
                                               img=image,
                                               label=prediction["labels"][j],
                                               mask=prediction["masks"][j],
-                                              categories=categories)
+                                              categories=categories,box=prediction["boxes"][j])
             spatialObjs.append(spatialObj)
 
         spatialObjMatrix.append(spatialObjs)

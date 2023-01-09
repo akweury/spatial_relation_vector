@@ -137,8 +137,10 @@ def data2tensorAutoMask(data_root, args):
 
 
 
-def data2tensor_fact_extractor(data_root, args):
-    for sub_name in ["test", "train", "val"]:
+def data2tensor_fact_extractor(data_root, args, sub_names=None):
+    if sub_names is None:
+        sub_names = ["test", "train", "val"]
+    for sub_name in sub_names:
         data_path = data_root / sub_name
         if not os.path.exists(str(data_path)):
             raise FileNotFoundError

@@ -10,7 +10,7 @@ from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
 from torchvision.models.detection.mask_rcnn import MaskRCNNPredictor
 
 from engine import config
-from engine.SpatialObject import generate_spatial_obj, calc_srv, spatial_obj, attrDiff, calc_property_matrix
+from engine.SpatialObject import calc_srv, spatial_obj, attrDiff, calc_property_matrix
 from engine import rule_utils
 
 def mask_rcnn(img_tensor_int, weights=None):

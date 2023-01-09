@@ -7,10 +7,13 @@ from torch.utils.data import DataLoader
 from engine.FactExtractorDataset import FactExtractorDataset
 from engine import config, pipeline, args_utils, rule_utils, file_utils
 from engine.models import rule_check
+import create_dataset
 
 # preprocessing
 args = args_utils.paser()
 log_manager = pipeline.LogManager(model_exp="object_detector_big", args=args)
+create_dataset.data2tensor_fact_extractor(log_manager.data_path, args, ["test"])
+
 test_loader = DataLoader(FactExtractorDataset(log_manager.data_path, "test"), shuffle=True, batch_size=1,
                          collate_fn=pipeline.collate_fn)
 # load object detector
@@ -38,14 +41,21 @@ for i, (data, objects, vertex_max, vertex_min, file_json) in enumerate(test_load
 
         try_counter = 0
         new_unsatisfied_rules = unsatisfied_rules.copy()
-
+        new_continual_spatial_objs = continual_spatial_objs.copy()
         while len(new_unsatisfied_rules) > 0:
             try_counter += 1
-            continual_spatial_objs = rule_utils.get_random_continual_spatial_objs(continual_spatial_objs,vertex_max[0], vertex_min[0])
-            new_facts = rule_utils.get_discrete_spatial_objs(continual_spatial_objs)
+            new_continual_spatial_objs = rule_utils.get_random_continual_spatial_objs(continual_spatial_objs,
+                                                                                      vertex_max[0],
+                                                                                      vertex_min[0])
+            new_facts = rule_utils.get_discrete_spatial_objs(new_continual_spatial_objs)
             new_satisfied_rules, new_unsatisfied_rules = rule_check(new_facts, learned_rules)
 
+            if (try_counter > 100):
+                break
+
         print(f"tried {try_counter} times")
+
+        # add new positions
 
         log_manager.visualization(images, prediction, config.categories,
                                   satisfied_rules=satisfied_rules,
@@ -54,6 +64,7 @@ for i, (data, objects, vertex_max, vertex_min, file_json) in enumerate(test_load
                                   suggested_objs=continual_spatial_objs,
                                   idx=i, prefix="Test", show=False)
 
-
-        scene_dict = {'scene':rule_utils.objs2scene(continual_spatial_objs), 'file_name':file_json[0]}
-        file_utils.save_json(scene_dict, str(config.output/ args.exp / f"Test_output_{i}.json"))
+        scene_dict = {'scene': rule_utils.objs2scene(continual_spatial_objs),
+                      "pred_scene": rule_utils.objs2scene(new_continual_spatial_objs),
+                      'file_name': file_json[0]}
+        file_utils.save_json(scene_dict, str(config.output / args.exp / f"Test_output_{i}.json"))

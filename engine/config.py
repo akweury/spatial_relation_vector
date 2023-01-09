@@ -5,7 +5,7 @@ import torch
 
 root = Path(__file__).parents[1]
 
-work_place_path = root / "workplace"
+# work_place_path = root / "workplace"
 storage = root / "storage"
 
 dataset = storage / "dataset"
@@ -34,7 +34,7 @@ categories = ["background", "sphere", "cube"]
 # pre-trained model
 # model_ball_sphere_detector = models / "object_detector_big" / "model_best.pth.tar"
 model_ball_sphere_detector = models / "object_detector_big" / "checkpoint-9.pth.tar"
-rules_ball_sphere = models / "fact_extractor" / "learned_rules.json"
+rules_ball_sphere = models / "01.scene_simulation" / "learned_rules.json"
 
 propertyNames = ["shape"]
 
@@ -46,5 +46,5 @@ relation_dict = {'size': 'bigger/smaller than',
 if __name__ == "__main__":
     print("root path: " + str(root))
     print("storage path: " + str(dataset))
-    print("work place path: " + str(work_place_path))
+    # print("work place path: " + str(work_place_path))
 
