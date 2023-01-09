@@ -219,7 +219,7 @@ def printRules(img_output, satisfied_rules, unsatisfied_rules, learned_rules, fa
     text_y_pos = 10
 
     # facts
-    img_output, text_y_pos = addTextPIL(img_output, "facts", (10, text_y_pos), color=(255, 0, 0))
+    img_output, text_y_pos = addTextPIL(img_output, "predictions", (10, text_y_pos), color=(255, 0, 0))
     if facts is not None:
         for ruleIdx in range(len(facts)):
             img_output, text_y_pos = addFactPIL(img_output, facts[ruleIdx], (10, text_y_pos))
