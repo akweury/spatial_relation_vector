@@ -105,7 +105,7 @@ def get_discrete_spatial_objs(continual_spatial_objs):
 def get_random_continual_spatial_objs(continual_spatial_objs, vertex_max, vertex_min):
     for img in continual_spatial_objs:
         for obj in img:
-            obj.position = np.random.rand(3) * (vertex_max - vertex_min) + vertex_min
+            obj.position = np.random.rand(3) * (vertex_max.numpy() - vertex_min.numpy()) + vertex_min.numpy()
     return continual_spatial_objs
 
 
@@ -137,7 +137,7 @@ def equivalent_conclusions(conclusion, fact, key):
     return False
 
 
-def objs2scene(random_continual_spatial_objs):
+def objs2scene(random_continual_spatial_objs, vertex_max, vertex_min):
     scene = []
     for pair in random_continual_spatial_objs:
         for obj in pair:
@@ -145,5 +145,9 @@ def objs2scene(random_continual_spatial_objs):
     for obj in scene:
         for key in obj.keys():
             if isinstance(obj[key], np.ndarray):
+                if key == "position":
+                    obj[key] =  obj[key] * (vertex_max - vertex_min) + vertex_min
                 obj[key] = obj[key].tolist()
+
+
     return scene

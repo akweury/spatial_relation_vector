@@ -22,7 +22,6 @@ class SpatialObject():
         self.color = color
         self.shape = shape
         self.position = pos
-        self.positionNew = None
         self.size = size
         self.material = material
         self.screenPosition = boxCenter

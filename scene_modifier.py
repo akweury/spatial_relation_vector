@@ -3,6 +3,7 @@
 import os
 import torch
 from torch.utils.data import DataLoader
+import copy
 
 from engine.FactExtractorDataset import FactExtractorDataset
 from engine import config, pipeline, args_utils, rule_utils, file_utils
@@ -40,13 +41,13 @@ for i, (data, objects, vertex_max, vertex_min, file_json) in enumerate(test_load
         satisfied_rules, unsatisfied_rules = rule_check(facts, learned_rules)
 
         try_counter = 0
-        new_unsatisfied_rules = unsatisfied_rules.copy()
-        new_continual_spatial_objs = continual_spatial_objs.copy()
+        new_unsatisfied_rules =copy.deepcopy(unsatisfied_rules)
+        new_continual_spatial_objs = copy.deepcopy(continual_spatial_objs)
         while len(new_unsatisfied_rules) > 0:
             try_counter += 1
-            new_continual_spatial_objs = rule_utils.get_random_continual_spatial_objs(continual_spatial_objs,
-                                                                                      vertex_max[0],
-                                                                                      vertex_min[0])
+            new_continual_spatial_objs = rule_utils.get_random_continual_spatial_objs(new_continual_spatial_objs,
+                                                                                      vertex[0].max(),
+                                                                                      vertex[0].min())
             new_facts = rule_utils.get_discrete_spatial_objs(new_continual_spatial_objs)
             new_satisfied_rules, new_unsatisfied_rules = rule_check(new_facts, learned_rules)
 
@@ -64,7 +65,7 @@ for i, (data, objects, vertex_max, vertex_min, file_json) in enumerate(test_load
                                   suggested_objs=continual_spatial_objs,
                                   idx=i, prefix="Test", show=False)
 
-        scene_dict = {'scene': rule_utils.objs2scene(continual_spatial_objs),
-                      "pred_scene": rule_utils.objs2scene(new_continual_spatial_objs),
+        scene_dict = {'scene': rule_utils.objs2scene(continual_spatial_objs, vertex_max[0], vertex_min[0]),
+                      "pred_scene": rule_utils.objs2scene(new_continual_spatial_objs, vertex_max[0], vertex_min[0]),
                       'file_name': file_json[0]}
         file_utils.save_json(scene_dict, str(config.output / args.exp / f"Test_output_{i}.json"))
