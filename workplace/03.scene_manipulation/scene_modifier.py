@@ -39,9 +39,9 @@ for i, (data, objects, vertex_max, vertex_min, file_json) in enumerate(test_load
 
         # fact extractor
         continual_spatial_objs = rule_utils.get_continual_spatial_objs(prediction, images, vertex, objects, log_manager)
-        facts = rule_utils.get_discrete_spatial_objs(continual_spatial_objs)
+        property_prediction = rule_utils.get_discrete_spatial_objs(continual_spatial_objs)
 
-        satisfied_rules, unsatisfied_rules = rule_check(facts, learned_rules)
+        satisfied_rules, unsatisfied_rules = rule_check(property_prediction, learned_rules)
 
         try_counter = 0
         new_unsatisfied_rules =copy.deepcopy(unsatisfied_rules)
@@ -64,7 +64,7 @@ for i, (data, objects, vertex_max, vertex_min, file_json) in enumerate(test_load
         log_manager.visualization(images, prediction, config.categories,
                                   satisfied_rules=satisfied_rules,
                                   unsatisfied_rules=unsatisfied_rules,
-                                  facts=facts,
+                                  property_prediction=property_prediction,
                                   suggested_objs=continual_spatial_objs,
                                   idx=i, prefix="Test", show=False)
 

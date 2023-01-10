@@ -19,9 +19,9 @@ def pol2cart(rho, phi):
 
 def size_mapping(ref_size, obj_size):
     if ref_size > obj_size:
-        return "bigger than"
+        return "smaller,,"
     else:
-        return "smaller than"
+        return "bigger,"
 
 
 def dir_mapping(ref_pos_vec, pos_vec):
@@ -31,13 +31,20 @@ def dir_mapping(ref_pos_vec, pos_vec):
     phi_clock_shift = (90 - int(phi)) % 360
     clock_num_zone = (phi_clock_shift + 15) // 30 % 12
 
-    return f"at the {clock_num_zone} o'clock"
+    position = ["north",  # 0
+                "northeast", "northeast",  # 1,2
+                "east",  # 3
+                "southeast", "southeast",  # 4,5
+                "south",  # 6
+                "southwest", "southwest",  # 7,8
+                "west",  # 9
+                "northwest", "northwest",  # 10,11
+                "north"  # 12
+                ]
+
+    return f"in the {position[clock_num_zone]} has "
 
 
 def property_mapping(propertyValues, propertyType):
     if propertyType == "shape":
         return propertyValues
-    # if propertyType == "color":
-    #     rgb = ["red", "green", "blue"]
-    #     approx_color = rgb[np.argmax(propertyValues)]
-    #     return approx_color

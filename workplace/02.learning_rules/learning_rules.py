@@ -41,12 +41,12 @@ for i, (data, objects, _, _, _) in enumerate(train_loader):
 
         # fact extractor
         continual_spatial_objs = rule_utils.get_continual_spatial_objs(prediction, images, vertex, objects, log_manager)
-        facts = rule_utils.get_discrete_spatial_objs(continual_spatial_objs)
+        obj_properties_prediction = rule_utils.get_discrete_spatial_objs(continual_spatial_objs)
 
-        learned_rules, learned_rules_batch = rule_search(facts, learned_rules)
+        learned_rules, learned_rules_batch = rule_search(obj_properties_prediction, learned_rules)
         save_rules(learned_rules, log_manager.output_folder / f"learned_rules_{i}.json")
         log_manager.visualization(images, prediction, categories,
-                                  learned_rules=learned_rules_batch, facts=facts, idx=i, prefix='Train', show=False)
+                                  learned_rules=learned_rules_batch, property_prediction=obj_properties_prediction, idx=i, prefix='Train', show=False)
         print("break")
 
 # save learned rules

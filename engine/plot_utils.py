@@ -146,7 +146,7 @@ def addRulePIL(img, rule, pos):
     for key in rule['conclusion'].keys():
         conclusion_text += rule['conclusion'][key]  + " "
 
-    ruleText = f'{ref_text} {conclusion_text} {obj_text} (freq:{rule["freq"]})'
+    ruleText = f'{obj_text} {conclusion_text} {ref_text} (freq:{rule["freq"]})'
 
     draw.text(pos, ruleText, (255, 255, 255))
     x_pos, y_pos = pos
@@ -164,7 +164,7 @@ def addFactPIL(img, fact, pos):
 
     conclusion_text = fact['dir'] + " " + fact["size"]
 
-    ruleText = f'{ref_text} {conclusion_text} {obj_text}'
+    ruleText = f'{obj_text} {conclusion_text} {ref_text}'
 
     draw.text(pos, ruleText, (255, 255, 255))
     x_pos, y_pos = pos
