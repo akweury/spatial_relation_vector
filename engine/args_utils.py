@@ -71,7 +71,7 @@ def paser():
 
     # Parse the arguments
     args = parser.parse_args()
-    args_path = config.models / args.exp / 'args.json'
+    args_path = config.work_place_path / args.exp / 'args.json'
     load_args_from_file(args_path, args)
     print_args(args)
     args = Args(args)

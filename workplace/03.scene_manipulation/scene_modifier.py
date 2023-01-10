@@ -9,19 +9,23 @@ from engine.FactExtractorDataset import FactExtractorDataset
 from engine import config, pipeline, args_utils, rule_utils, file_utils, create_dataset
 from engine.models import rule_check
 
+# input models
+od_model_path = config.model_ball_sphere_detector
+lr_rule_path = config.rules_ball_sphere
+
 # preprocessing
 args = args_utils.paser()
-log_manager = pipeline.LogManager(model_exp="01.object_detection", args=args)
-create_dataset.data2tensor_fact_extractor(log_manager.data_path, args, ["test"])
+log_manager = pipeline.LogManager(args=args)
+create_dataset.data2tensor_fact_extractor(log_manager.data_path, args)
 
-test_loader = DataLoader(FactExtractorDataset(log_manager.data_path, "test"), shuffle=True, batch_size=1,
+test_loader = DataLoader(FactExtractorDataset(log_manager.data_path), shuffle=True, batch_size=1,
                          collate_fn=pipeline.collate_fn)
 # load object detector
-model_od, optimizer, parameters = pipeline.load_checkpoint(config.model_ball_sphere_detector, args)
+model_od, optimizer, parameters = pipeline.load_checkpoint(od_model_path)
 model_od.eval()
 
 # load learned rules
-learned_rules = rule_utils.load_rules(os.path.join(str(config.rules_ball_sphere)))
+learned_rules = rule_utils.load_rules(os.path.join(str(lr_rule_path)))
 learned_rules = rule_utils.rule_combination(learned_rules)
 # apply rules
 for i, (data, objects, vertex_max, vertex_min, file_json) in enumerate(test_loader):

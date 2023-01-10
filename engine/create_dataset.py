@@ -137,56 +137,53 @@ def data2tensorAutoMask(data_root, args):
 
 
 
-def data2tensor_fact_extractor(data_root, args, sub_names=None):
-    if sub_names is None:
-        sub_names = ["test", "train", "val"]
-    for sub_name in sub_names:
-        data_path = data_root / sub_name
-        if not os.path.exists(str(data_path)):
-            raise FileNotFoundError
-        if not os.path.exists(str(data_path / "tensor")):
-            os.makedirs(str(data_path / "tensor"))
+def data2tensor_fact_extractor(data_root, args):
+    data_path = data_root
+    if not os.path.exists(str(data_path)):
+        raise FileNotFoundError
+    if not os.path.exists(str(data_path / "tensor")):
+        os.makedirs(str(data_path / "tensor"))
 
-        depth_files = np.array(sorted(glob.glob(str(data_path / "*depth0.png"), recursive=True)))
-        normal_files = np.array(sorted(glob.glob(str(data_path / "*normal0.png"), recursive=True)))
-        data_files = np.array(sorted(glob.glob(str(data_path / "*data0.json"), recursive=True)))
-        img_files = np.array(sorted(glob.glob(str(data_path / "*image.png"), recursive=True)))
+    depth_files = np.array(sorted(glob.glob(str(data_path / "*depth0.png"), recursive=True)))
+    normal_files = np.array(sorted(glob.glob(str(data_path / "*normal0.png"), recursive=True)))
+    data_files = np.array(sorted(glob.glob(str(data_path / "*data0.json"), recursive=True)))
+    img_files = np.array(sorted(glob.glob(str(data_path / "*image.png"), recursive=True)))
 
-        for item in range(len(data_files)):
-            output_tensor_file = str(data_path / "tensor" / f"{str(item).zfill(5)}.pth.tar")
-            if args.clear == "false" and (os.path.exists(output_tensor_file) or not os.path.exists(data_files[item])):
-                continue
+    for item in range(len(data_files)):
+        output_tensor_file = str(data_path / "tensor" / f"{str(item).zfill(5)}.pth.tar")
+        if args.clear == "false" and (os.path.exists(output_tensor_file) or not os.path.exists(data_files[item])):
+            continue
 
-            with open(data_files[item]) as f:
-                data = json.load(f)
+        with open(data_files[item]) as f:
+            data = json.load(f)
 
-            depth = utils.load_scaled16bitImage(depth_files[item],
-                                                data['minDepth'],
-                                                data['maxDepth'])
-            vertex = utils.depth2vertex(torch.tensor(depth).permute(2, 0, 1),
-                                        torch.tensor(data["K"]),
-                                        torch.tensor(data["R"]).float(),
-                                        torch.tensor(data["t"]).float())
+        depth = utils.load_scaled16bitImage(depth_files[item],
+                                            data['minDepth'],
+                                            data['maxDepth'])
+        vertex = utils.depth2vertex(torch.tensor(depth).permute(2, 0, 1),
+                                    torch.tensor(data["K"]),
+                                    torch.tensor(data["R"]).float(),
+                                    torch.tensor(data["t"]).float())
 
-            vertex_normalized, vertex_min, vertex_max = utils.normalize(vertex)
+        vertex_normalized, vertex_min, vertex_max = utils.normalize(vertex)
 
-            img = utils.load_32bitImage(img_files[item])
-            input_data = np.c_[
-                vertex_normalized,  # 0,1,2
-                img,  # 3,4,5
-            ]
-            # convert to tensor
-            input_tensor = torch.from_numpy(input_data.astype(np.float32)).permute(2, 0, 1)
+        img = utils.load_32bitImage(img_files[item])
+        input_data = np.c_[
+            vertex_normalized,  # 0,1,2
+            img,  # 3,4,5
+        ]
+        # convert to tensor
+        input_tensor = torch.from_numpy(input_data.astype(np.float32)).permute(2, 0, 1)
 
-            # save tensors
-            training_case = {"input_tensor": input_tensor,
-                             "objects": data["objects"],
-                             "vertex_max": vertex_max,
-                             "vertex_min": vertex_min,
-                             'file_name': data_files[item]
-                             }
-            torch.save(training_case, output_tensor_file)
-            print(f"File {item + 1}/{len(data_files)} saved as a tensor.")
+        # save tensors
+        training_case = {"input_tensor": input_tensor,
+                         "objects": data["objects"],
+                         "vertex_max": vertex_max,
+                         "vertex_min": vertex_min,
+                         'file_name': data_files[item]
+                         }
+        torch.save(training_case, output_tensor_file)
+        print(f"File {item + 1}/{len(data_files)} saved as a tensor.")
 
 
 

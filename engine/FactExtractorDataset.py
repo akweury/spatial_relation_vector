@@ -11,11 +11,8 @@ from engine import file_utils
 
 class FactExtractorDataset(Dataset):
 
-    def __init__(self, root, folder=None):
-
-        if folder is None:
-            raise ValueError("Please set the folder name to train/test ")
-        self.root = root / folder / "tensor"
+    def __init__(self, root):
+        self.root = root / "tensor"
         self.X = np.array(sorted(glob.glob(str(self.root / "*pth.tar"), recursive=True)))
 
     def __len__(self):

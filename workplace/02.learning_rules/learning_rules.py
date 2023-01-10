@@ -19,7 +19,7 @@ args = args_utils.paser()
 log_manager = pipeline.LogManager(args=args)
 
 # create data tensors if they are not exists
-create_dataset.data2tensor_fact_extractor(log_manager.data_path, args, sub_names=["train"])
+create_dataset.data2tensor_fact_extractor(log_manager.data_path, args)
 
 train_dataset = FactExtractorDataset(log_manager.data_path, "train")
 train_loader = DataLoader(train_dataset, shuffle=True, batch_size=args.batch_size,

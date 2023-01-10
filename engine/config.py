@@ -5,7 +5,7 @@ import torch
 
 root = Path(__file__).parents[1]
 
-# work_place_path = root / "workplace"
+work_place_path = root / "workplace"
 storage = root / "storage"
 
 dataset = storage / "dataset"
