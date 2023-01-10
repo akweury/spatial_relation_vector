@@ -13,6 +13,7 @@ from engine import config
 from engine.SpatialObject import calc_srv, spatial_obj, attrDiff, calc_property_matrix
 from engine import rule_utils
 
+
 def mask_rcnn(img_tensor_int, weights=None):
     if weights is None:
         weights = MaskRCNN_ResNet50_FPN_Weights.DEFAULT
@@ -302,7 +303,9 @@ def common_pair(premise, conclusion, property_matrices):
         for fact in property_matrix:
             if isSubObj(premise["ref"], fact["ref"]) and isSubObj(premise["obj"], fact["obj"]):
                 if len(conclusion) == 2:
-                    if rule_utils.equivalent_conclusions(conclusion, fact, 'size') and rule_utils.equivalent_conclusions(conclusion, fact, 'dir'):
+                    if rule_utils.equivalent_conclusions(conclusion, fact,
+                                                         'size') and rule_utils.equivalent_conclusions(conclusion, fact,
+                                                                                                       'dir'):
                         break
                     else:
                         return False
@@ -339,6 +342,7 @@ def rule_check(property_matrices, learned_rules):
         if not is_repeat_rule:
             no_repeat_rules.append(rule)
 
+    # check if any rules have been satisfied
     satisfied_rules = []
     unsatisfied_rules = []
     for rule in no_repeat_rules:
@@ -361,8 +365,10 @@ def rule_search(property_matrices, learned_rules):
         obj_num = len(property_matrix)
         for relation in property_matrix:
             premise = calc_subset_2objs(relation["ref"], relation["obj"])
-            conclusion = [{"dir": relation["dir"]}, {"size": relation["size"]},
-                          {"dir": relation["dir"], "size": relation["size"]}]
+            conclusion = [{"dir": relation["dir"]},
+                          {"size": relation["size"]},
+                          {"dir": relation["dir"], "size": relation["size"]}
+                          ]
             premise_conclusion_pairs.append({"premise": premise, "conclusion": conclusion})
 
     for premise_conclusion_pair in premise_conclusion_pairs:

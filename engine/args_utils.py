@@ -22,7 +22,7 @@ class Args():
         self.lr = args.lr
         self.momentum = args.momentum
         self.weight_decay = args.weight_decay
-
+        self.subexp = args.subexp
         if args.device == "gpu":
             self.device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
         else:
@@ -64,6 +64,7 @@ def paser():
     parser.add_argument('--num_classes', '-nc', help='Numer of Classes')
     parser.add_argument('--machine', type=str, default="local", help='choose the training machin, local or remote')
     parser.add_argument('--exp', '-e', help='Experiment name')
+    parser.add_argument('--subexp', help='Sub-experiment name')
     parser.add_argument('--device', default="cpu", help='Choose device as cpu or gpu')
     parser.add_argument('--print_freq', '-pf', help='print frequency')
     parser.add_argument('--resume', default=None, type=str, metavar='PATH',

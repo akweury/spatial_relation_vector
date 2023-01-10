@@ -227,7 +227,7 @@ def collate_fn(batch):
 
 
 class LogManager():
-    def __init__(self, model_exp=None, args=None, ):
+    def __init__(self, args=None, ):
         self.args = args
         self.epoch = None
         self.date_start = datetime.datetime.today().date()
@@ -240,18 +240,17 @@ class LogManager():
         self.data_path = None
         self.output_folder = None
         self.model_folder = None
-        self.io_path(model_exp)
+        self.io_path()
 
-    def io_path(self, model_exp=None):
-        self.data_path = config.dataset / self.args.exp
-        self.output_folder = config.output / self.args.exp
-        if model_exp is None:
-            self.model_folder = config.models / self.args.exp
-        else:
-            self.model_folder = config.models / model_exp
+    def io_path(self):
+        self.data_path = config.dataset / self.args.exp / self.args.subexp
+        self.output_folder = config.output / self.args.exp / self.args.subexp
+        self.model_folder = config.models / self.args.exp / self.args.subexp
+
+
 
         if not os.path.exists(str(self.data_path)):
-            raise ValueError("Dataset Tensors are not generated yet.")
+            raise ValueError("Dataset Tensors are not generated yet. Use Unity to generate the dataset first.")
 
         if not os.path.exists(str(self.output_folder)):
             os.makedirs(str(self.output_folder))

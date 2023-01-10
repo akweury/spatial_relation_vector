@@ -11,13 +11,12 @@ from engine.models import rule_check
 
 # input models
 od_model_path = config.model_ball_sphere_detector
-lr_rule_path = config.rules_ball_sphere
 
 # preprocessing
 args = args_utils.paser()
 log_manager = pipeline.LogManager(args=args)
+lr_rule_path = config.models / "02.learning_rules" / log_manager.args.subexp / "learned_rules.json"
 create_dataset.data2tensor_fact_extractor(log_manager.data_path, args)
-
 test_loader = DataLoader(FactExtractorDataset(log_manager.data_path), shuffle=True, batch_size=1,
                          collate_fn=pipeline.collate_fn)
 # load object detector
@@ -44,7 +43,7 @@ for i, (data, objects, vertex_max, vertex_min, file_json) in enumerate(test_load
         satisfied_rules, unsatisfied_rules = rule_check(property_prediction, learned_rules)
 
         try_counter = 0
-        new_unsatisfied_rules =copy.deepcopy(unsatisfied_rules)
+        new_unsatisfied_rules = copy.deepcopy(unsatisfied_rules)
         new_continual_spatial_objs = copy.deepcopy(continual_spatial_objs)
         while len(new_unsatisfied_rules) > 0:
             try_counter += 1
@@ -71,4 +70,4 @@ for i, (data, objects, vertex_max, vertex_min, file_json) in enumerate(test_load
         scene_dict = {'scene': rule_utils.objs2scene(continual_spatial_objs, vertex_max[0], vertex_min[0]),
                       "pred_scene": rule_utils.objs2scene(new_continual_spatial_objs, vertex_max[0], vertex_min[0]),
                       'file_name': file_json[0]}
-        file_utils.save_json(scene_dict, str(config.output / args.exp / f"Test_output_{i}.json"))
+        file_utils.save_json(scene_dict, str(log_manager.output_folder / f"Test_output_{i}.json"))

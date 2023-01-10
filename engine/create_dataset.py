@@ -4,10 +4,8 @@ import json
 import glob
 import numpy as np
 import torch
-import argparse
-from pprint import pprint
 
-from engine import config, dataset_utils as utils
+from engine import dataset_utils as utils
 
 
 def data2tensorManualMask(data_root, args):

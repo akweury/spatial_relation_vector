@@ -21,6 +21,7 @@ from torchvision.utils import draw_bounding_boxes, draw_segmentation_masks
 
 from engine import config
 
+
 def draw_line_chart(data_1, path, date_now, time_now,
                     title=None, x_label=None, y_label=None, show=False, log_y=False,
                     label=None, epoch=None, cla_leg=False, start_epoch=0, loss_type="mse"):
@@ -144,7 +145,11 @@ def addRulePIL(img, rule, pos):
 
     conclusion_text = ""
     for key in rule['conclusion'].keys():
-        conclusion_text += rule['conclusion'][key]  + " "
+        if isinstance(rule['conclusion'][key], list):
+            for each in rule['conclusion'][key]:
+                conclusion_text += each + " "
+        else:
+            conclusion_text += rule['conclusion'][key] + " "
 
     ruleText = f'{obj_text} {conclusion_text} {ref_text} (freq:{rule["freq"]})'
 
@@ -152,6 +157,7 @@ def addRulePIL(img, rule, pos):
     x_pos, y_pos = pos
     y_pos += 10
     return img, y_pos
+
 
 def addFactPIL(img, fact, pos):
     draw = ImageDraw.Draw(img)
@@ -161,8 +167,9 @@ def addFactPIL(img, fact, pos):
     obj_text = ""
     for property in fact["obj"]:
         obj_text += property.value + " "
-
-    conclusion_text = fact['dir'] + " " + fact["size"]
+    conclusion_text = []
+    for each in fact['dir'] + fact["size"]:
+        conclusion_text = each + " "
 
     ruleText = f'{obj_text} {conclusion_text} {ref_text}'
 
@@ -171,18 +178,19 @@ def addFactPIL(img, fact, pos):
     y_pos += 10
     return img, y_pos
 
+
 def addPosPIL(img, objs, pos):
     draw = ImageDraw.Draw(img)
 
     posText = f''
     for obj in objs:
-        posText +=obj.shape + ": " + str(['%.4f' % elem for elem in obj.position.tolist()]) + " "
-
+        posText += obj.shape + ": " + str(['%.4f' % elem for elem in obj.position.tolist()]) + " "
 
     draw.text(pos, posText, (255, 255, 255))
     x_pos, y_pos = pos
     y_pos += 10
     return img, y_pos
+
 
 def maskRCNNVisualization(img, img_pred, threshold, categories):
     img_pred["boxes"] = img_pred["boxes"][img_pred["scores"] > threshold]
@@ -229,28 +237,27 @@ def printRules(img_output, satisfied_rules, unsatisfied_rules, learned_rules, fa
     if satisfied_rules is not None:
         for ruleIdx in range(len(satisfied_rules)):
             img_output, text_y_pos = addRulePIL(img_output, satisfied_rules[ruleIdx],
-                                                           (10, text_y_pos))
+                                                (10, text_y_pos))
     # unsatisfied rules
     img_output, text_y_pos = addTextPIL(img_output, "unsatisfied_rules", (10, text_y_pos),
-                                                   color=(255, 0, 0))
+                                        color=(255, 0, 0))
     if unsatisfied_rules is not None:
         for ruleIdx in range(len(unsatisfied_rules)):
             img_output, text_y_pos = addRulePIL(img_output, unsatisfied_rules[ruleIdx],
-                                                           (10, text_y_pos))
+                                                (10, text_y_pos))
 
     # learned rules
     img_output, text_y_pos = addTextPIL(img_output, "learned_rules", (10, text_y_pos),
-                                                   color=(255, 0, 0))
+                                        color=(255, 0, 0))
     if learned_rules is not None:
         for ruleIdx in range(len(learned_rules)):
             img_output, text_y_pos = addRulePIL(img_output, learned_rules[ruleIdx], (10, text_y_pos))
 
     img_output, text_y_pos = addTextPIL(img_output, "suggested_positions", (10, text_y_pos),
-                                                   color=(255, 0, 0))
+                                        color=(255, 0, 0))
     if suggested_objs is not None:
         for ruleIdx in range(len(suggested_objs)):
             img_output, text_y_pos = addPosPIL(img_output, suggested_objs[ruleIdx], (10, text_y_pos))
-
 
     return img_output, text_y_pos
 
@@ -267,9 +274,10 @@ def get_concat_v_multi_resize(im_list, resample=Image.BICUBIC):
         pos_y += im.height
     return dst
 
+
 def get_concat_h_multi_resize(im_list, resample=Image.BICUBIC):
     min_height = min(im.height for im in im_list)
-    im_list_resize = [im.resize((int(im.width * min_height / im.height), min_height),resample=resample)
+    im_list_resize = [im.resize((int(im.width * min_height / im.height), min_height), resample=resample)
                       for im in im_list]
     total_width = sum(im.width for im in im_list_resize)
     dst = Image.new('RGB', (total_width, min_height))

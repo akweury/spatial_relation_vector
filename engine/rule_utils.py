@@ -86,7 +86,7 @@ def get_continual_spatial_objs(predictions, images, vertices, objects, log_manag
                                               img=image,
                                               label=prediction["labels"][j],
                                               mask=prediction["masks"][j],
-                                              categories=categories,box=prediction["boxes"][j])
+                                              categories=categories, box=prediction["boxes"][j])
             spatialObjs.append(spatialObj)
 
         spatialObjMatrix.append(spatialObjs)
@@ -119,11 +119,11 @@ def rule_combination(learned_rules):
                     hasConflict = True
                     if 'size' in combined_rule['conclusion'].keys():
                         if combined_rule['conclusion']['size'] != learned_rule['conclusion']['size']:
-                            combined_rule['conclusion']['size'] = config.relation_dict['size']
+                            combined_rule['conclusion']['size'] += (config.relation_dict['size'])
                             combined_rule['freq'] = combined_rule['freq'] + learned_rule['freq']
                     if 'dir' in combined_rule['conclusion'].keys():
                         if combined_rule['conclusion']['dir'] != learned_rule['conclusion']['dir']:
-                            combined_rule['conclusion']['dir'] = config.relation_dict['dir']
+                            combined_rule['conclusion']['dir'] += (learned_rule['conclusion']['dir'])
                             combined_rule['freq'] = combined_rule['freq'] + learned_rule['freq']
         if not hasConflict:
             combined_rules.append(learned_rule)
@@ -131,8 +131,19 @@ def rule_combination(learned_rules):
     return combined_rules
 
 
+def isSubList(test_list, sublist):
+    res = False
+    for idx in range(len(test_list) - len(sublist) + 1):
+        if test_list[idx: idx + len(sublist)] == sublist:
+            res = True
+            break
+    return res
+
+
 def equivalent_conclusions(conclusion, fact, key):
-    if conclusion[key] == fact[key]:
+    if isinstance(conclusion[key], list):
+        return isSubList(conclusion[key], fact[key])
+    elif conclusion[key] == fact[key]:
         return True
     return False
 
@@ -146,8 +157,6 @@ def objs2scene(random_continual_spatial_objs, vertex_max, vertex_min):
         for key in obj.keys():
             if isinstance(obj[key], np.ndarray):
                 if key == "position":
-                    obj[key] =  obj[key] * (vertex_max - vertex_min) + vertex_min
+                    obj[key] = obj[key] * (vertex_max - vertex_min) + vertex_min
                 obj[key] = obj[key].tolist()
-
-
     return scene

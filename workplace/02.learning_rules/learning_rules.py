@@ -50,4 +50,4 @@ for i, (data, objects, _, _, _) in enumerate(train_loader):
         print("break")
 
 # save learned rules
-rule_utils.save_rules(learned_rules, os.path.join(str(config.models / args.exp), 'learned_rules.json'))
+rule_utils.save_rules(learned_rules, os.path.join(str(log_manager.model_folder), 'learned_rules.json'))
