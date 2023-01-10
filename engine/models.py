@@ -87,7 +87,7 @@ def get_model_instance_segmentation(num_classes, weights=None):
 #         for j in range(len(prediction["labels"])):
 #             spatialObj = generate_spatial_obj(id=j,
 #                                               vertex=vertex,
-#                                               img=image,
+#                                               demo_img=image,
 #                                               label=prediction["labels"][j],
 #                                               mask=prediction["masks"][j],
 #                                               categories=categories)
