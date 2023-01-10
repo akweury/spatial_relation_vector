@@ -19,9 +19,9 @@ def pol2cart(rho, phi):
 
 def size_mapping(ref_size, obj_size):
     if ref_size > obj_size:
-        return "smaller,,"
+        return "smaller than, "
     else:
-        return "bigger,"
+        return "bigger than, "
 
 
 def dir_mapping(ref_pos_vec, pos_vec):
@@ -42,7 +42,7 @@ def dir_mapping(ref_pos_vec, pos_vec):
                 "north"  # 12
                 ]
 
-    return f"in the {position[clock_num_zone]} has "
+    return f"in the {position[clock_num_zone]} of, "
 
 
 def property_mapping(propertyValues, propertyType):
