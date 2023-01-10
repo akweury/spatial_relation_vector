@@ -291,7 +291,7 @@ class LogManager():
                                    cla_leg=True)
 
     def visualization(self, images, img_preds, categories,
-                      satisfied_rules=None, unsatisfied_rules=None, learned_rules=None,facts=None,
+                      satisfied_rules=None, unsatisfied_rules=None, learned_rules=None, facts=None,
                       suggested_objs=None,
                       idx=0,
                       prefix=None,
@@ -302,7 +302,8 @@ class LogManager():
 
         img_outputs = []
         for i in range(len(img_preds)):
-            img_output = plot_utils.maskRCNNVisualization(img_tensor_int[i], img_preds[i], self.args.conf_threshold, categories)
+            img_output = plot_utils.maskRCNNVisualization(img_tensor_int[i], img_preds[i], self.args.conf_threshold,
+                                                          categories)
             img_output, text_y_pos = plot_utils.printRules(img_output, satisfied_rules, unsatisfied_rules,
                                                            learned_rules, facts[i], suggested_objs)
             img_outputs.append(img_output)
@@ -434,14 +435,19 @@ def save_checkpoint(is_best, model, optimizer, log_manager):
         os.remove(os.path.join(log_manager.model_folder, 'checkpoint-' + str(log_manager.epoch - 1) + '.pth.tar'))
 
 
-def load_checkpoint(model_path, args):
-    model = models.get_model_instance_segmentation(args.num_classes).to(args.device)
-
+def load_checkpoint(model_path):
     assert os.path.isfile(model_path), f"No checkpoint found at:{model_path}"
-    checkpoint = torch.load(model_path, map_location=torch.device(args.device))
+    # checkpoint = torch.load(model_path, map_location=torch.device(args.device))
+    checkpoint = torch.load(model_path, map_location=torch.device("cpu"))
+
+    args = checkpoint["args"]
+    args.device = torch.device("cpu")
     start_epoch = checkpoint['epoch'] + 1  # resume epoch
-    model.load_state_dict(checkpoint["state_dict"])  # resume the model
     optimizer = checkpoint['optimizer']  # resume optimizer
+
+    model = models.get_model_instance_segmentation(args.num_classes).to(args.device)
+    model.load_state_dict(checkpoint["state_dict"])  # resume the model
+
     # self.optimizer = SGD(self.parameters, lr=self.args.lr, momentum=self.args.momentum, weight_decay=0)
     # self.args = checkpoint['args']
     parameters = filter(lambda p: p.requires_grad, model.parameters())

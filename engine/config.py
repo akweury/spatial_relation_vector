@@ -32,9 +32,9 @@ colors = [
 categories = ["background", "sphere", "cube"]
 
 # pre-trained model
-# model_ball_sphere_detector = models / "object_detector_big" / "model_best.pth.tar"
-model_ball_sphere_detector = models / "object_detector_big" / "checkpoint-9.pth.tar"
-rules_ball_sphere = models / "01.scene_simulation" / "learned_rules.json"
+# model_ball_sphere_detector = models / "01.object_detection" / "model_best.pth.tar"
+model_ball_sphere_detector = models / "01.object_detection" / "checkpoint-9.pth.tar"
+rules_ball_sphere = models / "02.learning_rules" / "learned_rules.json"
 
 propertyNames = ["shape"]
 

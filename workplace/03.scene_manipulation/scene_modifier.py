@@ -6,13 +6,12 @@ from torch.utils.data import DataLoader
 import copy
 
 from engine.FactExtractorDataset import FactExtractorDataset
-from engine import config, pipeline, args_utils, rule_utils, file_utils
+from engine import config, pipeline, args_utils, rule_utils, file_utils, create_dataset
 from engine.models import rule_check
-import create_dataset
 
 # preprocessing
 args = args_utils.paser()
-log_manager = pipeline.LogManager(model_exp="object_detector_big", args=args)
+log_manager = pipeline.LogManager(model_exp="01.object_detection", args=args)
 create_dataset.data2tensor_fact_extractor(log_manager.data_path, args, ["test"])
 
 test_loader = DataLoader(FactExtractorDataset(log_manager.data_path, "test"), shuffle=True, batch_size=1,
