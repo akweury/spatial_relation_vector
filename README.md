@@ -1,5 +1,19 @@
-# spatial_relation_vector
-The implementation about idea spatial relation vector
+# Spatial Relation Vector
+The implementation about idea "spatial relation vector"
+
+#### 01. Object detection
+Mask R-CNN based object detection
+![od_example](./storage/output/01.object_detection/output_9_0.png)
+
+#### 02. learning rules
+Learning common exist properties of a given batch images. Then consider them as rules.
+![learning_rules_example](./storage/output/02.learning_rules/Train_output_0.png)
+
+#### 03. scene manipulation
+Manipulate the objects to satisfy the unsatisfied rules.
+(Visualization is done by Unity.)
+![scene_manipulation_example](./storage/output/03.scene_manipulation/Test_output_0.compare.png)
+
 
 ---
 #### Docker Command
@@ -23,12 +37,4 @@ cd /storage-01/ml-jsha/output/object_detector_big
 copy dataset
 
 scp D:\PycharmProjects\spatial_relation_vector\dataset\object_detector.zip ml-jsha@130.83.185.153:/home/ml-jsha/spatial_relation_vector
-
-
----
-#### Create training tensors
-First, run `create_dataset.py` to calculate masks from dataset images and save them as tensors
-
----
-#### TODO List:
 
