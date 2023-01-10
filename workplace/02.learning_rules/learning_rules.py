@@ -21,7 +21,7 @@ log_manager = pipeline.LogManager(args=args)
 # create data tensors if they are not exists
 create_dataset.data2tensor_fact_extractor(log_manager.data_path, args)
 
-train_dataset = FactExtractorDataset(log_manager.data_path, "train")
+train_dataset = FactExtractorDataset(log_manager.data_path)
 train_loader = DataLoader(train_dataset, shuffle=True, batch_size=args.batch_size,
                           collate_fn=pipeline.collate_fn)
 
