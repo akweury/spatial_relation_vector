@@ -10,7 +10,7 @@ from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
 from torchvision.models.detection.mask_rcnn import MaskRCNNPredictor
 
 from engine import config
-from engine.SpatialObject import calc_srv, spatial_obj, attrDiff, calc_property_matrix
+from engine.SpatialObject import calc_srv, spatial_obj
 from engine import rule_utils
 
 
@@ -239,27 +239,10 @@ def common_exist_check(subset, property_matrices):
     return True
 
 
-def calc_subset_2objs(ref_obj, obj):
-    lists = []
-    ref_obj_subset = calc_subset(ref_obj)
-    obj_subset = calc_subset(obj)
-    for ref_obj_property in ref_obj_subset:
-        for obj_property in obj_subset:
-            lists.append({"ref": ref_obj_property, "obj": obj_property})
-
-    return lists
 
 
-def calc_subset(full_set):
-    full_set = list(full_set)
-    # lists = [[]]  # empty set has been included
-    lists = []  # no empty set has been included
-    for i in range(len(full_set) + 1):
-        for j in range(i):
-            subset = full_set[j:i]
-            if subset not in lists:
-                lists.append(subset)
-    return lists
+
+
 
 
 def rule_exist_search(property_matrices, learned_rules):
@@ -276,7 +259,7 @@ def rule_exist_search(property_matrices, learned_rules):
                 if common_exist(property, property_matrices):
                     property["commonExist"] = True
                     common_exist_set.append(property)
-        sub_common_sets = calc_subset(common_exist_set)
+        sub_common_sets = rule_utils.calc_subset(common_exist_set)
 
         for subset in sub_common_sets:
             if common_exist_check(subset, property_matrices):
@@ -284,47 +267,6 @@ def rule_exist_search(property_matrices, learned_rules):
                     common_exist_rules.append(subset)
 
     return common_exist_rules
-
-
-def isSubObj(subObj, obj):
-    for property_sub in subObj:
-        exist = False
-        for property_main in obj:
-            if property_main == property_sub:
-                exist = True
-        if not exist:
-            return False
-
-    return True
-
-
-def common_pair(premise, conclusion, property_matrices):
-    for property_matrix in property_matrices:
-        for fact in property_matrix:
-            if isSubObj(premise["ref"], fact["ref"]) and isSubObj(premise["obj"], fact["obj"]):
-                if len(conclusion) == 2:
-                    if rule_utils.equivalent_conclusions(conclusion, fact,
-                                                         'size') and rule_utils.equivalent_conclusions(conclusion, fact,
-                                                                                                       'dir'):
-                        break
-                    else:
-                        return False
-                elif "dir" in conclusion:
-                    if rule_utils.equivalent_conclusions(conclusion, fact, 'dir'):
-                        break
-                    else:
-                        return False
-                elif "size" in conclusion:
-                    if rule_utils.equivalent_conclusions(conclusion, fact, 'size'):
-                        break
-                    else:
-                        return False
-                else:
-                    return False
-            else:
-                return False
-    return True
-
 
 def rule_check(property_matrices, learned_rules):
     # delete repeated rules
@@ -346,9 +288,7 @@ def rule_check(property_matrices, learned_rules):
     satisfied_rules = []
     unsatisfied_rules = []
     for rule in no_repeat_rules:
-        premise = rule["premise"]
-        conclusion = rule["conclusion"]
-        if common_pair(premise, conclusion, property_matrices):
+        if rule_utils.common_pair(rule, property_matrices):
             satisfied_rules.append(rule)
         else:
             unsatisfied_rules.append(rule)
@@ -357,49 +297,18 @@ def rule_check(property_matrices, learned_rules):
 
 
 def rule_search(property_matrices, learned_rules):
-    common_exist_rules = learned_rules
-    learned_rules_batch = []
+    # search for all the possible candidate rules
+    candidate_rules = rule_utils.candidate_rule_search(property_matrices)
 
-    premise_conclusion_pairs = []
-    for property_matrix in property_matrices:
-        obj_num = len(property_matrix)
-        for relation in property_matrix:
-            premise = calc_subset_2objs(relation["ref"], relation["obj"])
-            conclusion = [{"dir": relation["dir"]},
-                          {"size": relation["size"]},
-                          {"dir": relation["dir"], "size": relation["size"]}
-                          ]
-            premise_conclusion_pairs.append({"premise": premise, "conclusion": conclusion})
+    # check if candidate rules exist in each image.
+    learned_rules_batch = rule_utils.exist_rule_search(property_matrices, candidate_rules)
 
-    for premise_conclusion_pair in premise_conclusion_pairs:
-        premises = premise_conclusion_pair["premise"]
-        conclusions = premise_conclusion_pair["conclusion"]
-        for premise in premises:
-            for conclusion in conclusions:
-                if common_pair(premise, conclusion, property_matrices):
-                    new_rule = {"premise": premise, "conclusion": conclusion, "freq": 1}
-                    is_new_rule = True
-                    for each_rule in common_exist_rules:
-                        if each_rule["premise"] == new_rule["premise"] and \
-                                each_rule["conclusion"] == new_rule["conclusion"]:
-                            each_rule["freq"] += 1
-                            is_new_rule = False
-                            break
-                    if is_new_rule:
-                        common_exist_rules.append(new_rule)
+    # update rule list
+    learned_rules = rule_utils.add_new_rules(learned_rules, learned_rules_batch)
 
-                    is_new_batch_rule = True
-                    new_batch_rule = {"premise": premise, "conclusion": conclusion, "freq": 1}
-                    for each_rule in learned_rules_batch:
-                        if each_rule["premise"] == new_batch_rule["premise"] and \
-                                each_rule["conclusion"] == new_batch_rule["conclusion"]:
-                            each_rule["freq"] += 1
-                            is_new_batch_rule = False
-                            break
-                    if is_new_batch_rule:
-                        learned_rules_batch.append(new_batch_rule)
 
-    return common_exist_rules, learned_rules_batch
+
+    return learned_rules, learned_rules_batch
 
 
 def obj2propertyList(obj):

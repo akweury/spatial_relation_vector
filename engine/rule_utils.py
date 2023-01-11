@@ -2,7 +2,8 @@
 import json
 import numpy as np
 from engine import config
-from engine.SpatialObject import Property, generate_spatial_obj, calc_srv, spatial_obj, attrDiff, calc_property_matrix
+from engine.SpatialObject import Property, generate_spatial_obj
+from engine import mechanics
 
 
 def obj2propertyList(obj):
@@ -57,6 +58,10 @@ def load_rules(file_name):
 
 
 def get_continual_spatial_objs(predictions, images, vertices, objects, log_manager):
+    """
+    return a list of spatialObjs.
+    Each spatial obj contains all the property information in continual space.
+    """
     facts = []
     spatialObjMatrix = []
     for i in range(len(images)):
@@ -94,12 +99,12 @@ def get_continual_spatial_objs(predictions, images, vertices, objects, log_manag
 
 
 def get_discrete_spatial_objs(continual_spatial_objs):
-    facts = []
-    for i in range(len(continual_spatial_objs)):
-        property_matrix = calc_property_matrix(continual_spatial_objs[i], config.propertyNames)
-        facts.append(property_matrix)
-    facts = np.array(facts)
-    return facts
+    scene_predictions = []
+    for img_objs in continual_spatial_objs:
+        property_matrix = calc_property_matrix(img_objs, config.propertyNames)
+        scene_predictions.append(property_matrix)
+    scene_predictions = np.array(scene_predictions)
+    return scene_predictions
 
 
 def get_random_continual_spatial_objs(continual_spatial_objs, vertex_max, vertex_min):
@@ -160,3 +165,163 @@ def objs2scene(random_continual_spatial_objs, vertex_max, vertex_min):
                     obj[key] = obj[key] * (vertex_max - vertex_min) + vertex_min
                 obj[key] = obj[key].tolist()
     return scene
+
+
+def get_obj_vector(obj, propertyNames):
+    obj_vector = []
+    for j in range(len(propertyNames)):
+        mapped_property = mechanics.property_mapping(obj.__dict__[propertyNames[j]], propertyNames[j])
+        propertyObj = Property(mapped_property, propertyNames[j], obj.id)
+        obj_vector.append(propertyObj)
+    return obj_vector
+
+
+def calc_property_matrix(objs, propertyNames):
+    '''
+    return a list of relationship dictionaries in an image.
+    One of the objects is considered as reference, then calculate the relationship between reference object and others.
+    The relationships are described by discrete symbols.
+    '''
+
+    # find the reference obj
+    obj_ref = mechanics.find_ref_obj(objs)
+    ref_obj_vector = get_obj_vector(obj_ref, propertyNames)
+
+    obj_relation_matrix = []
+    for obj in objs:
+        if obj != obj_ref:
+            # relationship
+            ref_dir = mechanics.dir_mapping(obj_ref.position, obj.position)
+            ref_size = mechanics.size_mapping(obj_ref.size, obj.size)
+            # obj vector
+            obj_vector = get_obj_vector(obj, propertyNames)
+            obj_relation_matrix.append({
+                "ref": ref_obj_vector,
+                "dir": [ref_dir],
+                "size": [ref_size],
+                "obj": obj_vector,
+            })
+    return obj_relation_matrix
+
+
+def calc_subset(full_set):
+    full_set = list(full_set)
+    # lists = [[]]  # empty set has been included
+    lists = []  # no empty set has been included
+    for i in range(len(full_set) + 1):
+        for j in range(i):
+            subset = full_set[j:i]
+            if subset not in lists:
+                lists.append(subset)
+    return lists
+
+
+def calc_subset_2objs(ref_obj, obj):
+    lists = []
+    ref_obj_subset = calc_subset(ref_obj)
+    obj_subset = calc_subset(obj)
+    for ref_obj_property in ref_obj_subset:
+        for obj_property in obj_subset:
+            lists.append({"ref": ref_obj_property, "obj": obj_property})
+
+    return lists
+
+
+def candidate_rule_search(property_matrices):
+    premise_conclusion_pairs = []
+    for img_relations in property_matrices:
+        for relation in img_relations:
+            premise = calc_subset_2objs(relation["ref"], relation["obj"])
+            conclusion = [{"dir": relation["dir"]},
+                          {"size": relation["size"]},
+                          {"dir": relation["dir"], "size": relation["size"]}
+                          ]
+            premise_conclusion_pairs.append({"premise": premise, "conclusion": conclusion, "freq": 1})
+
+    return premise_conclusion_pairs
+
+
+def add_new_rules(learned_rules, new_rules):
+    is_new_rule = True
+    for new_rule in new_rules:
+        for old_rule in learned_rules:
+            if old_rule["premise"] == new_rule["premise"] and \
+                    old_rule["conclusion"] == new_rule["conclusion"]:
+                old_rule["freq"] += new_rule["freq"]
+                is_new_rule = False
+                break
+        if is_new_rule:
+            learned_rules.append(new_rule)
+    return learned_rules
+
+
+def exist_rule_search(property_matrices, candidate_rules):
+    learned_rules_batch = []
+    for candidate_rule in candidate_rules:
+        premises = candidate_rule["premise"]
+        conclusions = candidate_rule["conclusion"]
+        for premise in premises:
+            for conclusion in conclusions:
+                new_batch_rule = {"premise": premise, "conclusion": conclusion, "freq": 1}
+                if common_pair(new_batch_rule, property_matrices):
+                    is_new_batch_rule = True
+
+                    for each_rule in learned_rules_batch:
+                        if each_rule["premise"] == new_batch_rule["premise"] and \
+                                each_rule["conclusion"] == new_batch_rule["conclusion"]:
+                            each_rule["freq"] += 1
+                            is_new_batch_rule = False
+                            break
+                    if is_new_batch_rule:
+                        learned_rules_batch.append(new_batch_rule)
+    return learned_rules_batch
+
+
+def common_pair(given_pair, property_matrices):
+    for img_relations in property_matrices:
+        is_sub_pair = False
+        for relation_pair in img_relations:
+            # check if given pair is a subset of each relation pair in the image
+            is_sub_pair = check_sub_pair(given_pair, relation_pair)
+            if is_sub_pair:
+                break
+        if not is_sub_pair:
+            return False
+    return True
+
+
+def check_sub_pair(sub_pair, pair):
+    if isSubObj(sub_pair["premise"]["ref"], pair["ref"]) and isSubObj(sub_pair["premise"]["obj"], pair["obj"]):
+        if len(sub_pair["conclusion"]) == 2:
+            if equivalent_conclusions(
+                    sub_pair["conclusion"], pair, 'size') and equivalent_conclusions(
+                    sub_pair["conclusion"], pair, 'dir'):
+                return True
+            else:
+                return False
+        elif "dir" in sub_pair["conclusion"]:
+            if equivalent_conclusions(sub_pair["conclusion"], pair, 'dir'):
+                return True
+            else:
+                return False
+        elif "size" in sub_pair["conclusion"]:
+            if equivalent_conclusions(sub_pair["conclusion"], pair, 'size'):
+                return True
+            else:
+                return False
+        else:
+            return False
+    else:
+        return False
+
+
+def isSubObj(subObj, obj):
+    for property_sub in subObj:
+        exist = False
+        for property_main in obj:
+            if property_main == property_sub:
+                exist = True
+        if not exist:
+            return False
+
+    return True

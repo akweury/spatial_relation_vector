@@ -25,7 +25,7 @@ model_od.eval()
 
 # load learned rules
 learned_rules = rule_utils.load_rules(os.path.join(str(lr_rule_path)))
-learned_rules = rule_utils.rule_combination(learned_rules)
+# learned_rules = rule_utils.rule_combination(learned_rules)
 # apply rules
 for i, (data, objects, vertex_max, vertex_min, file_json) in enumerate(test_loader):
     with torch.no_grad():

@@ -48,3 +48,18 @@ def dir_mapping(ref_pos_vec, pos_vec):
 def property_mapping(propertyValues, propertyType):
     if propertyType == "shape":
         return propertyValues
+
+
+def find_ref_obj(objs):
+    """
+    return the west most object
+    """
+    ref_obj = objs[0]
+    for obj in objs:
+        delta_x = obj.position[0] - ref_obj.position[0]
+        # new object on the west side
+        if delta_x < 0:
+            ref_obj = obj
+        print("break")
+
+    return ref_obj

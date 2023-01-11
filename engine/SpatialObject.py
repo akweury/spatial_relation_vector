@@ -1,9 +1,6 @@
 # Created by shaji on 14-Dec-22
 import numpy as np
 
-from engine.mechanics import size_mapping, dir_mapping, property_mapping
-
-
 class Property():
     def __init__(self, value, name, parent):
         self.name = name
@@ -89,38 +86,3 @@ def calc_srv(objA, objB, entity_num):
     return srv
 
 
-def calc_property_matrix(objs, propertyNames):
-    obj_relation_matrix = []
-    # discrete property values
-    for obj_ref in objs:
-        # ref obj
-        ref_obj_mapping = []
-        for propertyType in propertyNames:
-            mapped_property = property_mapping(obj_ref.__dict__[propertyType], propertyType)
-            ref_obj_mapping.append(mapped_property)
-        ref_obj_vector = []
-        for j in range(len(propertyNames)):
-            propertyObj = Property(ref_obj_mapping[j], propertyNames[j], obj_ref.id)
-            ref_obj_vector.append(propertyObj)
-
-        for obj in objs:
-            if obj != obj_ref:
-                # relationship
-                ref_dir = dir_mapping(obj_ref.position, obj.position)
-                ref_size = size_mapping(obj_ref.size, obj.size)
-                # obj vector
-                obj_mapping = []
-                for propertyType in propertyNames:
-                    mapped_property = property_mapping(obj.__dict__[propertyType], propertyType)
-                    obj_mapping.append(mapped_property)
-                obj_vector = []
-                for j in range(len(propertyNames)):
-                    propertyObj = Property(obj_mapping[j], propertyNames[j], obj.id)
-                    obj_vector.append(propertyObj)
-                obj_relation_matrix.append({
-                    "ref": ref_obj_vector,
-                    "dir": [ref_dir],
-                    "size": [ref_size],
-                    "obj": obj_vector,
-                })
-    return obj_relation_matrix
