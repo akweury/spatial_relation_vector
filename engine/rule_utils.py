@@ -162,8 +162,10 @@ def objs2scene(random_continual_spatial_objs, vertex_max, vertex_min):
         for key in obj.keys():
             if isinstance(obj[key], np.ndarray):
                 if key == "position":
+                    obj[key][2] = 1 - obj[key][2] # unity has inverse z axis
                     obj[key] = obj[key] * (vertex_max - vertex_min) + vertex_min
                 obj[key] = obj[key].tolist()
+
     return scene
 
 
@@ -295,7 +297,7 @@ def check_sub_pair(sub_pair, pair):
         if len(sub_pair["conclusion"]) == 2:
             if equivalent_conclusions(
                     sub_pair["conclusion"], pair, 'size') and equivalent_conclusions(
-                    sub_pair["conclusion"], pair, 'dir'):
+                sub_pair["conclusion"], pair, 'dir'):
                 return True
             else:
                 return False
