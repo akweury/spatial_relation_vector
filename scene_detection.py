@@ -68,5 +68,5 @@ prediction_dict = {
     'pos_res': pos_pred.detach(),
     'neg_res': neg_pred.detach()
 }
-model_file = str(config.storage / f"{args.dataset}_pm_res_val.pth.tar")
+model_file = str(config.storage / f"{args.exp}_pm_res_val.pth.tar")
 torch.save(prediction_dict, str(model_file))
