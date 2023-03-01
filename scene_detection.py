@@ -62,7 +62,7 @@ for i, (data, objects, _, _, _) in enumerate(neg_loader):
         # fact extractor
         continual_spatial_objs = rule_utils.get_continual_spatial_objs(prediction, images, vertex, objects, log_manager)
         # [x,y,z, color1, color2, color3, shape1, shape2]
-        neg_pred[i, :] = scene_detection_utils.obj2tensor(continual_spatial_objs[0])
+        neg_pred[i, :] = scene_detection_utils.obj2tensor(continual_spatial_objs[0][:5])
 
 prediction_dict = {
     'pos_res': pos_pred.detach(),
