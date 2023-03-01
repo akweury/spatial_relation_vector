@@ -39,6 +39,7 @@ model_od.eval()
 for i, (data, objects, _, _, _) in enumerate(pos_loader):
     with torch.no_grad():
         # input data
+        print(args.device)
         images = list((_data[3:] / 255).to(args.device) for _data in data)
         vertex = list((_data[:3]).to(args.device) for _data in data)
 
