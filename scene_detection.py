@@ -28,8 +28,8 @@ neg_dataset = FactExtractorDataset(neg_data_path)
 pos_loader = DataLoader(pos_dataset, shuffle=True, batch_size=args.batch_size, collate_fn=pipeline.collate_fn)
 neg_loader = DataLoader(neg_dataset, shuffle=True, batch_size=args.batch_size, collate_fn=pipeline.collate_fn)
 
-neg_pred = torch.zeros(size=(pos_dataset.__len__(), 6, 8))
-pos_pred = torch.zeros(size=(neg_dataset.__len__(), 6, 8))
+neg_pred = torch.zeros(size=(neg_dataset.__len__(), 6, 8))
+pos_pred = torch.zeros(size=(pos_dataset.__len__(), 6, 8))
 
 categories = config.categories
 
