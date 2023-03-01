@@ -12,7 +12,8 @@ od_model_path = config.model_ball_sphere_detector
 
 # preprocessing
 args = args_utils.paser()
-workplace = Path(__file__).parents[3]
+workplace = Path(__file__).parents[1]
+print(f"work place: {workplace}")
 pos_data_path = workplace / "storage" / "dataset" / "triangle_3" / "true"
 neg_data_path = workplace / "storage" / "dataset" / "triangle_3" / "false"
 create_dataset.data2tensor_fact_extractor(pos_data_path, args)
