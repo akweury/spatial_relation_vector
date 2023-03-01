@@ -1,12 +1,10 @@
 # Created by shaji on 14-Dec-22
 
-import os
 import torch
 from torch.utils.data import DataLoader
 from pathlib import Path
 from engine.FactExtractorDataset import FactExtractorDataset
 from engine import config, pipeline, args_utils, create_dataset
-from engine.models import rule_search, save_rules
 from engine import rule_utils
 import scene_detection_utils
 
