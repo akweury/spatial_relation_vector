@@ -36,9 +36,9 @@ def spatial_obj(id, shape, pos, size):
 
 
 def generate_spatial_obj(id, vertex, img, label, mask, categories, box):
-    vertex = vertex.permute(1, 2, 0).numpy()
-    img = img.permute(1, 2, 0).numpy()
-    mask = mask.squeeze(0).numpy()
+    vertex = vertex.permute(1, 2, 0).to("cpu").numpy()
+    img = img.permute(1, 2, 0).to("cpu").numpy()
+    mask = mask.squeeze(0).to("cpu").numpy()
     mask[mask > 0.8] = 1
     obj_points = vertex[mask == 1]
     obj_pixels = img[mask == 1]
