@@ -33,7 +33,7 @@ pos_pred = torch.zeros(size=(pos_dataset.__len__(), 6, 8))
 
 categories = config.categories
 
-model_od, optimizer, parameters = pipeline.load_checkpoint(od_model_path)
+model_od, optimizer, parameters = pipeline.load_checkpoint(od_model_path, args)
 model_od.eval()
 
 for i, (data, objects, _, _, _) in enumerate(pos_loader):

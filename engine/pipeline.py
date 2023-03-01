@@ -434,13 +434,13 @@ def save_checkpoint(is_best, model, optimizer, log_manager):
         os.remove(os.path.join(log_manager.model_folder, 'checkpoint-' + str(log_manager.epoch - 1) + '.pth.tar'))
 
 
-def load_checkpoint(model_path):
+def load_checkpoint(model_path, args):
     assert os.path.isfile(model_path), f"No checkpoint found at:{model_path}"
     # checkpoint = torch.load(model_path, map_location=torch.device(args.device))
-    checkpoint = torch.load(model_path, map_location=torch.device("cpu"))
+    checkpoint = torch.load(model_path, map_location=torch.device(args.device))
 
     args = checkpoint["args"]
-    args.device = torch.device("cpu")
+    args.device = torch.device(args.device)
     start_epoch = checkpoint['epoch'] + 1  # resume epoch
     optimizer = checkpoint['optimizer']  # resume optimizer
 
