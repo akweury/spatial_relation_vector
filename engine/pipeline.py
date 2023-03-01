@@ -243,10 +243,9 @@ class LogManager():
         self.io_path()
 
     def io_path(self):
-        self.data_path = config.dataset / self.args.exp / self.args.subexp
-        self.output_folder = config.output / self.args.exp / self.args.subexp
-        self.model_folder = config.models / self.args.exp / self.args.subexp
-
+        self.data_path = config.dataset / self.args.exp
+        self.output_folder = config.output / self.args.exp
+        self.model_folder = config.models / self.args.exp
 
 
         if not os.path.exists(str(self.data_path)):
