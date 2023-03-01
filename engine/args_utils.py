@@ -76,6 +76,7 @@ def paser():
     load_args_from_file(args_path, args)
     if not args.device == "cpu":
         args.device = int(args.device)
+    print(args.device)
     print_args(args)
     args = Args(args)
 
