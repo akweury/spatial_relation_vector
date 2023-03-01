@@ -28,8 +28,8 @@ neg_dataset = FactExtractorDataset(neg_data_path)
 pos_loader = DataLoader(pos_dataset, shuffle=True, batch_size=args.batch_size, collate_fn=pipeline.collate_fn)
 neg_loader = DataLoader(neg_dataset, shuffle=True, batch_size=args.batch_size, collate_fn=pipeline.collate_fn)
 
-neg_pred = torch.zeros(size=(neg_dataset.__len__(), 6, 8))
-pos_pred = torch.zeros(size=(pos_dataset.__len__(), 6, 8))
+neg_pred = torch.zeros(size=(neg_dataset.__len__(), 6, 9))
+pos_pred = torch.zeros(size=(pos_dataset.__len__(), 6, 9))
 
 categories = config.categories
 
@@ -49,7 +49,7 @@ for i, (data, objects, _, _, _) in enumerate(pos_loader):
         # fact extractor
         continual_spatial_objs = rule_utils.get_continual_spatial_objs(prediction, images, vertex, objects, log_manager)
         # [x,y,z, color1, color2, color3, shape1, shape2]
-        pos_pred[i, :] = scene_detection_utils.obj2tensor(continual_spatial_objs[0])
+        pos_pred[i, :] = scene_detection_utils.obj2tensor(continual_spatial_objs[0][:5])
 
 for i, (data, objects, _, _, _) in enumerate(neg_loader):
     with torch.no_grad():
