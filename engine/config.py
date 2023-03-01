@@ -3,10 +3,10 @@ import os
 from pathlib import Path
 import torch
 
-root = Path(__file__).parents[1]
+root = Path(__file__).parents[0]
 
 work_place_path = root / "workplace"
-storage = root /".."/ "buffer"
+storage = root / "storage"
 
 dataset = storage / "dataset"
 output = storage / "output"
