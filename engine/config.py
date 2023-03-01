@@ -6,7 +6,7 @@ import torch
 root = Path(__file__).parents[1]
 
 work_place_path = root / "workplace"
-storage = root / "storage"
+storage = root /".."/ "buffer"
 
 dataset = storage / "dataset"
 output = storage / "output"

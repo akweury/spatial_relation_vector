@@ -183,12 +183,11 @@ def addPosPIL(img, objs, pos):
     draw = ImageDraw.Draw(img)
 
     posText = f''
-    for obj in objs:
-        posText += obj.shape + ": " + str(['%.4f' % elem for elem in obj.position.tolist()]) + " "
-
-    draw.text(pos, posText, (255, 255, 255))
     x_pos, y_pos = pos
-    y_pos += 10
+    for obj in objs:
+        posText = obj.shape + ": " + str(['%.4f' % elem for elem in obj.position.tolist()]) + " "
+        draw.text((x_pos, y_pos), posText, (255, 255, 255))
+        y_pos += 10
     return img, y_pos
 
 
@@ -223,7 +222,7 @@ def maskRCNNVisualization(img, img_pred, threshold, categories):
     return img_output
 
 
-def printRules(img_output, satisfied_rules, unsatisfied_rules, learned_rules, facts, suggested_objs):
+def printRules(img_output, satisfied_rules, unsatisfied_rules, learned_rules, facts, suggested_objs, old_objs):
     text_y_pos = 10
 
     # facts
@@ -253,6 +252,15 @@ def printRules(img_output, satisfied_rules, unsatisfied_rules, learned_rules, fa
         for ruleIdx in range(len(learned_rules)):
             img_output, text_y_pos = addRulePIL(img_output, learned_rules[ruleIdx], (10, text_y_pos))
 
+    # old positions
+    img_output, text_y_pos = addTextPIL(img_output, "old_positions", (10, text_y_pos),
+                                        color=(255, 0, 0))
+    if old_objs is not None:
+        for ruleIdx in range(len(old_objs)):
+            img_output, text_y_pos = addPosPIL(img_output, old_objs[ruleIdx], (10, text_y_pos))
+
+
+    # suggest positions
     img_output, text_y_pos = addTextPIL(img_output, "suggested_positions", (10, text_y_pos),
                                         color=(255, 0, 0))
     if suggested_objs is not None:
