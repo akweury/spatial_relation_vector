@@ -249,7 +249,7 @@ class LogManager():
 
 
         if not os.path.exists(str(self.data_path)):
-            raise ValueError("Dataset Tensors are not generated yet. Use Unity to generate the dataset first.")
+            raise ValueError(f"Path {self.data_path} do not exist.")
 
         if not os.path.exists(str(self.output_folder)):
             os.makedirs(str(self.output_folder))
