@@ -12,7 +12,7 @@ od_model_path = config.model_ball_sphere_detector
 
 # preprocessing
 args = args_utils.paser()
-workplace = Path(__file__).parents[1]
+workplace = Path(__file__).parents[0]
 print(f"work place: {workplace}")
 pos_data_path = workplace / "storage" / "dataset" / "triangle_3" / "true"
 neg_data_path = workplace / "storage" / "dataset" / "triangle_3" / "false"
