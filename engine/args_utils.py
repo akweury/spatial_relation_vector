@@ -23,10 +23,7 @@ class Args():
         self.momentum = args.momentum
         self.weight_decay = args.weight_decay
         self.subexp = args.subexp
-        if args.device == "gpu":
-            self.device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
-        else:
-            self.device = "cpu"
+        self.device = args.device
 
 
 def load_args_from_file(args_file_path, given_args):
@@ -76,7 +73,6 @@ def paser():
     load_args_from_file(args_path, args)
     if not args.device == "cpu":
         args.device = int(args.device)
-    print(args.device)
     print_args(args)
     args = Args(args)
 
