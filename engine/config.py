@@ -3,7 +3,7 @@ import os
 from pathlib import Path
 import torch
 
-root = Path(__file__).parents[0]
+root = Path(__file__).parents[1]
 
 work_place_path = root / "workplace"
 storage = root / "storage"
