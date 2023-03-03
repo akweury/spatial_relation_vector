@@ -1,11 +1,11 @@
 {
   "rule_objs_per_scene": 0,
-  "random_objs_per_scene": 5,
+  "random_objs_per_scene": 7,
   "scene_num": 150,
   "objs": [
     {
       "size": "small",
-      "shape": "sphere",
+      "shape": "cube",
       "material": "",
       "x": 0,
       "y": 0,
@@ -13,19 +13,11 @@
     },
     {
       "size": "small",
-      "shape": "sphere",
+      "shape": "cube",
       "material": "",
-      "x": -1.5,
+      "x": 0.5,
       "y": 0,
       "z": 0
-    },
-    {
-      "size": "small",
-      "shape": "sphere",
-      "material": "",
-      "x": -0.75,
-      "y": 0,
-      "z": 1.30
     }
   ]
 }
