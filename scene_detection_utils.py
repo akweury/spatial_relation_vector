@@ -1,7 +1,7 @@
 import torch
 
 
-def obj2tensor(obj_predictions):
+def  obj2tensor(obj_predictions):
     obj_tensor = torch.zeros(size=(6, 9))
     for obj_i, obj in enumerate(obj_predictions):
         obj_tensor[obj_i, 0:3] = torch.from_numpy(obj.position)
