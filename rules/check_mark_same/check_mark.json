@@ -4,6 +4,7 @@
   "scene_num": 110,
   "scene_type": "positive",
   "same_color": true,
+  "same_shape": true,
   "random_position": false,
   "objs": [
     {
