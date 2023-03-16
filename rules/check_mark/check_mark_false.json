@@ -1,9 +1,9 @@
 {
   "rule_objs_per_scene": 5,
   "random_objs_per_scene": 0,
-  "scene_num": 20,
-  "scene_type": "positive",
-  "random_position": false,
+  "scene_num": 40,
+  "scene_type": "negative",
+  "random_position": true,
   "objs": [
     {
       "size": "small",

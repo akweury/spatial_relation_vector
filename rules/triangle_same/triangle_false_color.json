@@ -1,27 +1,15 @@
 {
-  "rule_objs_per_scene": 5,
+  "rule_objs_per_scene": 3,
   "random_objs_per_scene": 0,
-  "scene_num": 100,
+  "scene_num": 20,
+  "scene_type": "negative",
+  "same_color": false,
+  "same_shape": true,
+  "random_position": false,
   "objs": [
     {
       "size": "small",
-      "shape": "sphere",
-      "material": "",
-      "x": 0,
-      "y": 0,
-      "z": 1
-    },
-    {
-      "size": "small",
-      "shape": "sphere",
-      "material": "",
-      "x": -1,
-      "y": 0,
-      "z": 0
-    },
-    {
-      "size": "small",
-      "shape": "sphere",
+      "shape": "",
       "material": "",
       "x": 1,
       "y": 0,
@@ -29,19 +17,27 @@
     },
     {
       "size": "small",
-      "shape": "sphere",
+      "shape": "",
       "material": "",
-      "x": -0.7,
+      "x": 1,
       "y": 0,
-      "z": -1
+      "z": 1
     },
     {
       "size": "small",
-      "shape": "sphere",
+      "shape": "",
       "material": "",
-      "x": 0.7,
+      "x": 0,
       "y": 0,
-      "z": -1
+      "z": 1
+    },
+    {
+      "size": "small",
+      "shape": "",
+      "material": "",
+      "x": 0,
+      "y": 0,
+      "z": 0
     }
   ]
 }
