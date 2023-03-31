@@ -53,7 +53,7 @@ for data_type in ['train', 'val', "test"]:
             continual_spatial_objs = rule_utils.get_continual_spatial_objs(prediction, images, vertex, objects,
                                                                            log_manager)
             # [x,y,z, color1, color2, color3, shape1, shape2]
-            pos_pred[i, :] = scene_detection_utils.obj2tensor(continual_spatial_objs[0][:5])
+            pos_pred[i, :] = scene_detection_utils.obj2tensor(continual_spatial_objs[0][:10])
 
     for i, (data, objects, _, _, _) in enumerate(neg_loader):
         with torch.no_grad():
@@ -67,8 +67,8 @@ for data_type in ['train', 'val', "test"]:
             # fact extractor
             continual_spatial_objs = rule_utils.get_continual_spatial_objs(prediction, images, vertex, objects,
                                                                            log_manager)
-            # [x,y,z, color1, color2, color3, shape1, shape2]
-            neg_pred[i, :] = scene_detection_utils.obj2tensor(continual_spatial_objs[0][:5])
+            # [x,y,z, color1, color2, color3, shape1, shape2, conf]
+            neg_pred[i, :] = scene_detection_utils.obj2tensor(continual_spatial_objs[0][:10])
 
     prediction_dict = {
         'pos_res': pos_pred.detach(),
