@@ -21,7 +21,14 @@ test_dataset = SyntheticDataset(log_manager.data_path, "test")
 test_loader = DataLoader(test_dataset, shuffle=True, batch_size=args.batch_size,
                          collate_fn=pipeline.collate_fn)
 
-model = models.get_model_instance_segmentation(args.num_classes).to(args.device)
+if args.exp == "od":
+    model = models.get_model_instance_segmentation(args.od_classes).to(args.device)
+elif args.exp == "cd":
+    model = models.get_model_instance_segmentation(args.cd_classes).to(args.device)
+# elif args.exp == "pd":
+#     model = models.get_model_instance_segmentation(args.num_classes).to(args.device)
+else:
+    raise ValueError
 
 # construct an optimizer
 params = [p for p in model.parameters() if p.requires_grad]
@@ -36,7 +43,7 @@ for epoch in range(args.num_epochs):
     log_manager.update(epoch)
     # train for one epoch, printing logs
 
-    pipeline.train_one_epoch(model, optimizer, train_loader, log_manager)
+    pipeline.train_one_epoch(args, model, optimizer, train_loader, log_manager)
     # update the learning rate
     lr_scheduler.step()
     # evaluate the model
@@ -44,6 +51,6 @@ for epoch in range(args.num_epochs):
     # plot the training & evaluation loss history
     log_manager.plot()
     # Save checkpoint in case evaluation crashed
-    pipeline.save_checkpoint(is_best,  model, optimizer, log_manager)
+    pipeline.save_checkpoint(is_best, model, optimizer, log_manager)
 
 print("That's it!")

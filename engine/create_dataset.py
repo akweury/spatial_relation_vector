@@ -70,9 +70,9 @@ def data2tensorManualMask(data_root, args):
 
 
 def data2tensorAutoMask(data_root, args):
-    labelFile = str(data_root / 'label.json')
-    with open(labelFile) as f:
-        labelJson = json.load(f)
+    label_file = str(data_root / 'label.json')
+    with open(label_file) as f:
+        label_json = json.load(f)
     for sub_name in ["test", "train"]:
         data_path = data_root / sub_name
         if not os.path.exists(str(data_path)):
@@ -104,6 +104,7 @@ def data2tensorAutoMask(data_root, args):
                                         torch.tensor(data["K"]),
                                         torch.tensor(data["R"]).float(),
                                         torch.tensor(data["t"]).float())
+            positions = utils.load_pos_from_data(data["objects"])
 
             input_data = np.c_[
                 vertex,  # 0,1,2
@@ -112,10 +113,10 @@ def data2tensorAutoMask(data_root, args):
 
             # extract labels from each image file
             objData = data['objects']
-            class_mask, mask_labels = utils.get_masks(labelJson, objData, masks, vertex.shape[0],
-                                                      vertex.shape[1])
+            masks, labels = utils.get_masks(args, label_json, objData, masks, vertex.shape)
+
             gt = np.c_[
-                np.expand_dims(class_mask, axis=2),  # 0
+                np.expand_dims(masks, axis=2),  # 0
             ]
 
             # convert to tensor
@@ -125,8 +126,9 @@ def data2tensorAutoMask(data_root, args):
             # save tensors
             training_case = {"input_tensor": input_tensor,
                              "gt_tensor": gt_tensor,
-                             "mask_labels": mask_labels,
-                             "categories": list(labelJson.keys())}
+                             "mask_labels": labels,
+                             "categories": list(label_json.keys())
+                             }
 
             torch.save(training_case, output_tensor_file)
             print(f"File {item + 1}/{len(data_files)} saved as a tensor.")

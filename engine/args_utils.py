@@ -13,7 +13,8 @@ class Args():
         self.machine = args.machine
         self.clear = args.clear
         self.exp = args.exp
-        self.num_classes = args.num_classes
+        self.od_classes = args.od_classes
+        self.cd_classes = args.cd_classes
         self.print_freq = args.print_freq
         self.resume = args.resume
         self.batch_size = args.batch_size
@@ -58,7 +59,8 @@ def paser():
 
     # configuration args
     parser.add_argument('--clear', type=str, default="false", help='Clear tensors in dataset folders.')
-    parser.add_argument('--num_classes', '-nc', type=int, help='Numer of Classes')
+    parser.add_argument('--od_classes', type=int, help='Numer of Object Detection Classes')
+    parser.add_argument('--cd_classes', type=int, help='Numer of Color Detection Classes')
     parser.add_argument('--machine', type=str, default="local", help='choose the training machin, local or remote')
     parser.add_argument('--exp', '-e', help='Experiment name')
     parser.add_argument('--subexp', help='Sub-experiment name')

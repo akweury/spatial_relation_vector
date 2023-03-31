@@ -247,7 +247,6 @@ class LogManager():
         self.output_folder = config.output / self.args.exp
         self.model_folder = config.models / self.args.exp
 
-
         if not os.path.exists(str(self.data_path)):
             raise ValueError(f"Path {self.data_path} do not exist.")
 
@@ -304,7 +303,8 @@ class LogManager():
             img_output = plot_utils.maskRCNNVisualization(img_tensor_int[i], img_preds[i], self.args.conf_threshold,
                                                           categories)
             img_output, text_y_pos = plot_utils.printRules(img_output, satisfied_rules, unsatisfied_rules,
-                                                           learned_rules, property_prediction[i], suggested_objs, old_objs)
+                                                           learned_rules, property_prediction[i], suggested_objs,
+                                                           old_objs)
             img_outputs.append(img_output)
 
         # print rules on the image
@@ -316,7 +316,7 @@ class LogManager():
             img_outputs_img.show()
 
 
-def train_one_epoch(model, optimizer, train_loader, log_manager):
+def train_one_epoch(args, model, optimizer, train_loader, log_manager):
     loss_sum = 0.0
     args = log_manager.args
     # training

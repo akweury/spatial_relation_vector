@@ -122,7 +122,8 @@ def generate_class_mask(label, classMap, h, w):
     return class_mask, class_labels
 
 
-def get_masks(labelMap, objData, masks, h, w):
+def get_masks(args, labelMap, objData, masks, shape):
+    h, w = shape[0], shape[1]
     class_mask = np.zeros(shape=(h, w))
     masks = masks[:, :, 0]
     mask_values = np.unique(masks)
@@ -132,8 +133,12 @@ def get_masks(labelMap, objData, masks, h, w):
 
     class_labels = []
     for obj in objData:
-        class_labels.append(labelMap[obj["shape"]])
-
+        if args.exp == "od":
+            class_labels.append(labelMap['obj'][obj["shape"]])
+        elif args.exp == "cd":
+            class_labels.append(labelMap['color'][obj['material'].split("_")[1]])
+        else:
+            raise ValueError
     return class_mask, class_labels
 
 
@@ -152,3 +157,26 @@ def normalize(vertex):
     assert np.abs(np.sum(vertex[mask] - valid_points_recall[mask])) < 1e-2
 
     return vertex_normalized, valid_min, valid_max
+
+
+def load_colors_from_data(obj_list):
+    color = torch.zeros(size=[len(obj_list)])
+    for o_i, obj in enumerate(obj_list):
+        if 'red' in obj['material']:
+            color[o_i] = 1
+        elif 'green' in obj['material']:
+            color[o_i] = 2
+        elif 'blue' in obj['material']:
+            color[o_i] = 3
+        else:
+            color[o_i] = 0
+
+    return color
+
+
+def load_pos_from_data(obj_list):
+    positions = torch.zeros(size=[len(obj_list), 3])
+    for o_i, obj in enumerate(obj_list):
+        positions[o_i] = torch.Tensor(obj['position'])
+
+    return positions
