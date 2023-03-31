@@ -132,7 +132,7 @@ def get_masks(labelMap, objData, masks, h, w):
 
     class_labels = []
     for obj in objData:
-        class_labels.append(labelMap[obj["classes"]])
+        class_labels.append(labelMap[obj["shape"]])
 
     return class_mask, class_labels
 

@@ -70,16 +70,15 @@ def data2tensorManualMask(data_root, args):
 
 
 def data2tensorAutoMask(data_root, args):
+    labelFile = str(data_root / 'label.json')
+    with open(labelFile) as f:
+        labelJson = json.load(f)
     for sub_name in ["test", "train"]:
         data_path = data_root / sub_name
         if not os.path.exists(str(data_path)):
             raise FileNotFoundError
         if not os.path.exists(str(data_path / "tensor")):
             os.makedirs(str(data_path / "tensor"))
-
-        labelFile = str(data_path / 'labels.json')
-        with open(labelFile) as f:
-            labelJson = json.load(f)
 
         depth_files = np.array(sorted(glob.glob(str(data_path / "*depth0.png"), recursive=True)))
         normal_files = np.array(sorted(glob.glob(str(data_path / "*normal0.png"), recursive=True)))
