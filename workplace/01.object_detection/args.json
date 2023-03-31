@@ -1,5 +1,5 @@
 {
-  "exp": "od_auto_mask",
+  "exp": "od",
   "momentum": 0.9,
   "weight_decay": 0.0005,
   "conf_threshold": 0.7,
