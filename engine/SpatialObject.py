@@ -36,17 +36,18 @@ def spatial_obj(id, shape, pos, size):
     return SpatialObject(id, shape=shape, pos=pos, size=size)
 
 
-def generate_spatial_obj(id, vertex, img, label, mask, categories, box, pred):
+def generate_spatial_obj(id, vertex, img, label, mask, categories, color_categories, color_label, box, pred):
     vertex = vertex.permute(1, 2, 0).to("cpu").numpy()
-    img = img.permute(1, 2, 0).to("cpu").numpy()
+    # img = img.permute(1, 2, 0).to("cpu").numpy()
     mask = mask.squeeze(0).to("cpu").numpy()
     mask[mask > 0.8] = 1
     obj_points = vertex[mask == 1]
-    obj_pixels = img[mask == 1]
+    # obj_pixels = img[mask == 1]
     center_pos = obj_points.mean(axis=0)
     dim = obj_points.shape[0]
     shape = categories[label]
-    color = obj_pixels.mean(axis=0)
+    color = color_categories[color_label]
+    # pred_color = obj_pixels.mean(axis=0)
     box = box.tolist()
     pred = pred.tolist()
     boxCenter = [(box[0] + box[2]) / 2, (box[1] + box[3]) / 2]

@@ -243,9 +243,9 @@ class LogManager():
         self.io_path()
 
     def io_path(self):
-        self.data_path = config.dataset / self.args.exp
-        self.output_folder = config.output / self.args.exp
-        self.model_folder = config.models / self.args.exp
+        self.data_path = config.dataset / self.args.subexp
+        self.output_folder = config.output / self.args.subexp
+        self.model_folder = config.models / self.args.subexp
 
         if not os.path.exists(str(self.data_path)):
             raise ValueError(f"Path {self.data_path} do not exist.")
@@ -432,20 +432,26 @@ def save_checkpoint(args, is_best, model, optimizer, log_manager):
         shutil.copyfile(checkpoint_filename, best_filename)
 
     if log_manager.epoch > 0:
-        os.remove(os.path.join(log_manager.model_folder, f'{args.exp}-checkpoint-' + str(log_manager.epoch - 1) + '.pth.tar'))
+        os.remove(
+            os.path.join(log_manager.model_folder, f'{args.exp}-checkpoint-' + str(log_manager.epoch - 1) + '.pth.tar'))
 
 
-def load_checkpoint(model_path, args, device):
+def load_checkpoint(exp, model_path, args, device):
     assert os.path.isfile(model_path), f"No checkpoint found at:{model_path}"
     # checkpoint = torch.load(model_path, map_location=torch.device(args.device))
     checkpoint = torch.load(model_path, map_location=torch.device(args.device))
 
-    args = checkpoint["args"]
+    loaded_args = checkpoint["args"]
     args.device = torch.device(device)
     start_epoch = checkpoint['epoch'] + 1  # resume epoch
     optimizer = checkpoint['optimizer']  # resume optimizer
 
-    model = models.get_model_instance_segmentation(args.num_classes).to(args.device)
+    if exp == "od":
+        model = models.get_model_instance_segmentation(args.od_classes).to(args.device)
+    elif exp == "cd":
+        model = models.get_model_instance_segmentation(args.cd_classes).to(args.device)
+    else:
+        raise ValueError
     model.load_state_dict(checkpoint["state_dict"])  # resume the model
 
     # self.optimizer = SGD(self.parameters, lr=self.args.lr, momentum=self.args.momentum, weight_decay=0)
@@ -454,6 +460,6 @@ def load_checkpoint(model_path, args, device):
 
     print(f"pretrained net state_dict: \n"
           f"{model.state_dict().keys()}\n"
-          f"- checkout {checkpoint['epoch']} was loaded successfully!")
+          f"-({exp}) checkout {checkpoint['epoch']} was loaded successfully!")
 
     return model, optimizer, parameters

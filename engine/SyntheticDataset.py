@@ -38,7 +38,6 @@ class SyntheticDataset(Dataset):
             boxes.append([xmin, ymin, xmax, ymax])
 
         boxes = torch.as_tensor(boxes, dtype=torch.float32)
-
         labels = torch.as_tensor(X["mask_labels"], dtype=torch.int64)
         masks = torch.as_tensor(masks, dtype=torch.uint8)
         image_id = torch.tensor([item])

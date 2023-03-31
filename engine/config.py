@@ -30,10 +30,12 @@ colors = [
 ]
 
 categories = ["background", "sphere", "cube"]
+color_categories = ["other", "red", "green", "blue"]
 
 # pre-trained model
 # model_ball_sphere_detector = models / "od" / "model_best.pth.tar"
 model_ball_sphere_detector = models / "od" / "model_best.pth.tar"
+model_rgb_color_detector = models / "cd" / "cd-model_best.pth.tar"
 
 
 propertyNames = ["shape"]
@@ -47,4 +49,5 @@ if __name__ == "__main__":
     print("root path: " + str(root))
     print("storage path: " + str(dataset))
     # print("work place path: " + str(work_place_path))
+
 

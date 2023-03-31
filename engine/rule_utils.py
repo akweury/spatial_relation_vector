@@ -57,7 +57,7 @@ def load_rules(file_name):
     return rules
 
 
-def get_continual_spatial_objs(predictions, images, vertices, objects, log_manager):
+def get_continual_spatial_objs(od_pred, cd_pred, images, vertices, objects, log_manager):
     """
     return a list of spatialObjs.
     Each spatial obj contains all the property information in continual space.
@@ -67,32 +67,43 @@ def get_continual_spatial_objs(predictions, images, vertices, objects, log_manag
     for i in range(len(images)):
         image = images[i]
         vertex = vertices[i]
-        prediction = predictions[i]
+        od_prediction = od_pred[i]
+        cd_prediction = cd_pred[i]
 
-        prediction["boxes"] = prediction["boxes"][prediction["scores"] > log_manager.args.conf_threshold]
-        prediction["labels"] = prediction["labels"][prediction["scores"] > log_manager.args.conf_threshold]
-        prediction["masks"] = prediction["masks"][prediction["scores"] > log_manager.args.conf_threshold]
-        prediction["scores"] = prediction["scores"][prediction["scores"] > log_manager.args.conf_threshold]
+        od_prediction["boxes"] = od_prediction["boxes"][od_prediction["scores"] > log_manager.args.conf_threshold]
+        od_prediction["labels"] = od_prediction["labels"][od_prediction["scores"] > log_manager.args.conf_threshold]
+        od_prediction["masks"] = od_prediction["masks"][od_prediction["scores"] > log_manager.args.conf_threshold]
+        od_prediction["scores"] = od_prediction["scores"][od_prediction["scores"] > log_manager.args.conf_threshold]
 
-        img_labels = prediction["labels"].to("cpu").numpy()
+        cd_prediction["boxes"] = cd_prediction["boxes"][cd_prediction["scores"] > log_manager.args.conf_threshold]
+        cd_prediction["labels"] = cd_prediction["labels"][cd_prediction["scores"] > log_manager.args.conf_threshold]
+        cd_prediction["masks"] = cd_prediction["masks"][cd_prediction["scores"] > log_manager.args.conf_threshold]
+        cd_prediction["scores"] = cd_prediction["scores"][cd_prediction["scores"] > log_manager.args.conf_threshold]
+
+        img_labels = od_prediction["labels"].to("cpu").numpy()
+        color_labels = cd_prediction["labels"].to("cpu").numpy()
         categories = config.categories
-        # print(f"{len(img_labels)} objects has been detected.")
-        labels_with_prob = zip(img_labels, prediction["scores"].detach().to("cpu").numpy())
-        img_annot_labels = []
+        color_categories = config.color_categories
+        labels_with_prob = zip(img_labels, od_prediction["scores"].detach().to("cpu").numpy())
+        color_labels_with_prob = zip(color_labels, cd_prediction["scores"].detach().to("cpu").numpy())
+
         for label, prob in labels_with_prob:
             print(f"categories: {categories}, label: {label}, prob: {prob:.2f}")
-            img_annot_labels.append(f"{categories[label]}: {prob:.2f}")
-
+        for label, prob in color_labels_with_prob:
+            print(f"color categories: {color_categories}, label: {label}, prob: {prob:.2f}")
         # create SpatialObjects to save object vectors
         spatialObjs = []
-        for j in range(len(prediction["labels"])):
+        for j in range(len(od_prediction["labels"])):
             spatialObj = generate_spatial_obj(id=j,
                                               vertex=vertex,
                                               img=image,
-                                              label=prediction["labels"][j],
-                                              mask=prediction["masks"][j],
-                                              categories=categories, box=prediction["boxes"][j],
-                                              pred=prediction["scores"][j])
+                                              label=od_prediction["labels"][j],
+                                              mask=od_prediction["masks"][j],
+                                              categories=categories,
+                                              color_categories=color_categories,
+                                              color_label=cd_prediction["labels"][j],
+                                              box=od_prediction["boxes"][j],
+                                              pred=od_prediction["scores"][j])
             spatialObjs.append(spatialObj)
 
         spatialObjMatrix.append(spatialObjs)
@@ -163,7 +174,7 @@ def objs2scene(random_continual_spatial_objs, vertex_max, vertex_min):
         for key in obj.keys():
             if isinstance(obj[key], np.ndarray):
                 if key == "position":
-                    obj[key][2] = 1 - obj[key][2] # unity has inverse z axis
+                    obj[key][2] = 1 - obj[key][2]  # unity has inverse z axis
                     obj[key] = obj[key] * (vertex_max - vertex_min) + vertex_min
                 obj[key] = obj[key].tolist()
 

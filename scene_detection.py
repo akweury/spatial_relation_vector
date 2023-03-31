@@ -9,6 +9,7 @@ from engine import rule_utils
 import scene_detection_utils
 
 od_model_path = config.model_ball_sphere_detector
+cd_model_path = config.model_rgb_color_detector
 
 # preprocessing
 args = args_utils.paser()
@@ -17,8 +18,8 @@ print(f"work place: {workplace}")
 
 for data_type in ['train', 'val', "test"]:
 
-    pos_data_path = workplace / "storage" / "hide" / args.exp / data_type / "true"
-    neg_data_path = workplace / "storage" / "hide" / args.exp / data_type / "false"
+    pos_data_path = workplace / "storage" / "hide" / args.subexp / data_type / "true"
+    neg_data_path = workplace / "storage" / "hide" / args.subexp / data_type / "false"
     create_dataset.data2tensor_fact_extractor(pos_data_path, args)
     create_dataset.data2tensor_fact_extractor(neg_data_path, args)
     # init log manager
@@ -36,8 +37,10 @@ for data_type in ['train', 'val', "test"]:
 
     categories = config.categories
 
-    model_od, optimizer, parameters = pipeline.load_checkpoint(od_model_path, args, device=args.device)
+    model_od, optimizer_od, parameters_od = pipeline.load_checkpoint("od", od_model_path, args, device=args.device)
+    model_cd, optimizer_cd, parameters_cd = pipeline.load_checkpoint("cd", cd_model_path, args, device=args.device)
     model_od.eval()
+    model_cd.eval()
 
     for i, (data, objects, _, _, _) in enumerate(pos_loader):
         with torch.no_grad():
@@ -47,11 +50,12 @@ for data_type in ['train', 'val', "test"]:
             vertex = list((_data[:3]).to(args.device) for _data in data)
 
             # object detection
-            prediction = model_od(images)
+            od_prediction = model_od(images)
+            cd_prediction = model_cd(images)
 
             # fact extractor
-            continual_spatial_objs = rule_utils.get_continual_spatial_objs(prediction, images, vertex, objects,
-                                                                           log_manager)
+            continual_spatial_objs = rule_utils.get_continual_spatial_objs(od_prediction, cd_prediction, images, vertex,
+                                                                           objects, log_manager)
             # [x,y,z, color1, color2, color3, shape1, shape2]
             pos_pred[i, :] = scene_detection_utils.obj2tensor(continual_spatial_objs[0][:10])
 
@@ -62,10 +66,10 @@ for data_type in ['train', 'val', "test"]:
             vertex = list((_data[:3]).to(args.device) for _data in data)
 
             # object detection
-            prediction = model_od(images)
+            od_prediction = model_od(images)
 
             # fact extractor
-            continual_spatial_objs = rule_utils.get_continual_spatial_objs(prediction, images, vertex, objects,
+            continual_spatial_objs = rule_utils.get_continual_spatial_objs(od_prediction, images, vertex, objects,
                                                                            log_manager)
             # [x,y,z, color1, color2, color3, shape1, shape2, conf]
             neg_pred[i, :] = scene_detection_utils.obj2tensor(continual_spatial_objs[0][:10])
