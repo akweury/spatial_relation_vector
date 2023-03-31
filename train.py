@@ -31,7 +31,7 @@ else:
     raise ValueError
 
 # construct an optimizer
-params = [p for p in model.parameters_od() if p.requires_grad]
+params = [p for p in model.parameters() if p.requires_grad]
 optimizer = torch.optim.SGD(params, lr=args.lr,
                             momentum=args.momentum, weight_decay=args.weight_decay)
 # and a learning rate scheduler
