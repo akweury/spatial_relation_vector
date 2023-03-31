@@ -411,9 +411,10 @@ def evaluation(model, optimizer, test_loader, log_manager):
     return is_best
 
 
-def save_checkpoint(is_best, model, optimizer, log_manager):
+def save_checkpoint(args, is_best, model, optimizer, log_manager):
     args = log_manager.args
-    checkpoint_filename = os.path.join(log_manager.model_folder, 'checkpoint-' + str(log_manager.epoch) + '.pth.tar')
+    checkpoint_filename = os.path.join(log_manager.model_folder,
+                                       f'{args.exp}-checkpoint-' + str(log_manager.epoch) + '.pth.tar')
 
     state = {'args': args,
              'epoch': log_manager.epoch,

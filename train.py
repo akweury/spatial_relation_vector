@@ -51,6 +51,6 @@ for epoch in range(args.num_epochs):
     # plot the training & evaluation loss history
     log_manager.plot()
     # Save checkpoint in case evaluation crashed
-    pipeline.save_checkpoint(is_best, model, optimizer, log_manager)
+    pipeline.save_checkpoint(args,is_best, model, optimizer, log_manager)
 
 print("That's it!")
