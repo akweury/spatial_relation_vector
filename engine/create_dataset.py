@@ -68,18 +68,18 @@ def data2tensorManualMask(data_root, args):
             torch.save(training_case, output_tensor_file)
             print(f"File {item + 1}/{len(data_files)} saved as a tensor.")
 
-def data2tensorAutoMask(data_root, args):
-    labelFile = str(data_root/'label.json')
-    with open(labelFile) as f:
-        labelJson = json.load(f)
 
-    for sub_name in ["test", "train", "val"]:
+def data2tensorAutoMask(data_root, args):
+    for sub_name in ["test", "train"]:
         data_path = data_root / sub_name
         if not os.path.exists(str(data_path)):
             raise FileNotFoundError
         if not os.path.exists(str(data_path / "tensor")):
             os.makedirs(str(data_path / "tensor"))
 
+        labelFile = str(data_path / 'label.json')
+        with open(labelFile) as f:
+            labelJson = json.load(f)
 
         depth_files = np.array(sorted(glob.glob(str(data_path / "*depth0.png"), recursive=True)))
         normal_files = np.array(sorted(glob.glob(str(data_path / "*normal0.png"), recursive=True)))
@@ -133,8 +133,6 @@ def data2tensorAutoMask(data_root, args):
             print(f"File {item + 1}/{len(data_files)} saved as a tensor.")
 
 
-
-
 def data2tensor_fact_extractor(data_root, args):
     data_path = data_root
     if not os.path.exists(str(data_path)):
@@ -182,9 +180,6 @@ def data2tensor_fact_extractor(data_root, args):
                          }
         torch.save(training_case, output_tensor_file)
         print(f"File {item + 1}/{len(data_files)} saved as a tensor.")
-
-
-
 
 # parser = argparse.ArgumentParser()
 # parser.add_argument('--clear', type=str, default="false", help='set to true to clear existed tensors')
