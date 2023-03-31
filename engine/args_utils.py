@@ -58,7 +58,7 @@ def paser():
 
     # configuration args
     parser.add_argument('--clear', type=str, default="false", help='Clear tensors in dataset folders.')
-    parser.add_argument('--num_classes', '-nc', help='Numer of Classes')
+    parser.add_argument('--num_classes', '-nc', type=int, help='Numer of Classes')
     parser.add_argument('--machine', type=str, default="local", help='choose the training machin, local or remote')
     parser.add_argument('--exp', '-e', help='Experiment name')
     parser.add_argument('--subexp', help='Sub-experiment name')

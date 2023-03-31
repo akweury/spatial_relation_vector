@@ -32,7 +32,7 @@ colors = [
 categories = ["background", "sphere", "cube"]
 
 # pre-trained model
-# model_ball_sphere_detector = models / "01.object_detection" / "model_best.pth.tar"
+# model_ball_sphere_detector = models / "od" / "model_best.pth.tar"
 model_ball_sphere_detector = models / "object_detector_big" / "checkpoint-9.pth.tar"
 
 
