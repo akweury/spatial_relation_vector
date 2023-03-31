@@ -77,7 +77,7 @@ def data2tensorAutoMask(data_root, args):
         if not os.path.exists(str(data_path / "tensor")):
             os.makedirs(str(data_path / "tensor"))
 
-        labelFile = str(data_path / 'label.json')
+        labelFile = str(data_path / 'labels.json')
         with open(labelFile) as f:
             labelJson = json.load(f)
 
