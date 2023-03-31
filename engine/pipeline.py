@@ -394,8 +394,8 @@ def evaluation(model, optimizer, test_loader, log_manager):
 
             # visualize the output
             model.eval()
-            prediction = model(images)
-            log_manager.visualization(images, prediction, config.categories)
+            # prediction = model(images)
+            # log_manager.visualization(images, prediction, config.categories)
 
     # print loss
     log_manager.eval_losses[0, log_manager.epoch] = loss_sum / len(test_loader)
