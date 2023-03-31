@@ -4,6 +4,7 @@
   "weight_decay": 0.0005,
   "conf_threshold": 0.7,
   "print_freq": 10,
+  "num_epochs": 100,
   "num_classes": 3,
   "resume": null
 }
