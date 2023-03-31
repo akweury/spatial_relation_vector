@@ -14,8 +14,8 @@ od_model_path = config.model_ball_sphere_detector
 args = args_utils.paser()
 workplace = Path(__file__).parents[0]
 print(f"work place: {workplace}")
-pos_data_path = workplace / "storage" / "dataset" / args.exp / "true"
-neg_data_path = workplace / "storage" / "dataset" / args.exp / "false"
+pos_data_path = workplace / "storage" / "hide" / args.exp / "train" / "true"
+neg_data_path = workplace / "storage" / "hide" / args.exp / "train" / "false"
 create_dataset.data2tensor_fact_extractor(pos_data_path, args)
 create_dataset.data2tensor_fact_extractor(neg_data_path, args)
 # init log manager
