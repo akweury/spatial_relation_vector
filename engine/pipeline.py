@@ -428,11 +428,11 @@ def save_checkpoint(args, is_best, model, optimizer, log_manager):
 
     # save the model as the best model
     if is_best:
-        best_filename = os.path.join(log_manager.model_folder, 'model_best.pth.tar')
+        best_filename = os.path.join(log_manager.model_folder, f'{args.exp}-model_best.pth.tar')
         shutil.copyfile(checkpoint_filename, best_filename)
 
     if log_manager.epoch > 0:
-        os.remove(os.path.join(log_manager.model_folder, 'checkpoint-' + str(log_manager.epoch - 1) + '.pth.tar'))
+        os.remove(os.path.join(log_manager.model_folder, f'{args.exp}-checkpoint-' + str(log_manager.epoch - 1) + '.pth.tar'))
 
 
 def load_checkpoint(model_path, args, device):
