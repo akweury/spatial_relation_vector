@@ -8,7 +8,7 @@ root = Path(__file__).parents[1]
 work_place_path = root / "workplace"
 storage = root / "storage"
 
-dataset = storage / "dataset"
+dataset = storage / "hide"
 output = storage / "output"
 models = storage / "models"
 
