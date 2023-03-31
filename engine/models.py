@@ -62,6 +62,17 @@ def get_model_instance_segmentation(num_classes, weights=None):
     return model
 
 
+def get_model_instance_color(num_classes):
+    model = maskrcnn_resnet50_fpn()
+    in_features = model.roi_heads.box_predictor.cls_score.in_features
+    model.roi_heads.box_predictor = FastRCNNPredictor(in_features, num_classes)
+
+    in_features_mask = model.roi_heads.mask_predictor.conv5_mask.in_channels
+    hidden_layer = 256
+    model.roi_heads.mask_predictor = MaskRCNNPredictor(in_features_mask, hidden_layer, num_classes)
+    return model
+
+
 def load_rules(data, entity_num):
     # create SpatialObjects to save object vectors
     target_obj = {}
@@ -194,12 +205,6 @@ def common_exist_check(subset, property_matrices):
     return True
 
 
-
-
-
-
-
-
 def rule_exist_search(property_matrices, learned_rules):
     common_exist_set = []
     common_for_all_set = []
@@ -222,6 +227,7 @@ def rule_exist_search(property_matrices, learned_rules):
                     common_exist_rules.append(subset)
 
     return common_exist_rules
+
 
 def rule_check(property_matrices, learned_rules):
     # delete repeated rules
@@ -260,8 +266,6 @@ def rule_search(property_matrices, learned_rules):
 
     # update rule list
     learned_rules = rule_utils.add_new_rules(learned_rules, learned_rules_batch)
-
-
 
     return learned_rules, learned_rules_batch
 

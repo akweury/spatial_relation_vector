@@ -24,7 +24,7 @@ test_loader = DataLoader(test_dataset, shuffle=True, batch_size=args.batch_size,
 if args.exp == "od":
     model = models.get_model_instance_segmentation(args.od_classes).to(args.device)
 elif args.exp == "cd":
-    model = models.get_model_instance_segmentation(args.cd_classes).to(args.device)
+    model = models.get_model_instance_color(args.cd_classes).to(args.device)
 # elif args.exp == "pd":
 #     model = models.get_model_instance_segmentation(args.num_classes).to(args.device)
 else:

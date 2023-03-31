@@ -67,10 +67,11 @@ for data_type in ['train', 'val', "test"]:
 
             # object detection
             od_prediction = model_od(images)
+            cd_prediction = model_cd(images)
 
             # fact extractor
-            continual_spatial_objs = rule_utils.get_continual_spatial_objs(od_prediction, images, vertex, objects,
-                                                                           log_manager)
+            continual_spatial_objs = rule_utils.get_continual_spatial_objs(od_prediction, cd_prediction, images, vertex,
+                                                                           objects, log_manager)
             # [x,y,z, color1, color2, color3, shape1, shape2, conf]
             neg_pred[i, :] = scene_detection_utils.obj2tensor(continual_spatial_objs[0][:10])
 

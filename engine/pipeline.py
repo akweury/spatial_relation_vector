@@ -454,8 +454,6 @@ def load_checkpoint(exp, model_path, args, device):
         raise ValueError
     model.load_state_dict(checkpoint["state_dict"])  # resume the model
 
-    # self.optimizer = SGD(self.parameters, lr=self.args.lr, momentum=self.args.momentum, weight_decay=0)
-    # self.args = checkpoint['args']
     parameters = filter(lambda p: p.requires_grad, model.parameters())
 
     print(f"pretrained net state_dict: \n"
