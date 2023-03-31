@@ -14,60 +14,65 @@ od_model_path = config.model_ball_sphere_detector
 args = args_utils.paser()
 workplace = Path(__file__).parents[0]
 print(f"work place: {workplace}")
-pos_data_path = workplace / "storage" / "hide" / args.exp / "train" / "true"
-neg_data_path = workplace / "storage" / "hide" / args.exp / "train" / "false"
-create_dataset.data2tensor_fact_extractor(pos_data_path, args)
-create_dataset.data2tensor_fact_extractor(neg_data_path, args)
-# init log manager
-log_manager = pipeline.LogManager(args=args)
 
-# create data tensors if they are not exists
+for data_type in ['train', 'val', "test"]:
 
-pos_dataset = FactExtractorDataset(pos_data_path)
-neg_dataset = FactExtractorDataset(neg_data_path)
-pos_loader = DataLoader(pos_dataset, shuffle=True, batch_size=args.batch_size, collate_fn=pipeline.collate_fn)
-neg_loader = DataLoader(neg_dataset, shuffle=True, batch_size=args.batch_size, collate_fn=pipeline.collate_fn)
+    pos_data_path = workplace / "storage" / "hide" / args.exp / data_type / "true"
+    neg_data_path = workplace / "storage" / "hide" / args.exp / data_type / "false"
+    create_dataset.data2tensor_fact_extractor(pos_data_path, args)
+    create_dataset.data2tensor_fact_extractor(neg_data_path, args)
+    # init log manager
+    log_manager = pipeline.LogManager(args=args)
 
-neg_pred = torch.zeros(size=(neg_dataset.__len__(), 6, 9))
-pos_pred = torch.zeros(size=(pos_dataset.__len__(), 6, 9))
+    # create data tensors if they are not exists
 
-categories = config.categories
+    pos_dataset = FactExtractorDataset(pos_data_path)
+    neg_dataset = FactExtractorDataset(neg_data_path)
+    pos_loader = DataLoader(pos_dataset, shuffle=True, batch_size=args.batch_size, collate_fn=pipeline.collate_fn)
+    neg_loader = DataLoader(neg_dataset, shuffle=True, batch_size=args.batch_size, collate_fn=pipeline.collate_fn)
 
-model_od, optimizer, parameters = pipeline.load_checkpoint(od_model_path, args, device=args.device)
-model_od.eval()
+    neg_pred = torch.zeros(size=(neg_dataset.__len__(), 6, 9))
+    pos_pred = torch.zeros(size=(pos_dataset.__len__(), 6, 9))
 
-for i, (data, objects, _, _, _) in enumerate(pos_loader):
-    with torch.no_grad():
-        # input data
-        print(args.device)
-        images = list((_data[3:] / 255).to(args.device) for _data in data)
-        vertex = list((_data[:3]).to(args.device) for _data in data)
+    categories = config.categories
 
-        # object detection
-        prediction = model_od(images)
+    model_od, optimizer, parameters = pipeline.load_checkpoint(od_model_path, args, device=args.device)
+    model_od.eval()
 
-        # fact extractor
-        continual_spatial_objs = rule_utils.get_continual_spatial_objs(prediction, images, vertex, objects, log_manager)
-        # [x,y,z, color1, color2, color3, shape1, shape2]
-        pos_pred[i, :] = scene_detection_utils.obj2tensor(continual_spatial_objs[0][:5])
+    for i, (data, objects, _, _, _) in enumerate(pos_loader):
+        with torch.no_grad():
+            # input data
+            print(args.device)
+            images = list((_data[3:] / 255).to(args.device) for _data in data)
+            vertex = list((_data[:3]).to(args.device) for _data in data)
 
-for i, (data, objects, _, _, _) in enumerate(neg_loader):
-    with torch.no_grad():
-        # input data
-        images = list((_data[3:] / 255).to(args.device) for _data in data)
-        vertex = list((_data[:3]).to(args.device) for _data in data)
+            # object detection
+            prediction = model_od(images)
 
-        # object detection
-        prediction = model_od(images)
+            # fact extractor
+            continual_spatial_objs = rule_utils.get_continual_spatial_objs(prediction, images, vertex, objects,
+                                                                           log_manager)
+            # [x,y,z, color1, color2, color3, shape1, shape2]
+            pos_pred[i, :] = scene_detection_utils.obj2tensor(continual_spatial_objs[0][:5])
 
-        # fact extractor
-        continual_spatial_objs = rule_utils.get_continual_spatial_objs(prediction, images, vertex, objects, log_manager)
-        # [x,y,z, color1, color2, color3, shape1, shape2]
-        neg_pred[i, :] = scene_detection_utils.obj2tensor(continual_spatial_objs[0][:5])
+    for i, (data, objects, _, _, _) in enumerate(neg_loader):
+        with torch.no_grad():
+            # input data
+            images = list((_data[3:] / 255).to(args.device) for _data in data)
+            vertex = list((_data[:3]).to(args.device) for _data in data)
 
-prediction_dict = {
-    'pos_res': pos_pred.detach(),
-    'neg_res': neg_pred.detach()
-}
-model_file = str(config.storage / f"{args.exp}_pm_res_val.pth.tar")
-torch.save(prediction_dict, str(model_file))
+            # object detection
+            prediction = model_od(images)
+
+            # fact extractor
+            continual_spatial_objs = rule_utils.get_continual_spatial_objs(prediction, images, vertex, objects,
+                                                                           log_manager)
+            # [x,y,z, color1, color2, color3, shape1, shape2]
+            neg_pred[i, :] = scene_detection_utils.obj2tensor(continual_spatial_objs[0][:5])
+
+    prediction_dict = {
+        'pos_res': pos_pred.detach(),
+        'neg_res': neg_pred.detach()
+    }
+    model_file = str(config.storage / f"{args.exp}_pm_res_val.pth.tar")
+    torch.save(prediction_dict, str(model_file))
