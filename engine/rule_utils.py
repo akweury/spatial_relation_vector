@@ -3,8 +3,7 @@ import json
 import numpy as np
 from engine import config
 from engine.SpatialObject import Property, generate_spatial_obj
-from engine import mechanics
-
+from engine import mechanics, models
 
 def obj2propertyList(obj):
     lists = []
@@ -57,7 +56,7 @@ def load_rules(file_name):
     return rules
 
 
-def get_continual_spatial_objs(od_pred, cd_pred, images, vertices, objects, log_manager):
+def get_continual_spatial_objs(od_pred, images, vertices, objects, log_manager):
     """
     return a list of spatialObjs.
     Each spatial obj contains all the property information in continual space.
@@ -68,32 +67,24 @@ def get_continual_spatial_objs(od_pred, cd_pred, images, vertices, objects, log_
         image = images[i]
         vertex = vertices[i]
         od_prediction = od_pred[i]
-        cd_prediction = cd_pred[i]
 
         od_prediction["boxes"] = od_prediction["boxes"][od_prediction["scores"] > log_manager.args.conf_threshold]
         od_prediction["labels"] = od_prediction["labels"][od_prediction["scores"] > log_manager.args.conf_threshold]
         od_prediction["masks"] = od_prediction["masks"][od_prediction["scores"] > log_manager.args.conf_threshold]
         od_prediction["scores"] = od_prediction["scores"][od_prediction["scores"] > log_manager.args.conf_threshold]
 
-        cd_prediction["boxes"] = cd_prediction["boxes"][cd_prediction["scores"] > log_manager.args.conf_threshold]
-        cd_prediction["labels"] = cd_prediction["labels"][cd_prediction["scores"] > log_manager.args.conf_threshold]
-        cd_prediction["masks"] = cd_prediction["masks"][cd_prediction["scores"] > log_manager.args.conf_threshold]
-        cd_prediction["scores"] = cd_prediction["scores"][cd_prediction["scores"] > log_manager.args.conf_threshold]
-
         img_labels = od_prediction["labels"].to("cpu").numpy()
-        color_labels = cd_prediction["labels"].to("cpu").numpy()
         categories = config.categories
         color_categories = config.color_categories
         labels_with_prob = zip(img_labels, od_prediction["scores"].detach().to("cpu").numpy())
-        color_labels_with_prob = zip(color_labels, cd_prediction["scores"].detach().to("cpu").numpy())
 
         for label, prob in labels_with_prob:
             print(f"categories: {categories}, label: {label}, prob: {prob:.2f}")
-        for label, prob in color_labels_with_prob:
-            print(f"color categories: {color_categories}, label: {label}, prob: {prob:.2f}")
+
         # create SpatialObjects to save object vectors
         spatialObjs = []
         for j in range(len(od_prediction["labels"])):
+
             spatialObj = generate_spatial_obj(id=j,
                                               vertex=vertex,
                                               img=image,
@@ -101,14 +92,12 @@ def get_continual_spatial_objs(od_pred, cd_pred, images, vertices, objects, log_
                                               mask=od_prediction["masks"][j],
                                               categories=categories,
                                               color_categories=color_categories,
-                                              color_label=cd_prediction["labels"][j],
                                               box=od_prediction["boxes"][j],
                                               pred=od_prediction["scores"][j])
             spatialObjs.append(spatialObj)
 
         spatialObjMatrix.append(spatialObjs)
     return spatialObjMatrix
-
 
 def get_discrete_spatial_objs(continual_spatial_objs):
     scene_predictions = []

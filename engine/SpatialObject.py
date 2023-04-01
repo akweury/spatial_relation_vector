@@ -1,5 +1,6 @@
 # Created by shaji on 14-Dec-22
 import numpy as np
+from engine import models
 
 
 class Property():
@@ -36,17 +37,18 @@ def spatial_obj(id, shape, pos, size):
     return SpatialObject(id, shape=shape, pos=pos, size=size)
 
 
-def generate_spatial_obj(id, vertex, img, label, mask, categories, color_categories, color_label, box, pred):
+def generate_spatial_obj(id, vertex, img, label, mask, categories, color_categories, box, pred):
     vertex = vertex.permute(1, 2, 0).to("cpu").numpy()
     # img = img.permute(1, 2, 0).to("cpu").numpy()
     mask = mask.squeeze(0).to("cpu").numpy()
     mask[mask > 0.8] = 1
     obj_points = vertex[mask == 1]
-    # obj_pixels = img[mask == 1]
-    center_pos = obj_points.mean(axis=0)
+    img = img.permute(1, 2, 0)
+    obj_pixels = img[mask == 1]
+    center_pos = obj_points.median(axis=0)
     dim = obj_points.shape[0]
     shape = categories[label]
-    color = color_categories[color_label]
+    color = models.model_cd(color_categories, img, mask)
     # pred_color = obj_pixels.mean(axis=0)
     box = box.tolist()
     pred = pred.tolist()

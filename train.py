@@ -21,14 +21,7 @@ test_dataset = SyntheticDataset(log_manager.data_path, "test")
 test_loader = DataLoader(test_dataset, shuffle=True, batch_size=args.batch_size,
                          collate_fn=pipeline.collate_fn)
 
-if args.exp == "od":
-    model = models.get_model_instance_segmentation(args.od_classes).to(args.device)
-elif args.exp == "cd":
-    model = models.get_model_instance_color(args.cd_classes).to(args.device)
-# elif args.exp == "pd":
-#     model = models.get_model_instance_segmentation(args.num_classes).to(args.device)
-else:
-    raise ValueError
+model = models.get_model_instance_segmentation(args.od_classes).to(args.device)
 
 # construct an optimizer
 params = [p for p in model.parameters() if p.requires_grad]

@@ -3,6 +3,7 @@ import json
 import numpy as np
 import torch
 from PIL import Image
+import cv2 as cv
 from torchvision.models.detection import MaskRCNN_ResNet50_FPN_Weights, maskrcnn_resnet50_fpn
 from torchvision.transforms.functional import pil_to_tensor, to_pil_image
 from torchvision.utils import draw_bounding_boxes, draw_segmentation_masks
@@ -62,15 +63,48 @@ def get_model_instance_segmentation(num_classes, weights=None):
     return model
 
 
-def get_model_instance_color(num_classes):
-    model = maskrcnn_resnet50_fpn()
-    in_features = model.roi_heads.box_predictor.cls_score.in_features
-    model.roi_heads.box_predictor = FastRCNNPredictor(in_features, num_classes)
+def model_cd(color_categories, img, mask):
+    # img_np = img.numpy()
 
-    in_features_mask = model.roi_heads.mask_predictor.conv5_mask.in_channels
-    hidden_layer = 256
-    model.roi_heads.mask_predictor = MaskRCNNPredictor(in_features_mask, hidden_layer, num_classes)
-    return model
+    max_s_value = 1.0
+    min_s_value = 0.78
+
+    max_v_value = 1.0
+    min_v_value = 0.2
+
+    img_24bit = img
+    img_np = img_24bit.numpy().astype(np.float32)
+
+    img_rgb = cv.cvtColor(img_np, cv.COLOR_BGR2RGB)
+
+    img_obj = np.zeros(shape=img_24bit.numpy().shape)
+    img_obj[mask != 0] = img_24bit[mask != 0]
+    img_obj = img_obj.astype(np.float32)
+    img_obj_rgb = cv.cvtColor(img_obj, cv.COLOR_BGR2RGB)
+    # ret will return a true value if the frame exists otherwise False
+    img_obj_hsv = cv.cvtColor(img_obj_rgb, cv.COLOR_RGB2HSV)
+    img_obj_rgb_cb = cv.cvtColor(img_obj_hsv, cv.COLOR_HSV2RGB)
+
+    red_l = np.array([260, min_s_value, min_v_value])  # setting the blue lower limit
+    red_h = np.array([301, max_s_value, max_v_value])  # setting the blue upper limit
+
+    green_l = np.array([110, min_s_value, min_v_value])  # setting the blue lower limit
+    green_h = np.array([115, max_s_value, max_v_value])  # setting the blue upper limit
+
+    blue_l = np.array([10, min_s_value, min_v_value])  # setting the blue lower limit
+    blue_h = np.array([15, max_s_value, max_v_value])  # setting the blue upper limit
+
+    r_mask = cv.inRange(img_obj_hsv, red_l, red_h)
+    g_mask = cv.inRange(img_obj_hsv, green_l, green_h)
+    b_mask = cv.inRange(img_obj_hsv, blue_l, blue_h)
+
+    red_score = np.sum(r_mask)
+    green_score = np.sum(g_mask)
+    blue_score = np.sum(b_mask)
+    color_label = np.argmax([0, red_score, green_score, blue_score])
+
+    color = color_categories[color_label]
+    return color
 
 
 def load_rules(data, entity_num):
