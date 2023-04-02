@@ -9,7 +9,6 @@ from engine import rule_utils
 import scene_detection_utils
 
 od_model_path = config.model_ball_sphere_detector
-cd_model_path = config.model_rgb_color_detector
 
 # preprocessing
 args = args_utils.paser()
@@ -38,9 +37,7 @@ for data_type in ['train', 'val', "test"]:
     categories = config.categories
 
     model_od, optimizer_od, parameters_od = pipeline.load_checkpoint("od", od_model_path, args, device=args.device)
-    model_cd, optimizer_cd, parameters_cd = pipeline.load_checkpoint("cd", cd_model_path, args, device=args.device)
     model_od.eval()
-    model_cd.eval()
 
     for i, (data, objects, _, _, _) in enumerate(pos_loader):
         with torch.no_grad():
