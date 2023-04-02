@@ -76,3 +76,4 @@ for data_type in ['train', 'val', "test"]:
     }
     model_file = str(config.storage / 'hide' / f"{args.exp}_pm_res_{data_type}.pth.tar")
     torch.save(prediction_dict, str(model_file))
+    print(f"file {model_file} saved successfully!")
