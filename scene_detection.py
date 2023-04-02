@@ -9,7 +9,7 @@ from engine import rule_utils
 import scene_detection_utils
 
 od_model_path = config.model_ball_sphere_detector
-
+max_obj_num = 6
 # preprocessing
 args = args_utils.paser()
 workplace = Path(__file__).parents[0]
@@ -31,8 +31,8 @@ for data_type in ['train', 'val', "test"]:
     pos_loader = DataLoader(pos_dataset, shuffle=True, batch_size=args.batch_size, collate_fn=pipeline.collate_fn)
     neg_loader = DataLoader(neg_dataset, shuffle=True, batch_size=args.batch_size, collate_fn=pipeline.collate_fn)
 
-    neg_pred = torch.zeros(size=(neg_dataset.__len__(), 6, 9))
-    pos_pred = torch.zeros(size=(pos_dataset.__len__(), 6, 9))
+    neg_pred = torch.zeros(size=(neg_dataset.__len__(), max_obj_num, 9))
+    pos_pred = torch.zeros(size=(pos_dataset.__len__(), max_obj_num, 9))
 
     categories = config.categories
 
@@ -53,7 +53,7 @@ for data_type in ['train', 'val', "test"]:
             continual_spatial_objs = rule_utils.get_continual_spatial_objs(od_prediction, images, vertex,
                                                                            objects, log_manager)
             # [x,y,z, color1, color2, color3, shape1, shape2]
-            pos_pred[i, :] = scene_detection_utils.obj2tensor(continual_spatial_objs[0][:10])
+            pos_pred[i, :] = scene_detection_utils.obj2tensor(continual_spatial_objs[0][:max_obj_num], max_obj_num)
 
     for i, (data, objects, _, _, _) in enumerate(neg_loader):
         with torch.no_grad():
@@ -68,7 +68,7 @@ for data_type in ['train', 'val', "test"]:
             continual_spatial_objs = rule_utils.get_continual_spatial_objs(od_prediction, images, vertex,
                                                                            objects, log_manager)
             # [x,y,z, color1, color2, color3, shape1, shape2, conf]
-            neg_pred[i, :] = scene_detection_utils.obj2tensor(continual_spatial_objs[0][:10])
+            neg_pred[i, :] = scene_detection_utils.obj2tensor(continual_spatial_objs[0][:max_obj_num], max_obj_num)
 
     prediction_dict = {
         'pos_res': pos_pred.detach(),

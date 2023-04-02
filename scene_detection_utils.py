@@ -1,8 +1,8 @@
 import torch
 
 
-def obj2tensor(obj_predictions):
-    obj_tensor = torch.zeros(size=(6, 9))
+def obj2tensor(obj_predictions,max_obj_num):
+    obj_tensor = torch.zeros(size=(max_obj_num, 9))
     for obj_i, obj in enumerate(obj_predictions):
         obj_tensor[obj_i, 0:3] = torch.from_numpy(obj.position)
         if obj.color == "red":
