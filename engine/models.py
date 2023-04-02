@@ -72,7 +72,7 @@ def model_cd(color_categories, img, mask):
     max_v_value = 1.0
     min_v_value = 0.2
 
-    img_24bit = img
+    img_24bit = img.detect().to('cpu')
     img_np = img_24bit.numpy().astype(np.float32)
 
     img_rgb = cv.cvtColor(img_np, cv.COLOR_BGR2RGB)
