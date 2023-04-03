@@ -1,11 +1,3 @@
-#### ssh connection
-
-ssh ml-jsha@130.83.185.153
-ssh ml-jsha@130.83.185.155
-ssh ml-jsha@130.83.185.145
-ssh ml-jsha@130.83.185.147
-ssh ml-jsha@130.83.42.209
-ssh ml-jsha@130.83.42.211
 
 ###### Build docker
 
