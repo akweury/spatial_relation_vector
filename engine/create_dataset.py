@@ -123,6 +123,9 @@ def data2tensorAutoMask(data_root, args):
             input_tensor = torch.from_numpy(input_data.astype(np.float32)).permute(2, 0, 1)
             gt_tensor = torch.from_numpy(gt).permute(2, 0, 1)
 
+            if len(gt_tensor.unique()) - 1 != len(labels):
+                continue
+
             # save tensors
             training_case = {"input_tensor": input_tensor,
                              "gt_tensor": gt_tensor,

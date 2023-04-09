@@ -15,5 +15,6 @@ python3 train.py --exp od --subexp od --device 11
 
 python3 scene_detection.py --exp scene_detection --subexp three_same --batch_size 1 --device 11
 python3 scene_detection.py --exp scene_detection --subexp cross --batch_size 1 --device 11
+python3 scene_detection.py --exp scene_detection --subexp cross_same --batch_size 1 --device 11
 
 
