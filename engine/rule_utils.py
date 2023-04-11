@@ -4,7 +4,7 @@ import numpy as np
 from engine import config
 from engine.SpatialObject import Property, generate_spatial_obj
 from engine import mechanics, models
-
+import torch
 
 def obj2propertyList(obj):
     lists = []
@@ -90,7 +90,10 @@ def get_continual_spatial_objs(od_pred, images, vertices, objects, log_manager):
             labels_with_prob = labels_with_prob[:log_manager.args.e]
         for pred in pred_res:
             print(f"\tcategories: {categories}, label: {pred['label']}, prob: {pred['score']:.2f}")
-
+        from engine import plot_utils
+        img_uint8 = (image * 255).to(torch.uint8)
+        img_show = plot_utils.maskRCNNVisualization(img_uint8, od_prediction, log_manager.args.conf_threshold, categories)
+        img_show.show()
         # create SpatialObjects to save object vectors
         spatialObjs = []
         for j in range(len(pred_res)):
