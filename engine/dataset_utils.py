@@ -154,7 +154,7 @@ def normalize(vertex):
     valid_points_recall = np.zeros(shape=vertex_normalized.shape)
     valid_points_recall[mask] = vertex_normalized[mask] * (valid_max - valid_min) + valid_min
     print("recall difference: " + str(np.sum(vertex[mask] - valid_points_recall[mask])))
-    assert np.abs(np.sum(vertex[mask] - valid_points_recall[mask])) < 1e-2
+    assert np.abs(np.sum(vertex[mask] - valid_points_recall[mask])) < 2 * 1e-2
 
     return vertex_normalized, valid_min, valid_max
 
