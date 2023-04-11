@@ -69,6 +69,8 @@ for data_type in ['train', 'val', "test"]:
             # fact extractor
             continual_spatial_objs = rule_utils.get_continual_spatial_objs(f"negative_{i}", od_prediction, images,
                                                                            vertex, objects, log_manager)
+            if continual_spatial_objs is None:
+                continue
             # [x,y,z, color1, color2, color3, shape1, shape2, conf]
             neg_pred[i, :] = scene_detection_utils.obj2tensor(continual_spatial_objs[0][:max_obj_num], max_obj_num)
 
