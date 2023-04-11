@@ -9,9 +9,10 @@ from engine import rule_utils
 import scene_detection_utils
 
 od_model_path = config.model_ball_sphere_detector
-max_obj_num = 8
+
 # preprocessing
 args = args_utils.paser()
+max_obj_num = args.e
 workplace = Path(__file__).parents[0]
 print(f"work place: {workplace}")
 
