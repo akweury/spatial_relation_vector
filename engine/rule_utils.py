@@ -6,6 +6,7 @@ from engine.SpatialObject import Property, generate_spatial_obj
 from engine import mechanics, models
 import torch
 
+
 def obj2propertyList(obj):
     lists = []
     for property in obj:
@@ -86,14 +87,14 @@ def get_continual_spatial_objs(od_pred, images, vertices, objects, log_manager):
                      "mask": masks[ind]} for ind in range(len(labels))]
         print(f"{len(pred_res)} objects have been detected.")
         if len(pred_res) > log_manager.args.e:
-            labels_with_prob = sorted(pred_res, key=lambda x: x["score"], reverse=True)
-            labels_with_prob = labels_with_prob[:log_manager.args.e]
+            pred_res = sorted(pred_res, key=lambda x: x["score"], reverse=True)
+            pred_res = pred_res[:log_manager.args.e]
         for pred in pred_res:
             print(f"\tcategories: {categories}, label: {pred['label']}, prob: {pred['score']:.2f}")
         from engine import plot_utils
         img_uint8 = (image * 255).to(torch.uint8)
-        img_show = plot_utils.maskRCNNVisualization(img_uint8, od_prediction, log_manager.args.conf_threshold, categories)
-        img_show.show()
+        img_show = plot_utils.maskRCNNVisualization(img_uint8, pred_res, log_manager.args.conf_threshold, categories)
+        img_show.save(str(config.storage / 'output' / f"{log_manager.args.subexp}" / f"{i}.png"))
         # create SpatialObjects to save object vectors
         spatialObjs = []
         for j in range(len(pred_res)):

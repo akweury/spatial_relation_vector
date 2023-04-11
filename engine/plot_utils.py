@@ -192,31 +192,30 @@ def addPosPIL(img, objs, pos):
 
 
 def maskRCNNVisualization(img, img_pred, threshold, categories):
-    img_pred["boxes"] = img_pred["boxes"][img_pred["scores"] > threshold]
-    img_pred["labels"] = img_pred["labels"][img_pred["scores"] > threshold]
-    img_pred["masks"] = img_pred["masks"][img_pred["scores"] > threshold]
-    img_pred["scores"] = img_pred["scores"][img_pred["scores"] > threshold]
 
-    img_labels = img_pred["labels"].to("cpu").numpy()
+
+    # img_labels = img_pred["labels"].to("cpu").numpy()
+    boxes = [pred['box'] for pred in img_pred]
+    boxes = torch.tensor(np.array(boxes))
     # print(f"{len(img_labels)} objects has been detected.")
-    labels_with_prob = zip(img_labels, img_pred["scores"].detach().to("cpu").numpy())
-    img_annot_labels = []
-    for label, prob in labels_with_prob:
-        print(f"categories: {categories}, label: {label}, prob: {prob:.2f}")
-        img_annot_labels.append(f"{categories[label]}: {prob:.2f}")
+    # labels_with_prob = zip(img_labels, img_pred["scores"].detach().to("cpu").numpy())
+    img_annot_labels = [f"{categories[pred['label']]}: {pred['score']:.2f}" for pred in img_pred]
+    # for label, prob in labels_with_prob:
+    #     print(f"categories: {categories}, label: {label}, prob: {prob:.2f}")
+    #     img_annot_labels.append(f"{categories[label]}: {prob:.2f}")
 
-    colors = [config.colors[i] for i in img_labels]
+    colors = [config.colors[img_pred[i]['label']] for i in range(len(img_pred))]
     img_output_tensor = draw_bounding_boxes(image=img,
-                                            boxes=img_pred["boxes"],
+                                            boxes=boxes,
                                             labels=img_annot_labels,
                                             colors=colors,
                                             width=2)
 
-    img_masks_float = img_pred["masks"].squeeze(1)
-    img_masks_float[img_masks_float < 0.8] = 0
-    img_masks_bool = img_masks_float.bool()
-    if img_masks_bool.size(0) > 0:
-        img_output_tensor = draw_segmentation_masks(img_output_tensor, masks=img_masks_bool, alpha=0.2)
+    # img_masks_float = img_pred["masks"].squeeze(1)
+    # img_masks_float[img_masks_float < 0.8] = 0
+    # img_masks_bool = img_masks_float.bool()
+    # if img_masks_bool.size(0) > 0:
+    #     img_output_tensor = draw_segmentation_masks(img_output_tensor, masks=img_masks_bool, alpha=0.2)
     img_output = to_pil_image(img_output_tensor)
 
     return img_output
