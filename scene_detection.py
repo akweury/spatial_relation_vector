@@ -48,7 +48,7 @@ for data_type in ['train', 'val', "test"]:
 
             # object detection
             od_prediction = model_od(images)
-            if len(od_prediction["labels"])<args.e:
+            if len(od_prediction[0]["labels"]) < args.e:
                 continue
             # fact extractor
             continual_spatial_objs = rule_utils.get_continual_spatial_objs(f"positive_{i}", od_prediction, images,
