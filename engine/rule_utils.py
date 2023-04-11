@@ -86,9 +86,11 @@ def get_continual_spatial_objs(prefix, od_pred, images, vertices, objects, log_m
                      "box": boxes[ind],
                      "mask": masks[ind]} for ind in range(len(labels))]
         print(f"{len(pred_res)} objects have been detected.")
-        if len(pred_res) > log_manager.args.e:
+        if len(pred_res) >= log_manager.args.e:
             pred_res = sorted(pred_res, key=lambda x: x["score"], reverse=True)
             pred_res = pred_res[:log_manager.args.e]
+        else:
+            continue
         for pred in pred_res:
             print(f"\tcategories: {categories}, label: {pred['label']}, prob: {pred['score']:.2f}")
         from engine import plot_utils

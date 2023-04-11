@@ -3,7 +3,7 @@
   "momentum": 0.9,
   "e": 5,
   "weight_decay": 0.0005,
-  "conf_threshold": 0.5,
+  "conf_threshold": 0.8,
   "print_freq": 10,
   "num_epochs": 50,
   "od_classes": 3,
