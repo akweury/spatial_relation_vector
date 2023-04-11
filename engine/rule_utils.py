@@ -85,14 +85,15 @@ def get_continual_spatial_objs(prefix, od_pred, images, vertices, objects, log_m
                      "label": labels[ind],
                      "box": boxes[ind],
                      "mask": masks[ind]} for ind in range(len(labels))]
-        print(f"{len(pred_res)} objects have been detected.")
+
         if len(pred_res) >= log_manager.args.e:
             pred_res = sorted(pred_res, key=lambda x: x["score"], reverse=True)
             pred_res = pred_res[:log_manager.args.e]
+            print(f"{len(pred_res)} objects have been detected.")
         else:
             return None
-        for pred in pred_res:
-            print(f"\tcategories: {categories}, label: {pred['label']}, prob: {pred['score']:.2f}")
+        # for pred in pred_res:
+        #     print(f"\tcategories: {categories}, label: {pred['label']}, prob: {pred['score']:.2f}")
         from engine import plot_utils
         img_uint8 = (image * 255).to(torch.uint8)
         img_show = plot_utils.maskRCNNVisualization(img_uint8, pred_res, log_manager.args.conf_threshold, categories)
