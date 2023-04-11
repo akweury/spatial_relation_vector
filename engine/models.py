@@ -85,13 +85,13 @@ def model_cd(color_categories, img, mask):
     img_obj_hsv = cv.cvtColor(img_obj_rgb, cv.COLOR_RGB2HSV)
     img_obj_rgb_cb = cv.cvtColor(img_obj_hsv, cv.COLOR_HSV2RGB)
 
-    red_l = np.array([260, min_s_value, min_v_value])  # setting the blue lower limit
-    red_h = np.array([301, max_s_value, max_v_value])  # setting the blue upper limit
+    red_l = np.array([230, min_s_value, min_v_value])  # setting the blue lower limit
+    red_h = np.array([235, max_s_value, max_v_value])  # setting the blue upper limit
 
     green_l = np.array([110, min_s_value, min_v_value])  # setting the blue lower limit
-    green_h = np.array([115, max_s_value, max_v_value])  # setting the blue upper limit
+    green_h = np.array([125, max_s_value, max_v_value])  # setting the blue upper limit
 
-    blue_l = np.array([10, min_s_value, min_v_value])  # setting the blue lower limit
+    blue_l = np.array([0, min_s_value, min_v_value])  # setting the blue lower limit
     blue_h = np.array([15, max_s_value, max_v_value])  # setting the blue upper limit
 
     r_mask = cv.inRange(img_obj_hsv, red_l, red_h)
