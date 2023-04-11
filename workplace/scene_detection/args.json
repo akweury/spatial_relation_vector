@@ -1,7 +1,7 @@
 {
   "exp": "scene_detection",
   "momentum": 0.9,
-  "e": 5,
+  "e": 8,
   "weight_decay": 0.0005,
   "conf_threshold": 0.8,
   "print_freq": 10,
