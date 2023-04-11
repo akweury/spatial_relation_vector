@@ -39,6 +39,7 @@ for data_type in ['train', 'val', "test"]:
     model_od, optimizer_od, parameters_od = pipeline.load_checkpoint("od", od_model_path, args, device=args.device)
     model_od.eval()
 
+    pos_indices = []
     for i, (data, objects, _, _, _) in enumerate(pos_loader):
         with torch.no_grad():
             # input data
@@ -54,9 +55,13 @@ for data_type in ['train', 'val', "test"]:
                                                                            vertex, objects, log_manager)
             if continual_spatial_objs is None:
                 continue
+            else:
+                pos_indices.append(i)
             # [x,y,z, color1, color2, color3, shape1, shape2]
             pos_pred[i, :] = scene_detection_utils.obj2tensor(continual_spatial_objs[0][:max_obj_num], max_obj_num)
+    pos_pred = pos_pred[pos_indices]
 
+    neg_indices = []
     for i, (data, objects, _, _, _) in enumerate(neg_loader):
         with torch.no_grad():
             # input data
@@ -71,8 +76,11 @@ for data_type in ['train', 'val', "test"]:
                                                                            vertex, objects, log_manager)
             if continual_spatial_objs is None:
                 continue
+            else:
+                neg_indices.append(i)
             # [x,y,z, color1, color2, color3, shape1, shape2, conf]
             neg_pred[i, :] = scene_detection_utils.obj2tensor(continual_spatial_objs[0][:max_obj_num], max_obj_num)
+    neg_pred = neg_pred[neg_indices]
 
     prediction_dict = {
         'pos_res': pos_pred.detach(),
