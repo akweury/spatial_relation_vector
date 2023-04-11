@@ -58,7 +58,7 @@ def load_rules(file_name):
     return rules
 
 
-def get_continual_spatial_objs(od_pred, images, vertices, objects, log_manager):
+def get_continual_spatial_objs(prefix, od_pred, images, vertices, objects, log_manager):
     """
     return a list of spatialObjs.
     Each spatial obj contains all the property information in continual space.
@@ -94,7 +94,7 @@ def get_continual_spatial_objs(od_pred, images, vertices, objects, log_manager):
         from engine import plot_utils
         img_uint8 = (image * 255).to(torch.uint8)
         img_show = plot_utils.maskRCNNVisualization(img_uint8, pred_res, log_manager.args.conf_threshold, categories)
-        img_show.save(str(config.storage / 'output' / f"{log_manager.args.subexp}" / f"{i}.png"))
+        img_show.save(str(config.storage / 'output' / f"{log_manager.args.subexp}" / f"{prefix}.png"))
         # create SpatialObjects to save object vectors
         spatialObjs = []
         for j in range(len(pred_res)):
