@@ -39,6 +39,7 @@ for data_type in ['train', 'val', "test"]:
     model_od, optimizer_od, parameters_od = pipeline.load_checkpoint("od", od_model_path, args, device=args.device)
     model_od.eval()
 
+    print("++++++++++++++++ positive image prediction ++++++++++++++++ ")
     pos_indices = []
     for i, (data, objects, _, _, _) in enumerate(pos_loader):
         with torch.no_grad():
@@ -61,6 +62,7 @@ for data_type in ['train', 'val', "test"]:
             pos_pred[i, :] = scene_detection_utils.obj2tensor(continual_spatial_objs[0][:max_obj_num], max_obj_num)
     pos_pred = pos_pred[pos_indices]
 
+    print("++++++++++++++++ negative image prediction ++++++++++++++++ ")
     neg_indices = []
     for i, (data, objects, _, _, _) in enumerate(neg_loader):
         with torch.no_grad():
