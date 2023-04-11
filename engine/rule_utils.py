@@ -5,6 +5,7 @@ from engine import config
 from engine.SpatialObject import Property, generate_spatial_obj
 from engine import mechanics, models
 
+
 def obj2propertyList(obj):
     lists = []
     for property in obj:
@@ -73,31 +74,40 @@ def get_continual_spatial_objs(od_pred, images, vertices, objects, log_manager):
         od_prediction["masks"] = od_prediction["masks"][od_prediction["scores"] > log_manager.args.conf_threshold]
         od_prediction["scores"] = od_prediction["scores"][od_prediction["scores"] > log_manager.args.conf_threshold]
 
-        img_labels = od_prediction["labels"].to("cpu").numpy()
+        labels = od_prediction["labels"].to("cpu").numpy()
         categories = config.categories
         color_categories = config.color_categories
-        labels_with_prob = zip(img_labels, od_prediction["scores"].detach().to("cpu").numpy())
-
-        for label, prob in labels_with_prob:
-            print(f"categories: {categories}, label: {label}, prob: {prob:.2f}")
+        scores = od_prediction["scores"].detach().to("cpu").numpy()
+        boxes = od_prediction["boxes"].detach().to("cpu").numpy()
+        masks = od_prediction["masks"].detach().to("cpu").numpy()
+        pred_res = [{"score": scores[ind],
+                     "label": labels[ind],
+                     "box": boxes[ind],
+                     "mask": masks[ind]} for ind in range(len(labels))]
+        print(f"{len(pred_res)} objects have been detected.")
+        if len(pred_res) > log_manager.args.e:
+            labels_with_prob = sorted(pred_res, key=lambda x: x["score"], reverse=True)
+            labels_with_prob = labels_with_prob[:log_manager.args.e]
+        for pred in pred_res:
+            print(f"\tcategories: {categories}, label: {pred['label']}, prob: {pred['score']:.2f}")
 
         # create SpatialObjects to save object vectors
         spatialObjs = []
-        for j in range(len(od_prediction["labels"])):
-
+        for j in range(len(pred_res)):
             spatialObj = generate_spatial_obj(id=j,
                                               vertex=vertex,
                                               img=image,
-                                              label=od_prediction["labels"][j],
-                                              mask=od_prediction["masks"][j],
+                                              label=pred_res[j]["label"],
+                                              mask=pred_res[j]["mask"],
                                               categories=categories,
                                               color_categories=color_categories,
-                                              box=od_prediction["boxes"][j],
-                                              pred=od_prediction["scores"][j])
+                                              box=pred_res[j]["box"],
+                                              pred=pred_res[j]["score"])
             spatialObjs.append(spatialObj)
 
         spatialObjMatrix.append(spatialObjs)
     return spatialObjMatrix
+
 
 def get_discrete_spatial_objs(continual_spatial_objs):
     scene_predictions = []
