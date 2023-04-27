@@ -4,7 +4,7 @@ import torch
 from torch.utils.data import DataLoader
 from pathlib import Path
 from engine.FactExtractorDataset import FactExtractorDataset
-from engine import config, pipeline, args_utils, create_dataset, models
+from engine import config, pipeline, args_utils, create_dataset
 from engine import rule_utils
 import scene_detection_utils
 
@@ -35,14 +35,18 @@ for data_type in ['train', 'val', "test"]:
     neg_pred = torch.zeros(size=(neg_dataset.__len__(), max_obj_num, 9))
     pos_pred = torch.zeros(size=(pos_dataset.__len__(), max_obj_num, 9))
 
+    pos_names = []
+    neg_names = []
+
     categories = config.categories
 
     model_od, optimizer_od, parameters_od = pipeline.load_checkpoint("od", od_model_path, args, device=args.device)
     model_od.eval()
 
-    print(f"++++++++++++++++ positive {data_type} image prediction ++++++++++++++++ ")
+    print(f"++++++++++++++++ positive {data_type} image prediction ++++++++++++++++")
     pos_indices = []
-    for i, (data, objects, _, _, _) in enumerate(pos_loader):
+    for i, (data, objects, _, _, json_file) in enumerate(pos_loader):
+
         with torch.no_grad():
             # input data
 
@@ -56,16 +60,17 @@ for data_type in ['train', 'val', "test"]:
             continual_spatial_objs = rule_utils.get_continual_spatial_objs(f"positive_{i}", od_prediction, images,
                                                                            vertex, objects, log_manager)
             if continual_spatial_objs is None:
+
                 continue
             else:
                 pos_indices.append(i)
+                pos_names.append(json_file)
             # [x,y,z, color1, color2, color3, shape1, shape2]
             pos_pred[i, :] = scene_detection_utils.obj2tensor(continual_spatial_objs[0][:max_obj_num], max_obj_num)
     pos_pred = pos_pred[pos_indices]
-
     print(f"++++++++++++++++ negative {data_type} image prediction ++++++++++++++++ ")
     neg_indices = []
-    for i, (data, objects, _, _, _) in enumerate(neg_loader):
+    for i, (data, objects, _, _, json_file) in enumerate(neg_loader):
         with torch.no_grad():
             # input data
             images = list((_data[3:] / 255).to(args.device) for _data in data)
@@ -81,13 +86,16 @@ for data_type in ['train', 'val', "test"]:
                 continue
             else:
                 neg_indices.append(i)
+                neg_names.append(json_file)
             # [x,y,z, color1, color2, color3, shape1, shape2, conf]
             neg_pred[i, :] = scene_detection_utils.obj2tensor(continual_spatial_objs[0][:max_obj_num], max_obj_num)
     neg_pred = neg_pred[neg_indices]
 
     prediction_dict = {
         'pos_res': pos_pred.detach(),
-        'neg_res': neg_pred.detach()
+        'neg_res': neg_pred.detach(),
+        'pos_names': pos_names,
+        'neg_names': neg_names
     }
     model_file = str(config.storage / 'hide' / f"{args.subexp}_pm_res_{data_type}.pth.tar")
     torch.save(prediction_dict, str(model_file))
