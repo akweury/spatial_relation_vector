@@ -45,7 +45,7 @@ for data_type in ['train', 'val', "test"]:
 
     print(f"++++++++++++++++ positive {data_type} image prediction ++++++++++++++++")
     pos_indices = []
-    for i, (data, objects, _, _, json_file) in enumerate(pos_loader):
+    for i, (data, objects, _, _, _, json_file) in enumerate(pos_loader):
 
         with torch.no_grad():
             # input data
@@ -70,7 +70,7 @@ for data_type in ['train', 'val', "test"]:
     pos_pred = pos_pred[pos_indices]
     print(f"++++++++++++++++ negative {data_type} image prediction ++++++++++++++++ ")
     neg_indices = []
-    for i, (data, objects, _, _, json_file) in enumerate(neg_loader):
+    for i, (data, objects, _, _, _, json_file) in enumerate(neg_loader):
         with torch.no_grad():
             # input data
             images = list((_data[3:] / 255).to(args.device) for _data in data)

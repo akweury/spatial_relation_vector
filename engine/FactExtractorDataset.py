@@ -24,4 +24,5 @@ class FactExtractorDataset(Dataset):
 
         X = torch.load(self.X[item])
         file_json = file_utils.load_json(X['file_name'])
-        return X["input_tensor"], X["objects"], X["vertex_max"], X["vertex_min"], file_json
+
+        return X["input_tensor"], X["objects"], X["vertex_max"], X["vertex_min"], file_json, X['file_name']
