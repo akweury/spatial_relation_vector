@@ -97,6 +97,6 @@ for data_type in ['train', 'val', "test"]:
         'pos_names': pos_names,
         'neg_names': neg_names
     }
-    model_file = str(config.storage / 'hide' / f"{args.subexp}_pm_res_{data_type}.pth.tar")
+    model_file = str(config.storage / 'hide' / f"{args.subexp}" / f"{args.subexp}_pm_res_{data_type}.pth.tar")
     torch.save(prediction_dict, str(model_file))
     print(f"file {model_file} saved successfully!")
