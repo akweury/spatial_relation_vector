@@ -16,5 +16,6 @@ def obj2tensor(obj_predictions, max_obj_num):
         elif obj.shape == "cube":
             obj_tensor[obj_i, 7] = 1
         obj_tensor[obj_i, 8] = obj.pred
+        print(obj.__dict__())
         obj_tensor[obj_i, 9:11] = torch.tensor(obj.screenPosition)
     return obj_tensor
