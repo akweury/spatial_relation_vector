@@ -57,7 +57,7 @@ for data_type in ['train', 'val', "test"]:
             od_prediction = model_od(images)
 
             # fact extractor
-            continual_spatial_objs = rule_utils.get_continual_spatial_objs(f"positive_{i}", od_prediction, images,
+            continual_spatial_objs = rule_utils.get_continual_spatial_objs(f"{data_type}_positive_{i}", od_prediction, images,
                                                                            vertex, objects, log_manager)
             if continual_spatial_objs is None:
 
@@ -80,7 +80,7 @@ for data_type in ['train', 'val', "test"]:
             od_prediction = model_od(images)
 
             # fact extractor
-            continual_spatial_objs = rule_utils.get_continual_spatial_objs(f"negative_{i}", od_prediction, images,
+            continual_spatial_objs = rule_utils.get_continual_spatial_objs(f"{data_type}_negative_{i}", od_prediction, images,
                                                                            vertex, objects, log_manager)
             if continual_spatial_objs is None:
                 continue
