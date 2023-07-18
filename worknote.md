@@ -16,7 +16,7 @@ docker run --gpus all -it -v /home/ml-jsha/storage:/root/spatial_relation_vector
 
 ###### Train OD
 
-python3 train.py --exp od --subexp od --device 11
+python3 train.py --exp od --subexp od --device 0
 
 
 ###### check GPU stats
@@ -40,7 +40,7 @@ python3 scene_detection.py --exp scene_detection --subexp letter_a_15 --batch_si
 python3 scene_detection.py --exp scene_detection --subexp all_letters --batch_size 1 --device 6 --e 5
 python3 scene_detection.py --exp scene_detection --subexp letter_i_12 --batch_size 1 --device 6 --e 6
 
-python3 scene_detection.py --exp scene_detection --subexp letter_A_12 --batch_size 1 --device 6 --e 10
+python3 scene_detection.py --exp scene_detection --subexp letter_A --batch_size 1 --device 6 --e 10
 python3 scene_detection.py --exp scene_detection --subexp letter_I_10 --batch_size 1 --device 6 --e 9
 python3 scene_detection.py --exp scene_detection --subexp letter_O_8 --batch_size 1 --device 6 --e 8
 python3 scene_detection.py --exp scene_detection --subexp letter_Q_10 --batch_size 1 --device 6 --e 10
@@ -61,6 +61,14 @@ python3 scene_detection.py --exp scene_detection --subexp letter_B --batch_size 
 python3 scene_detection.py --exp scene_detection --subexp letter_C --batch_size 1 --device 6 --e 9
 python3 scene_detection.py --exp scene_detection --subexp letter_D --batch_size 1 --device 6 --e 9
 python3 scene_detection.py --exp scene_detection --subexp letter_G --batch_size 1 --device 6 --e 14
+
+python3 scene_detection.py --exp scene_detection --subexp letter_J --batch_size 1 --device 6 --e 7
+python3 scene_detection.py --exp scene_detection --subexp letter_P --batch_size 1 --device 6 --e 10
+python3 scene_detection.py --exp scene_detection --subexp letter_S --batch_size 1 --device 6 --e 13
+python3 scene_detection.py --exp scene_detection --subexp letter_U --batch_size 1 --device 6 --e 8
+
+python3 scene_detection.py --exp scene_detection --subexp letter_R --batch_size 1 --device 6 --e 12
+
 
 
 

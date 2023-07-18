@@ -9,7 +9,7 @@ from engine import rule_utils
 import scene_detection_utils
 
 od_model_path = config.model_ball_sphere_detector
-
+dataset_name = "alphabet"
 # preprocessing
 args = args_utils.paser()
 max_obj_num = args.e
@@ -18,8 +18,8 @@ print(f"work place: {workplace}")
 
 for data_type in ['train', 'val', "test"]:
 
-    pos_data_path = workplace / "storage" / "hide" / args.subexp / data_type / "true"
-    neg_data_path = workplace / "storage" / "hide" / args.subexp / data_type / "false"
+    pos_data_path = workplace / "storage" / dataset_name / args.subexp / data_type / "true"
+    neg_data_path = workplace / "storage" / dataset_name / args.subexp / data_type / "false"
     create_dataset.data2tensor_fact_extractor(pos_data_path, args)
     create_dataset.data2tensor_fact_extractor(neg_data_path, args)
     # init log manager
@@ -97,6 +97,6 @@ for data_type in ['train', 'val', "test"]:
         'pos_names': pos_names,
         'neg_names': neg_names
     }
-    model_file = str(config.storage / 'hide' / f"{args.subexp}" / f"{args.subexp}_pm_res_{data_type}.pth.tar")
+    model_file = str(config.storage / dataset_name / f"{args.subexp}" / f"{args.subexp}_pm_res_{data_type}.pth.tar")
     torch.save(prediction_dict, str(model_file))
     print(f"file {model_file} saved successfully!")
