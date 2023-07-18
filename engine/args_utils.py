@@ -10,6 +10,7 @@ from engine import config
 
 class Args():
     def __init__(self, args):
+        self.dataset = args.dataset
         self.machine = args.machine
         self.clear = args.clear
         self.exp = args.exp
