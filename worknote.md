@@ -40,6 +40,12 @@ python3 scene_detection.py --exp scene_detection --subexp letter_a_15 --batch_si
 python3 scene_detection.py --exp scene_detection --subexp all_letters --batch_size 1 --device 6 --e 5
 python3 scene_detection.py --exp scene_detection --subexp letter_i_12 --batch_size 1 --device 6 --e 6
 
+
+###### group 7
+python3 scene_detection.py --exp scene_detection --subexp letter_L --dataset alphabet --batch_size 1 --device 6 --e 7
+python3 scene_detection.py --exp scene_detection --subexp letter_Y --dataset alphabet --batch_size 1 --device 6 --e 7
+
+
 python3 scene_detection.py --exp scene_detection --subexp letter_A --batch_size 1 --device 6 --e 10
 python3 scene_detection.py --exp scene_detection --subexp letter_I_10 --batch_size 1 --device 6 --e 9
 python3 scene_detection.py --exp scene_detection --subexp letter_O_8 --batch_size 1 --device 6 --e 8
@@ -48,7 +54,7 @@ python3 scene_detection.py --exp scene_detection --subexp letter_E --batch_size 
 python3 scene_detection.py --exp scene_detection --subexp letter_H --batch_size 1 --device 6 --e 12
 python3 scene_detection.py --exp scene_detection --subexp letter_F --batch_size 1 --device 6 --e 9
 python3 scene_detection.py --exp scene_detection --subexp letter_K --batch_size 1 --device 6 --e 9
-python3 scene_detection.py --exp scene_detection --subexp letter_L --batch_size 1 --device 6 --e 7
+
 python3 scene_detection.py --exp scene_detection --subexp letter_M --batch_size 1 --device 6 --e 17
 python3 scene_detection.py --exp scene_detection --subexp letter_N --batch_size 1 --device 6 --e 13
 python3 scene_detection.py --exp scene_detection --subexp letter_T --batch_size 1 --device 6 --e 7

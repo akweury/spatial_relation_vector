@@ -51,6 +51,7 @@ def paser():
     parser = argparse.ArgumentParser()
 
     # fine tune args
+    parser.add_argument('--dataset', type=str, help='dataset name')
     parser.add_argument('--batch_size', '-b', default=2, type=int, help='Mini-batch size (default: 2)')
     parser.add_argument('--num_epochs', default=10, type=int, help='Set number of training epochs')
     parser.add_argument('--conf_threshold', default=0.7, help='The confidence threshold of bounding boxes')
