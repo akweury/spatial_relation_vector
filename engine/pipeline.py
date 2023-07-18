@@ -243,7 +243,7 @@ class LogManager():
         self.io_path()
 
     def io_path(self):
-        self.data_path = self.args.dataset / self.args.subexp
+        self.data_path = config.storage / self.args.dataset / self.args.subexp
         self.output_folder = config.output / self.args.subexp
         self.model_folder = config.models / self.args.subexp
 
