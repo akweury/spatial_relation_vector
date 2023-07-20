@@ -105,6 +105,11 @@ def generate_class_mask(label, classMap, h, w):
                 polygon.append(
                     (shape_attributes["all_points_x"][point_index], shape_attributes["all_points_y"][point_index]))
             ImageDraw.Draw(img).polygon(polygon, outline=1, fill=1)
+        elif shape_attributes["name"] == "rect":
+            rect_shape = [shape_attributes["x"], shape_attributes["y"],
+                          shape_attributes["x"] + shape_attributes["width"],
+                          shape_attributes["y"] + shape_attributes["height"]]
+            ImageDraw.Draw(img).rectangle(rect_shape, fill=1, outline=1)
 
         mask_i = np.array(img)
 
@@ -137,6 +142,30 @@ def get_masks(args, labelMap, objData, masks, shape):
             class_labels.append(labelMap['obj'][obj["shape"]])
         elif args.exp == "cd":
             class_labels.append(labelMap['color'][obj['material'].split("_")[1]])
+        elif "letter" in args.exp:
+            break
+        else:
+            raise ValueError
+    return class_mask, class_labels
+
+
+def get_mask_from_json(args, label_json, annotation_json):
+    h, w = shape[0], shape[1]
+    class_mask = np.zeros(shape=(h, w))
+    masks = masks[:, :, 0]
+    mask_values = np.unique(masks)
+    for i in range(len(mask_values)):
+        mask_i = masks == mask_values[i]
+        class_mask[mask_i] = i
+
+    class_labels = []
+    for obj in objData:
+        if args.exp == "od":
+            class_labels.append(labelMap['obj'][obj["shape"]])
+        elif args.exp == "cd":
+            class_labels.append(labelMap['color'][obj['material'].split("_")[1]])
+        elif "letter" in args.exp:
+            break
         else:
             raise ValueError
     return class_mask, class_labels

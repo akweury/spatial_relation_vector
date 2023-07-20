@@ -18,6 +18,9 @@ docker run --gpus all -it -v /home/ml-jsha/storage:/root/spatial_relation_vector
 
 python3 train.py --exp od --subexp od --device 0
 
+###### Train OD Letter
+
+python3 train_letter_od.py --exp od_letter --subexp letter_L --device 0
 
 ###### check GPU stats
 gpustat -cp
@@ -42,8 +45,8 @@ python3 scene_detection.py --exp scene_detection --subexp letter_i_12 --batch_si
 
 
 ###### group 7
-python3 scene_detection.py --exp scene_detection --subexp letter_L --dataset alphabet --batch_size 1 --device 6 --e 7
-python3 scene_detection.py --exp scene_detection --subexp letter_Y --dataset alphabet --batch_size 1 --device 6 --e 7
+python3 scene_detection.py --exp scene_detection --subexp letter_L --dataset alphabet --batch_size 1 --device 5 --e 7
+python3 scene_detection.py --exp scene_detection --subexp letter_Y --dataset alphabet --batch_size 1 --device 5 --e 7
 
 
 python3 scene_detection.py --exp scene_detection --subexp letter_A --batch_size 1 --device 6 --e 10

@@ -8,11 +8,14 @@ from torch.utils.data import Dataset
 
 class SyntheticDataset(Dataset):
 
-    def __init__(self, root, folder=None):
+    def __init__(self, root, folder=None, sub_folder=None):
 
         if folder is None:
             raise ValueError("Please set the folder name to train/test ")
-        self.root = root / folder / "tensor"
+        if sub_folder is None:
+            self.root = root / folder / "tensor"
+        else:
+            self.root = root / folder / sub_folder / "tensor"
         self.X = np.array(sorted(glob.glob(str(self.root / "*pth.tar"), recursive=True)))
 
     def __len__(self):

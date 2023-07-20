@@ -9,14 +9,14 @@ from engine import dataset_utils as utils
 
 
 def data2tensorManualMask(data_root, args):
-    for sub_name in ["test", "train", "val"]:
-        data_path = data_root / sub_name
+    for sub_name in ["val", "test"]:
+        data_path = data_root / sub_name / "true"
         if not os.path.exists(str(data_path)):
             raise FileNotFoundError
         if not os.path.exists(str(data_path / "tensor")):
             os.makedirs(str(data_path / "tensor"))
 
-        label_json = data_path / "labels.json"
+        label_json = data_path / "label.json"
         if not os.path.exists(label_json):
             raise FileNotFoundError("No labels.json has been found!")
         labels, categories = utils.load_labels(label_json)
@@ -74,7 +74,11 @@ def data2tensorAutoMask(data_root, args):
     with open(label_file) as f:
         label_json = json.load(f)
     for sub_name in ["test", "train"]:
-        data_path = data_root / sub_name
+        if 'letter' in args.exp:
+            data_path = data_root / sub_name / 'true'
+        else:
+            data_path = data_root / sub_name
+
         if not os.path.exists(str(data_path)):
             raise FileNotFoundError
         if not os.path.exists(str(data_path / "tensor")):
@@ -85,7 +89,7 @@ def data2tensorAutoMask(data_root, args):
         mask_files = np.array(sorted(glob.glob(str(data_path / "*mask.png"), recursive=True)))
         data_files = np.array(sorted(glob.glob(str(data_path / "*data0.json"), recursive=True)))
         img_files = np.array(sorted(glob.glob(str(data_path / "*image.png"), recursive=True)))
-
+        annotation_file = str(data_path / "label.json")
         for item in range(len(data_files)):
             output_tensor_file = str(data_path / "tensor" / f"{str(item).zfill(5)}.pth.tar")
             img = utils.load_32bitImage(img_files[item])
@@ -111,9 +115,14 @@ def data2tensorAutoMask(data_root, args):
                 img,  # 3,4,5
             ]
 
-            # extract labels from each image file
-            objData = data['objects']
-            masks, labels = utils.get_masks(args, label_json, objData, masks, vertex.shape)
+
+            if 'letter' in args.exp:
+                masks, labels = utils.get_mask_from_json(args, label_json, annotation_file)
+            elif args.exp == "od":
+                # extract labels from each image file
+                masks, labels = utils.get_masks(args, label_json, data['objects'], masks, vertex.shape)
+            else:
+                raise ValueError
 
             gt = np.c_[
                 np.expand_dims(masks, axis=2),  # 0
