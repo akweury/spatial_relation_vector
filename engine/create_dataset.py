@@ -13,8 +13,8 @@ def data2tensorManualMask(data_root, args):
         data_path = data_root / sub_name / "true"
         if not os.path.exists(str(data_path)):
             raise FileNotFoundError
-        if not os.path.exists(str(data_path / "tensor")):
-            os.makedirs(str(data_path / "tensor"))
+        if not os.path.exists(str(data_path / "letter_od_tensor")):
+            os.makedirs(str(data_path / "letter_od_tensor"))
 
         label_json = data_path / "label.json"
         if not os.path.exists(label_json):
@@ -27,7 +27,7 @@ def data2tensorManualMask(data_root, args):
         img_files = np.array(sorted(glob.glob(str(data_path / "*image.png"), recursive=True)))
 
         for item in range(len(data_files)):
-            output_tensor_file = str(data_path / "tensor" / f"{str(item).zfill(5)}.pth.tar")
+            output_tensor_file = str(data_path / "letter_od_tensor" / f"{str(item).zfill(5)}.pth.tar")
             if args.clear != "true" and (os.path.exists(output_tensor_file) or not os.path.exists(data_files[item])):
                 continue
 

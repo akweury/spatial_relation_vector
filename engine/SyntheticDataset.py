@@ -15,7 +15,7 @@ class SyntheticDataset(Dataset):
         if sub_folder is None:
             self.root = root / folder / "tensor"
         else:
-            self.root = root / folder / sub_folder / "tensor"
+            self.root = root / folder / sub_folder / "letter_od_tensor"
         self.X = np.array(sorted(glob.glob(str(self.root / "*pth.tar"), recursive=True)))
 
     def __len__(self):

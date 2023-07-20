@@ -12,7 +12,7 @@ docker build -t ml-sha/hide_dataset_docker .
 
 ###### Run docker
 
-docker run --gpus all -it -v /home/ml-jsha/storage:/root/spatial_relation_vector/storage --rm ml-sha/hide_dataset_docker
+docker run --gpus all -it -v /home/ml-jsha/storage:/root/storage --rm ml-sha/hide_dataset_docker
 
 ###### Train OD
 
@@ -20,7 +20,7 @@ python3 train.py --exp od --subexp od --device 0
 
 ###### Train OD Letter
 
-python3 train_letter_od.py --exp od_letter --subexp letter_L --device 0
+python3 train_letter_od.py --exp od_letter --subexp letter_L --device 1
 
 ###### check GPU stats
 gpustat -cp
