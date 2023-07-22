@@ -48,8 +48,10 @@ python3 scene_detection.py --exp scene_detection --subexp letter_i_12 --batch_si
 python3 scene_detection.py --exp scene_detection --subexp letter_L --dataset alphabet --batch_size 1 --device 5 --e 7
 python3 scene_detection.py --exp scene_detection --subexp letter_Y --dataset alphabet --batch_size 1 --device 5 --e 7
 
+###### Group 11
+python3 scene_detection.py --exp scene_detection --subexp letter_A --batch_size 1 --device 6 --max_e 100
 
-python3 scene_detection.py --exp scene_detection --subexp letter_A --batch_size 1 --device 6 --e 10
+
 python3 scene_detection.py --exp scene_detection --subexp letter_I_10 --batch_size 1 --device 6 --e 9
 python3 scene_detection.py --exp scene_detection --subexp letter_O_8 --batch_size 1 --device 6 --e 8
 python3 scene_detection.py --exp scene_detection --subexp letter_Q_10 --batch_size 1 --device 6 --e 10
