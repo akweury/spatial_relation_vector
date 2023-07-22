@@ -1,5 +1,5 @@
 # Created by shaji on 14-Dec-22
-
+import os
 import torch
 from torch.utils.data import DataLoader
 from pathlib import Path
@@ -13,7 +13,7 @@ dataset_name = "alphabet"
 # preprocessing
 args = args_utils.paser()
 max_obj_num = args.max_e
-workplace = Path(__file__).parents[1]
+workplace = Path(os.path.abspath(__file__)).parents[1]
 print(f"work place: {workplace}")
 
 for data_type in ['train', 'val', "test"]:
@@ -57,7 +57,8 @@ for data_type in ['train', 'val', "test"]:
             od_prediction = model_od(images)
 
             # fact extractor
-            continual_spatial_objs = rule_utils.get_continual_spatial_objs(f"{data_type}_positive_{i}", od_prediction, images,
+            continual_spatial_objs = rule_utils.get_continual_spatial_objs(f"{data_type}_positive_{i}", od_prediction,
+                                                                           images,
                                                                            vertex, objects, log_manager)
             if continual_spatial_objs is None:
 
@@ -80,7 +81,8 @@ for data_type in ['train', 'val', "test"]:
             od_prediction = model_od(images)
 
             # fact extractor
-            continual_spatial_objs = rule_utils.get_continual_spatial_objs(f"{data_type}_negative_{i}", od_prediction, images,
+            continual_spatial_objs = rule_utils.get_continual_spatial_objs(f"{data_type}_negative_{i}", od_prediction,
+                                                                           images,
                                                                            vertex, objects, log_manager)
             if continual_spatial_objs is None:
                 continue
