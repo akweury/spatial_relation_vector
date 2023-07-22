@@ -450,6 +450,8 @@ def load_checkpoint(exp, model_path, args, device):
         model = models.get_model_instance_segmentation(args.od_classes).to(args.device)
     elif exp == "cd":
         model = models.get_model_instance_segmentation(args.cd_classes).to(args.device)
+    elif exp == "od_letter":
+        model = models.get_model_instance_segmentation(args.od_classes).to(args.device)
     else:
         raise ValueError
     model.load_state_dict(checkpoint["state_dict"])  # resume the model
@@ -457,7 +459,6 @@ def load_checkpoint(exp, model_path, args, device):
     parameters = filter(lambda p: p.requires_grad, model.parameters())
 
     print(f"pretrained net state_dict: \n"
-          f"{model.state_dict().keys()}\n"
           f"-({exp}) checkout {checkpoint['epoch']} was loaded successfully!")
 
     return model, optimizer, parameters

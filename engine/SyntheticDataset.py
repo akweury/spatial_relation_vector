@@ -44,7 +44,10 @@ class SyntheticDataset(Dataset):
         labels = torch.as_tensor(X["mask_labels"], dtype=torch.int64)
         masks = torch.as_tensor(masks, dtype=torch.uint8)
         image_id = torch.tensor([item])
-        area = (boxes[:, 3] - boxes[:, 1]) * (boxes[:, 2] - boxes[:, 0])
+        if len(boxes) == 0:
+            area = None
+        else:
+            area = (boxes[:, 3] - boxes[:, 1]) * (boxes[:, 2] - boxes[:, 0])
         # suppose all instances are not crowd
         iscrowd = torch.zeros((num_objs,), dtype=torch.int64)
 
