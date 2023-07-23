@@ -9,12 +9,12 @@ from engine import rule_utils
 import scene_detection_utils
 
 od_model_path = config.model_ball_sphere_detector
-dataset_name = "alphabet"
+
 # preprocessing
 args = args_utils.paser()
 max_obj_num = args.max_e
 workplace = Path(os.path.abspath(__file__)).parents[1]
-print(f"work place: {workplace}")
+dataset_name = args.dataset
 
 for data_type in ['train', 'val', "test"]:
 
