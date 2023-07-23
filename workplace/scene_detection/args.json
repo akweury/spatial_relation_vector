@@ -1,5 +1,6 @@
 {
   "exp": "scene_detection",
+  "max_e": 100,
   "momentum": 0.9,
   "weight_decay": 0.0005,
   "conf_threshold": 0.7,
