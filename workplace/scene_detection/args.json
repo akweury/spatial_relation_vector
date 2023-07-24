@@ -1,5 +1,6 @@
 {
   "exp": "scene_detection",
+  "batch_size": 1,
   "max_e": 100,
   "momentum": 0.9,
   "weight_decay": 0.0005,

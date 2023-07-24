@@ -54,7 +54,7 @@ python3 scene_detection.py --exp scene_detection --subexp letter_L --dataset alp
 python3 scene_detection.py --exp scene_detection --subexp letter_Y --dataset alphabet --batch_size 1 --device 5 --e 7
 
 ###### Group 11
-python3 scene_detection.py --exp scene_detection --subexp letter_A --dataset alphabet --batch_size 1 --device 6 --max_e 100
+python3 scene_detection.py --exp scene_detection --subexp letter_A --dataset alphabet --device 6
 
 
 python3 scene_detection.py --exp scene_detection --subexp letter_I_10 --batch_size 1 --device 6 --e 9
