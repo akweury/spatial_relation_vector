@@ -15,7 +15,11 @@ def obj2tensor(obj_predictions, max_obj_num):
             obj_tensor[obj_i, 6] = 1
         elif obj.shape == "cube":
             obj_tensor[obj_i, 7] = 1
-        obj_tensor[obj_i, 8] = obj.pred
+        elif obj.shape == "cone":
+            obj_tensor[obj_i, 8] = 1
+        elif obj.shape == "cylinder":
+            obj_tensor[obj_i, 9] = 1
+        obj_tensor[obj_i, 10] = obj.pred
 
-        obj_tensor[obj_i, 9:11] = torch.as_tensor(np.array(obj.screenPosition))
+        obj_tensor[obj_i, 11:13] = torch.as_tensor(np.array(obj.screenPosition))
     return obj_tensor
