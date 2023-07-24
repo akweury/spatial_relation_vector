@@ -16,7 +16,7 @@ docker run --gpus all -it -v /home/ml-jsha/storage:/root/storage --rm ml-sha/hid
 
 ###### Train OD
 
-python3 train.py --exp od --subexp od --device 0
+python3 train.py --exp od --subexp od --dataset alphabet --device 4
 
 ###### Train OD Letter
 
@@ -27,6 +27,10 @@ gpustat -cp
 
 ###### Run experiment: scene detection
 python3 scene_detection.py --exp scene_detection --subexp check_mark_4 --dataset single_pattern --batch_size 1 --device 5
+python3 scene_detection.py --exp scene_detection --subexp check_mark_5 --dataset single_pattern --batch_size 1 --device 5
+python3 scene_detection.py --exp scene_detection --subexp check_mark_6 --dataset single_pattern --batch_size 1 --device 5
+python3 scene_detection.py --exp scene_detection --subexp six_same_6 --dataset single_pattern --batch_size 1 --device 5
+python3 scene_detection.py --exp scene_detection --subexp ten_same_10 --dataset single_pattern --batch_size 1 --device 5
 
 python3 scene_detection.py --exp scene_detection --subexp three_same --batch_size 1 --device 11
 python3 scene_detection.py --exp scene_detection --subexp cross --batch_size 1 --device 11
@@ -50,7 +54,7 @@ python3 scene_detection.py --exp scene_detection --subexp letter_L --dataset alp
 python3 scene_detection.py --exp scene_detection --subexp letter_Y --dataset alphabet --batch_size 1 --device 5 --e 7
 
 ###### Group 11
-python3 scene_detection.py --exp scene_detection --subexp letter_A --batch_size 1 --device 6 --max_e 100
+python3 scene_detection.py --exp scene_detection --subexp letter_A --dataset alphabet --batch_size 1 --device 6 --max_e 100
 
 
 python3 scene_detection.py --exp scene_detection --subexp letter_I_10 --batch_size 1 --device 6 --e 9
