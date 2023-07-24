@@ -29,7 +29,7 @@ colors = [
     "cyan"
 ]
 
-categories = ["background", "sphere", "cube"]
+categories = ["background", "sphere", "cube", "cone", "cylinder"]
 color_categories = ["other", "red", "green", "blue"]
 
 # pre-trained model
