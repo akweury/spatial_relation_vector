@@ -91,7 +91,7 @@ def get_continual_spatial_objs(prefix, od_pred, images, vertices, objects, log_m
             # pred_res = pred_res[:log_manager.args.e]
             # print(f"({prefix}) {len(pred_res)} objects have been detected.")
         # else:
-        print(f"({prefix}) {len(pred_res)} objects have been detected.")
+
             # return None
         # for pred in pred_res:
         #     print(f"\tcategories: {categories}, label: {pred['label']}, prob: {pred['score']:.2f}")
@@ -111,8 +111,9 @@ def get_continual_spatial_objs(prefix, od_pred, images, vertices, objects, log_m
                                               color_categories=color_categories,
                                               box=pred_res[j]["box"],
                                               pred=pred_res[j]["score"])
-            spatialObjs.append(spatialObj)
-
+            if spatialObj is not None:
+                spatialObjs.append(spatialObj)
+        print(f"({prefix}) {len(spatialObjs)} objects have been detected.")
         spatialObjMatrix.append(spatialObjs)
     return spatialObjMatrix
 
