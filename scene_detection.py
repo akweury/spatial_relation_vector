@@ -61,7 +61,6 @@ for data_type in ['train', 'val', "test"]:
                                                                            images,
                                                                            vertex, objects, log_manager)
             if continual_spatial_objs is None:
-
                 continue
             else:
                 pos_indices.append(i)
