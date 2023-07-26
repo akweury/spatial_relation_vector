@@ -46,6 +46,8 @@ def generate_spatial_obj(id, vertex, img, label, mask, categories, color_categor
     img = img.permute(1, 2, 0)
     obj_pixels = img[mask == 1]
     center_pos = np.median(obj_points, axis=0)
+    if np.isnan(center_pos).sum() > 0:
+        print(obj_points)
     dim = obj_points.shape[0]
     shape = categories[label]
     color = models.model_cd(color_categories, img, mask)
