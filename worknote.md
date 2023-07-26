@@ -16,7 +16,7 @@ docker run --gpus all -it -v /home/ml-jsha/storage:/root/storage --rm ml-sha/hid
 
 ###### Train OD
 
-python3 train.py --exp od --subexp od --dataset alphabet --device 4
+python3 train.py --exp od --subexp od --dataset alphabet --device 9
 
 ###### Train OD Letter
 
@@ -55,6 +55,8 @@ python3 scene_detection.py --exp scene_detection --subexp letter_Y --dataset alp
 
 ###### Group 11
 python3 scene_detection.py --exp scene_detection --subexp letter_A --dataset alphabet --device 6
+###### Group 12
+python3 scene_detection.py --exp scene_detection --subexp letter_B --dataset alphabet --device 6
 
 
 python3 scene_detection.py --exp scene_detection --subexp letter_I_10 --batch_size 1 --device 6 --e 9

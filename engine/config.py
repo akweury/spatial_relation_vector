@@ -33,8 +33,8 @@ categories = ["background", "sphere", "cube", "cone", "cylinder"]
 color_categories = ["other", "red", "green", "blue"]
 
 # pre-trained model
-model_ball_sphere_detector = models / "od" / "model_best.pth.tar"
-# model_ball_sphere_detector = models / "od" / "od-checkpoint-99.pth.tar"
+# model_ball_sphere_detector = models / "od" / "od-model_best.pth.tar"
+model_ball_sphere_detector = models / "od" / "od-checkpoint-99.pth.tar"
 
 
 propertyNames = ["shape"]
