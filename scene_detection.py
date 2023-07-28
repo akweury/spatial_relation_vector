@@ -29,8 +29,8 @@ for data_type in ['train', 'val', "test"]:
 
     pos_dataset = FactExtractorDataset(pos_data_path)
     neg_dataset = FactExtractorDataset(neg_data_path)
-    pos_loader = DataLoader(pos_dataset, shuffle=True, batch_size=args.batch_size, collate_fn=pipeline.collate_fn)
-    neg_loader = DataLoader(neg_dataset, shuffle=True, batch_size=args.batch_size, collate_fn=pipeline.collate_fn)
+    pos_loader = DataLoader(pos_dataset, shuffle=False, batch_size=args.batch_size, collate_fn=pipeline.collate_fn)
+    neg_loader = DataLoader(neg_dataset, shuffle=False, batch_size=args.batch_size, collate_fn=pipeline.collate_fn)
 
     neg_pred = torch.zeros(size=(neg_dataset.__len__(), max_obj_num, 13))
     pos_pred = torch.zeros(size=(pos_dataset.__len__(), max_obj_num, 13))
