@@ -5,7 +5,7 @@
   "conf_threshold": 0.9,
   "print_freq": 10,
   "num_epochs": 100,
-  "od_classes": 5,
+  "od_classes": 4,
   "cd_classes": 3,
   "resume": null
 }
