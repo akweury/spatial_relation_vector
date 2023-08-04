@@ -67,6 +67,8 @@ def matching_prediction(objects, pred_res, categories):
     pred_sign = []
     for box_i, gt_sc_position in enumerate(gt_sc_positions):
         for position_i, gt_sc_position in enumerate(gt_sc_positions):
+            print(pred_boxes[box_i])
+            print(f"position: {gt_sc_position}")
             if pred_boxes[box_i][0] < gt_sc_position[0] < pred_boxes[box_i][2] and pred_boxes[box_i][1] < \
                     gt_sc_position[1] < pred_boxes[box_i][3]:
                 pred_sign.append(pred_lables[box_i] == gt_labels[box_i])
