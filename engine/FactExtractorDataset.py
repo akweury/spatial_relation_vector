@@ -11,9 +11,9 @@ from engine import file_utils
 
 class FactExtractorDataset(Dataset):
 
-    def __init__(self, root):
+    def __init__(self, root, top_data):
         self.root = root / "tensor"
-        self.X = np.array(sorted(glob.glob(str(self.root / "*pth.tar"), recursive=True)))
+        self.X = np.array(sorted(glob.glob(str(self.root / "*pth.tar"), recursive=True)))[:top_data]
 
     def __len__(self):
         return len(self.X)

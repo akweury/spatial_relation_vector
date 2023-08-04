@@ -29,8 +29,8 @@ for data_type in ['train', 'val', "test"]:
 
     # create data tensors if they are not exists
 
-    pos_dataset = FactExtractorDataset(pos_data_path)
-    neg_dataset = FactExtractorDataset(neg_data_path)
+    pos_dataset = FactExtractorDataset(pos_data_path, args.top_data)
+    neg_dataset = FactExtractorDataset(neg_data_path, args.top_data)
     pos_loader = DataLoader(pos_dataset, shuffle=False, batch_size=args.batch_size, collate_fn=pipeline.collate_fn)
     neg_loader = DataLoader(neg_dataset, shuffle=False, batch_size=args.batch_size, collate_fn=pipeline.collate_fn)
 
