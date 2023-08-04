@@ -27,6 +27,7 @@ class Args():
         self.subexp = args.subexp
         self.device = args.device
         self.max_e = args.max_e
+        self.top_data = args.top_data
 
 
 def load_args_from_file(args_file_path, given_args):
