@@ -74,7 +74,8 @@ def matching_prediction(objects, pred_res, categories):
                 if pred_box[0] < gt_sc_position[0] < pred_box[2] and pred_box[1] < gt_sc_position[1] < pred_box[3]:
                     pred_sign.append(pred_lables[box_i] == gt_labels[position_i])
                     break
-    print(f"----------------------------------------------------------length of sc positions {len(pred_sign)}")
+        if len(pred_sign) < position_i:
+            pred_sign.append(False)
     return pred_sign
 
 
