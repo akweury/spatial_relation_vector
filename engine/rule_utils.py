@@ -65,6 +65,7 @@ def matching_prediction(objects, pred_res, categories):
     pred_lables = [categories[pred['label']] for pred in pred_res]
 
     pred_sign = []
+    print(f"length of sc positions {len(gt_sc_positions)}")
     for box_i, gt_sc_position in enumerate(gt_sc_positions):
         if len(pred_boxes) <= box_i:
             pred_sign.append(False)

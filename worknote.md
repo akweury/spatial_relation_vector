@@ -26,7 +26,7 @@ python3 train_letter_od.py --exp od_letter --subexp letter_L --device 1
 gpustat -cp
 
 ###### Run experiment: scene detection
-python3 scene_detection.py --exp scene_detection --subexp three_same_3 --dataset single_pattern --batch_size 1 --device 6 -gt 3
+python3 scene_detection.py --exp scene_detection --subexp three_same_3 --dataset single_pattern --batch_size 1 --device 6 --top_data 35
 
 
 python3 scene_detection.py --exp scene_detection --subexp check_mark_4 --dataset single_pattern --batch_size 1 --device 5
