@@ -58,13 +58,34 @@ def load_rules(file_name):
     return rules
 
 
-def get_continual_spatial_objs(prefix, od_pred, images, vertices, objects, log_manager):
+def matching_prediction(objects, pred_res, categories):
+    gt_sc_positions = [objects[0][i]['screenPosition'] for i in range(len(objects[0]))]
+    gt_labels = [objects[0][i]['shape'] for i in range(len(objects[0]))]
+    pred_boxes = [pred['box'] for pred in pred_res]  # x1, y1, x2, y2
+    pred_lables = [categories[pred['label']] for pred in pred_res]
+
+    pred_sign = []
+    for box_i, gt_sc_position in enumerate(gt_sc_positions):
+        for position_i, gt_sc_position in enumerate(gt_sc_positions):
+            if pred_boxes[box_i][0] < gt_sc_position[0] < pred_boxes[box_i][2] and pred_boxes[box_i][1] < \
+                    gt_sc_position[1] < pred_boxes[box_i][3]:
+                pred_sign.append(pred_lables[box_i] == gt_labels[box_i])
+
+        # if no match
+        if len(pred_sign) != (box_i + 1):
+            pred_sign.append(False)
+
+    return pred_sign
+
+
+def get_obj_tensors(prefix, od_pred, images, vertices, objects, log_manager):
     """
     return a list of spatialObjs.
     Each spatial obj contains all the property information in continual space.
     """
     facts = []
     spatialObjMatrix = []
+    pred_signs = []
     for i in range(len(images)):
         image = images[i]
         vertex = vertices[i]
@@ -75,26 +96,21 @@ def get_continual_spatial_objs(prefix, od_pred, images, vertices, objects, log_m
         od_prediction["masks"] = od_prediction["masks"][od_prediction["scores"] > log_manager.args.conf_threshold]
         od_prediction["scores"] = od_prediction["scores"][od_prediction["scores"] > log_manager.args.conf_threshold]
 
-        labels = od_prediction["labels"].to("cpu").numpy()
+        pred_ids = od_prediction["labels"].to("cpu").numpy()
         categories = config.categories
         color_categories = config.color_categories
         scores = od_prediction["scores"].detach().to("cpu").numpy()
         boxes = od_prediction["boxes"].detach().to("cpu").numpy()
         masks = od_prediction["masks"].detach().to("cpu").numpy()
         pred_res = [{"score": scores[ind],
-                     "label": labels[ind],
+                     "label": pred_ids[ind],
                      "box": boxes[ind],
-                     "mask": masks[ind]} for ind in range(len(labels))]
+                     "mask": masks[ind]} for ind in range(len(pred_ids))]
 
-        # if len(pred_res) >= log_manager.args.e:
-            # pred_res = sorted(pred_res, key=lambda x: x["score"], reverse=True)
-            # pred_res = pred_res[:log_manager.args.e]
-            # print(f"({prefix}) {len(pred_res)} objects have been detected.")
-        # else:
+        match_res = matching_prediction(objects, pred_res, categories)
 
-            # return None
-        # for pred in pred_res:
-        #     print(f"\tcategories: {categories}, label: {pred['label']}, prob: {pred['score']:.2f}")
+        pred_signs.append(match_res)
+
         from engine import plot_utils
         img_uint8 = (image * 255).to(torch.uint8)
         img_show = plot_utils.maskRCNNVisualization(img_uint8, pred_res, log_manager.args.conf_threshold, categories)
@@ -115,7 +131,7 @@ def get_continual_spatial_objs(prefix, od_pred, images, vertices, objects, log_m
                 spatialObjs.append(spatialObj)
         print(f"({prefix}) {len(spatialObjs)} objects have been detected.")
         spatialObjMatrix.append(spatialObjs)
-    return spatialObjMatrix
+    return spatialObjMatrix, pred_signs
 
 
 def get_discrete_spatial_objs(continual_spatial_objs):

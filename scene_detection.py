@@ -16,6 +16,8 @@ max_obj_num = args.max_e
 workplace = Path(os.path.abspath(__file__)).parents[1]
 dataset_name = args.dataset
 
+mistake_counter = 0
+pred_signs_all = []
 for data_type in ['train', 'val', "test"]:
 
     pos_data_path = workplace / "storage" / dataset_name / args.subexp / data_type / "true"
@@ -37,6 +39,8 @@ for data_type in ['train', 'val', "test"]:
 
     pos_names = []
     neg_names = []
+    pred_signs_pos = []
+    pred_signs_neg = []
 
     categories = config.categories
 
@@ -57,16 +61,16 @@ for data_type in ['train', 'val', "test"]:
             od_prediction = model_od(images)
 
             # fact extractor
-            continual_spatial_objs = rule_utils.get_continual_spatial_objs(f"{data_type}_positive_{i}", od_prediction,
-                                                                           images,
-                                                                           vertex, objects, log_manager)
-            if continual_spatial_objs is None:
+            obj_tensors, pred_signs = rule_utils.get_obj_tensors(f"{data_type}_positive_{i}",
+                                                                 od_prediction, images, vertex, objects, log_manager)
+            pred_signs_pos.append(pred_signs)
+            if obj_tensors is None:
                 continue
             else:
                 pos_indices.append(i)
                 pos_names.append(json_file)
             # [x,y,z, color1, color2, color3, shape1, shape2]
-            pos_pred[i, :] = scene_detection_utils.obj2tensor(continual_spatial_objs[0][:max_obj_num], max_obj_num)
+            pos_pred[i, :] = scene_detection_utils.obj2tensor(obj_tensors[0][:max_obj_num], max_obj_num)
     pos_pred = pos_pred[pos_indices]
     print(f"++++++++++++++++ negative {data_type} image prediction ++++++++++++++++ ")
     neg_indices = []
@@ -80,17 +84,20 @@ for data_type in ['train', 'val', "test"]:
             od_prediction = model_od(images)
 
             # fact extractor
-            continual_spatial_objs = rule_utils.get_continual_spatial_objs(f"{data_type}_negative_{i}", od_prediction,
-                                                                           images,
-                                                                           vertex, objects, log_manager)
-            if continual_spatial_objs is None:
+            obj_tensors, pred_signs = rule_utils.get_obj_tensors(f"{data_type}_negative_{i}", od_prediction,
+                                                                 images, vertex, objects, log_manager)
+            pred_signs_neg.append(pred_signs)
+            if obj_tensors is None:
                 continue
             else:
                 neg_indices.append(i)
                 neg_names.append(json_file)
             # [x,y,z, color1, color2, color3, shape1, shape2, conf]
-            neg_pred[i, :] = scene_detection_utils.obj2tensor(continual_spatial_objs[0][:max_obj_num], max_obj_num)
+            neg_pred[i, :] = scene_detection_utils.obj2tensor(obj_tensors[0][:max_obj_num], max_obj_num)
     neg_pred = neg_pred[neg_indices]
+
+    pred_signs_all.append(pred_signs_pos)
+    pred_signs_all.append(pred_signs_neg)
 
     prediction_dict = {
         'pos_res': pos_pred.detach(),
@@ -101,3 +108,7 @@ for data_type in ['train', 'val', "test"]:
     model_file = str(config.storage / dataset_name / f"{args.subexp}" / f"{args.subexp}_pm_res_{data_type}.pth.tar")
     torch.save(prediction_dict, str(model_file))
     print(f"file {model_file} saved successfully!")
+
+pred_signs_tensor = torch.tensor(pred_signs_all)
+accuracy = pred_signs_tensor.sum() / torch.prod(torch.tensor(pred_signs_tensor.shape))
+print(f"accuracy: {accuracy}")

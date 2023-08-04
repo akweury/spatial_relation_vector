@@ -37,7 +37,7 @@ for i, (data, objects, vertex_max, vertex_min, file_json) in enumerate(test_load
         prediction = model_od(images)
 
         # fact extractor
-        continual_spatial_objs = rule_utils.get_continual_spatial_objs(prediction, images, vertex, objects, log_manager)
+        continual_spatial_objs = rule_utils.get_obj_tensors(prediction, images, vertex, objects, log_manager)
         property_prediction = rule_utils.get_discrete_spatial_objs(continual_spatial_objs)
 
         satisfied_rules, unsatisfied_rules = rule_check(property_prediction, learned_rules)

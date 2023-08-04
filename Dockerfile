@@ -12,7 +12,8 @@ RUN cd /root \
 	&& pip uninstall opencv-python \
 	&& pip uninstall opencv-contrib-python \
 	&& pip uninstall opencv-contrib-python-headless \
-	&& pip install opencv-python==4.5.5.64  
+	&& pip install opencv-python==4.5.5.64  \
+    && pip install mean_average_precision
 
 RUN cd /root/spatial_relation_vector \
   	&& git pull \

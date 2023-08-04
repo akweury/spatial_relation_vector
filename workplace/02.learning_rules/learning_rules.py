@@ -40,7 +40,7 @@ for i, (data, objects, _, _, _) in enumerate(train_loader):
         prediction = model_od(images)
 
         # fact extractor
-        continual_spatial_objs = rule_utils.get_continual_spatial_objs(prediction, images, vertex, objects, log_manager)
+        continual_spatial_objs = rule_utils.get_obj_tensors(prediction, images, vertex, objects, log_manager)
         obj_properties_prediction = rule_utils.get_discrete_spatial_objs(continual_spatial_objs)
 
         learned_rules, learned_rules_batch = rule_search(obj_properties_prediction, learned_rules)
