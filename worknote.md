@@ -27,6 +27,7 @@ gpustat -cp
 
 ###### Run experiment: scene detection
 python3 scene_detection.py --exp scene_detection --subexp three_same_3 --dataset single_pattern --batch_size 1 --device 6 --top_data 35
+python3 scene_detection.py --exp scene_detection --subexp check_mark_4 --dataset single_pattern  --top_data 35 --device 6
 
 
 python3 scene_detection.py --exp scene_detection --subexp check_mark_4 --dataset single_pattern --batch_size 1 --device 5
