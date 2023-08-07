@@ -68,7 +68,7 @@ for data_type in ['train', 'val', "test"]:
                 continue
             else:
                 pos_indices.append(i)
-                pos_names.append(json_file)
+                pos_names.append(os.path.basename(json_file[0]))
             # [x,y,z, color1, color2, color3, shape1, shape2]
             pos_pred[i, :] = scene_detection_utils.obj2tensor(obj_tensors[0][:max_obj_num], max_obj_num)
     pos_pred = pos_pred[pos_indices]
@@ -91,7 +91,7 @@ for data_type in ['train', 'val', "test"]:
                 continue
             else:
                 neg_indices.append(i)
-                neg_names.append(json_file)
+                neg_names.append(os.path.basename(json_file[0]))
             # [x,y,z, color1, color2, color3, shape1, shape2, conf]
             neg_pred[i, :] = scene_detection_utils.obj2tensor(obj_tensors[0][:max_obj_num], max_obj_num)
     neg_pred = neg_pred[neg_indices]
