@@ -48,9 +48,6 @@ python3 scene_detection.py --exp scene_detection --subexp triangle_6 --batch_siz
 python3 scene_detection.py --exp scene_detection --subexp pentagon_5_logic --batch_size 1 --device 3 --e 5
 python3 scene_detection.py --exp scene_detection --subexp cross_position --batch_size 1 --device 4 --e 5
 
-python3 scene_detection.py --exp scene_detection --subexp letter_a_15 --batch_size 1 --device 8 --e 20
-python3 scene_detection.py --exp scene_detection --subexp all_letters --batch_size 1 --device 6 --e 5
-python3 scene_detection.py --exp scene_detection --subexp letter_i_12 --batch_size 1 --device 6 --e 6
 
 
 ###### group 7
@@ -61,10 +58,15 @@ python3 scene_detection.py --exp scene_detection --subexp letter_Y --dataset alp
 python3 scene_detection.py --exp scene_detection --subexp letter_A --dataset alphabet --device 6
 ###### Group 12
 python3 scene_detection.py --exp scene_detection --subexp letter_B --dataset alphabet --device 6
+python3 scene_detection.py --exp scene_detection --subexp letter_Q --dataset alphabet --top_data 35 --device 6 
 python3 scene_detection.py --exp scene_detection --subexp letter_L --dataset alphabet --device 6
 
 
 
+###### custom scenes
+python3 scene_detection.py --exp scene_detection --subexp diagonal --dataset custom_scenes --top_data 35 --device 6 
+python3 scene_detection.py --exp scene_detection --subexp close --dataset custom_scenes --top_data 35 --device 6 
+python3 scene_detection.py --exp scene_detection --subexp red_cube_and_random_sphere --dataset custom_scenes --top_data 35 --device 10 
 
 
 
