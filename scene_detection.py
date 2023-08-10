@@ -109,6 +109,12 @@ for data_type in ['train', 'val', "test"]:
     torch.save(prediction_dict, str(model_file))
     print(f"file {model_file} saved successfully!")
 
-pred_signs_tensor = torch.tensor(pred_signs_all)
-accuracy = pred_signs_tensor.sum() / torch.prod(torch.tensor(pred_signs_tensor.shape))
+obj_total_num = 0
+obj_tp_num = 0
+for pred_type in pred_signs_all:
+    for pred_img in pred_type:
+        obj_tp_num += torch.tensor(pred_img).sum()
+        obj_total_num += len(pred_img[0])
+
+accuracy = obj_tp_num / obj_total_num
 print(f"accuracy: {accuracy}")

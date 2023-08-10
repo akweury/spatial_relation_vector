@@ -192,8 +192,6 @@ def addPosPIL(img, objs, pos):
 
 
 def maskRCNNVisualization(img, img_pred, threshold, categories):
-
-
     # img_labels = img_pred["labels"].to("cpu").numpy()
     boxes = [pred['box'] for pred in img_pred]
     boxes = torch.tensor(np.array(boxes))
@@ -205,13 +203,16 @@ def maskRCNNVisualization(img, img_pred, threshold, categories):
     #     img_annot_labels.append(f"{categories[label]}: {prob:.2f}")
 
     colors = [config.colors[img_pred[i]['label']] for i in range(len(img_pred))]
-    img_output_tensor = draw_bounding_boxes(image=img,
-                                            boxes=boxes,
-                                            labels=img_annot_labels,
-                                            colors=colors,
-                                            width=2)
+    if len(boxes) > 0:
+        img_output_tensor = draw_bounding_boxes(image=img,
+                                                boxes=boxes,
+                                                labels=img_annot_labels,
+                                                colors=colors,
+                                                width=2)
+    else:
+        img_output_tensor = img
 
-    # img_masks_float = img_pred["masks"].squeeze(1)
+        # img_masks_float = img_pred["masks"].squeeze(1)
     # img_masks_float[img_masks_float < 0.8] = 0
     # img_masks_bool = img_masks_float.bool()
     # if img_masks_bool.size(0) > 0:
@@ -257,7 +258,6 @@ def printRules(img_output, satisfied_rules, unsatisfied_rules, learned_rules, fa
     if old_objs is not None:
         for ruleIdx in range(len(old_objs)):
             img_output, text_y_pos = addPosPIL(img_output, old_objs[ruleIdx], (10, text_y_pos))
-
 
     # suggest positions
     img_output, text_y_pos = addTextPIL(img_output, "suggested_positions", (10, text_y_pos),
